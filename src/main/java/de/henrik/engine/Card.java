@@ -1,23 +1,25 @@
 package de.henrik.engine;
 
-import javax.swing.*;
+import de.henrik.engine.base.Component;
+
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
-import java.util.Arrays;
 
-abstract public class Card {
+abstract public class Card extends Component {
     public static final int ARC_SIZE = 15;
     private static int IDCount = 0;
     public final int ID;
 
+    Image frontOfCardTemp, backOfCardTemp;
     private Image frontOfCard, backOfCard;
-    private Dimension size;
-    private Point pos;
+
+    boolean paintFront;
 
     /**
-     * Generic Card constructor with a custom JPanel
+     * CONSTRUCTOR
      */
-    public Card(Image frontOfCard, Image backOfCard) {
+    public Card(Image frontOfCard, Image backOfCard, int x, int y, int width, int height, boolean paintFront) {
+        super(x,y,width,height);
         if (frontOfCard == null || backOfCard == null)
             throw new IllegalArgumentException();
 
@@ -25,7 +27,15 @@ abstract public class Card {
 
         this.backOfCard = backOfCard;
         this.frontOfCard = frontOfCard;
-        this.size = new Dimension(100, 100);
+        this.paintFront = paintFront;
+    }
+
+    public Card(Image frontOfCard, Image backOfCard, int x, int y, int width, int height) {
+        this(frontOfCard, backOfCard, x, y, width, height, false);
+    }
+
+    public Card(Image frontOfCard, Image backOfCard) {
+        this(frontOfCard, backOfCard, 0, 0, 0, 0, false);
     }
 
     public int getID() {
@@ -47,54 +57,65 @@ abstract public class Card {
         return ID;
     }
 
-    public void paint(Graphics g, boolean front, Point pos) {
-        System.out.println("paintCard");
-        Graphics2D graphics = (Graphics2D) g;
+    @Override
+    public void paint() {
+
+        if (g == null)
+            return;
+        Graphics2D graphics = (Graphics2D) g.create();
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+        int x = getX() + 1;
+        int y = getY() + 1;
+        int w = getWidth() - 1;
+        int h = getHeight() - 1;
         graphics.setColor(Color.DARK_GRAY);
-        graphics.fillRoundRect(pos.x - 1, pos.y - 1, getWidth(), getHeight(), ARC_SIZE, ARC_SIZE);
+        graphics.drawRoundRect(x-1, y-1, w, h, ARC_SIZE, ARC_SIZE);
 
-        graphics.setClip(new RoundRectangle2D.Float(pos.x, pos.y, getWidth(), getHeight(), ARC_SIZE, ARC_SIZE));
-        if (front) {
+        graphics.setClip(new RoundRectangle2D.Float(x, y, w, h, ARC_SIZE, ARC_SIZE));
+        if (paintFront) {
             if (frontOfCard != null)
-                graphics.drawImage(frontOfCard, pos.x, pos.y, null);
+                graphics.drawImage(frontOfCardTemp, x, y, null);
             else {
-                graphics.drawString("Image not found", pos.x, pos.y);
-                graphics.fillRect(pos.x, pos.y, getWidth(), getHeight());
+                graphics.drawString("Image not found", x, y);
+                graphics.fillRect(x, y, w, h);
             }
         } else if (backOfCard != null)
-            graphics.drawImage(backOfCard, pos.x, pos.y, null);
+            graphics.drawImage(backOfCardTemp, x, y, null);
         else {
-            graphics.drawString("Image not found", pos.x, pos.y);
-            graphics.fillRect(pos.x, pos.y, getWidth(), getHeight());
+            graphics.drawString("Image not found", x, y);
+            graphics.fillRect(x, y, w, h);
         }
 
 
         graphics.setColor(Color.BLACK);
-        graphics.drawRoundRect(pos.x, pos.y, getWidth(), getHeight(), ARC_SIZE, ARC_SIZE); //paint border
+        graphics.drawRoundRect(x, y, w, h, ARC_SIZE, ARC_SIZE); //paint border
+
     }
 
-    public int getWidth() {
-        return size.width;
+    public void setPaintFront(boolean paintFront) {
+        this.paintFront = paintFront;
     }
 
-    public int getHeight() {
-        return size.height;
+    @Override
+    public void setSize(int width, int height) {
+        backOfCardTemp = backOfCard.getScaledInstance(width - 1, height- 1, Image.SCALE_SMOOTH);
+        frontOfCardTemp = frontOfCard.getScaledInstance(width- 1, height- 1, Image.SCALE_SMOOTH);
+        super.setSize(width, height);
     }
 
-
-    public void setSize(Dimension d) {
-        size = d;
-        frontOfCard = frontOfCard.getScaledInstance(d.width, d.height, Image.SCALE_SMOOTH);
-        backOfCard = backOfCard.getScaledInstance(d.width, d.height, Image.SCALE_SMOOTH);
+    @Override
+    public void setPosition(int x, int y) {
+        super.setPosition(x, y);
     }
 
-    public void setPos(Point pos) {
-        this.pos = pos;
-    }
-
-    public Point getPos() {
-        return pos;
+    @Override
+    public String toString() {
+        return "Card{" +
+                "ID=" + ID +
+                ", paintFront=" + paintFront +
+                ", pos=" + getPosition() +
+                ", size=" + getSize() +
+                '}';
     }
 }

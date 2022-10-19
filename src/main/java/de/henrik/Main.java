@@ -15,14 +15,13 @@ public class Main {
 
         GameBoard gameBoard = new GameBoard(GameImage.getImage("/background/gameboard.png"), Toolkit.getDefaultToolkit().getScreenSize());
         BasicCardStack cardStack = new BasicCardStack("stack1", new Point(100, 100), gameBoard);
-        BasicCardStack cardStack1 = new BasicCardStack("stack2", new Point(400, 100), gameBoard);
+        BasicCardStack cardStack1 = new BasicCardStack("stack2", new Point(100, 500), gameBoard);
         cardStack.fillStack(10);
-        cardStack1.fillStack(40);
+        cardStack1.fillStack(10);
 
-        gameBoard.build();
         game.setGameBoard(gameBoard);
-
         game.start();
+
 
 
 

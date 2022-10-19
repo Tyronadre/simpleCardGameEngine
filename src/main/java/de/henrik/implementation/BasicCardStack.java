@@ -11,7 +11,7 @@ public class BasicCardStack extends CardStack {
 
 
     public BasicCardStack(String name, Point pos, GameBoard gameBoard) {
-        super(name, TOP_CARD_TURNED, card -> true, new Dimension(200, 300), pos, 5, gameBoard);
+        super(name, TOP_CARD_TURNED, card -> true, new Dimension(200, 300), pos, 20, gameBoard);
         setTopCardDraggable(true);
         setDrawStackSizeHint(true);
     }
