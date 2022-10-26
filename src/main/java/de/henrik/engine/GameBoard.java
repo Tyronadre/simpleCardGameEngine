@@ -2,10 +2,7 @@ package de.henrik.engine;
 
 import de.henrik.engine.base.Component;
 
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -28,8 +25,8 @@ public class GameBoard extends Component {
     private final List<CardStack> cardStacks;
     private boolean build;
 
-    private boolean cardDragged;
-    private Game game = Game.game;
+    private Card cardDragged;
+    private final Game game = Game.game;
 
 
     public GameBoard(BufferedImage backgroundImage, Dimension size) {
@@ -59,48 +56,34 @@ public class GameBoard extends Component {
         return null;
     }
 
-    public void setCardDragged(boolean cardDragged) {
-        this.cardDragged = cardDragged;
+    /**
+     * sets the card that should be dragged.
+     * <p>
+     * If null the dragged card will be removed. If there is no dragged card, nothing will happen.
+     * @param card The dragged Card
+     * @exception IllegalArgumentException if there is already a card being dragged.
+     */
+    public void setCardDragged(Card card) {
+        if (card == null) {
+            remove(cardDragged);
+        } else if (isCardDragged())
+            throw new IllegalArgumentException();
+        else
+            add(card);
+        this.cardDragged = card;
+
     }
 
     public boolean isCardDragged() {
-        return cardDragged;
+        return cardDragged != null;
     }
 
     @Override
-    public void paint() {
+    public void paint(Graphics2D g) {
         g.drawImage(backgroundImage, getX(), getY(), null);
-        paintChildren();
+        paintChildren(g);
     }
 
-    @Override
-    public void repaint(int x, int y, int width, int height) {
-        x = Math.min(getWidth(), Math.max(x, 0));
-        y = Math.min(getHeight(), Math.max(y, 0));
-        width = Math.min(width, getWidth() - x);
-        height = Math.min(height, getHeight() - y);
-        if (height == 0 || width == 0)
-            return;
-        g.setClip(x, y, width, height);
-
-        g.drawImage(backgroundImage.getSubimage(x, y, width, height), x, y, null);
-        Rectangle repaintRec = new Rectangle(x, y, width, height);
-        for (Component child : getChildren()) {
-            Rectangle childRec = new Rectangle(child.getX(), child.getY(), child.getWidth(), child.getHeight());
-            if (childRec.intersects(repaintRec)) {
-                System.out.println("Paint child " + child);
-                // TODO: 20.10.2022 Repainting needs some more work 
-                child.repaint(childRec.intersection(repaintRec));
-            }
-        }
-        g.setClip(null);
-    }
-
-
-    @Override
-    public void paintChildren() {
-        super.paintChildren();
-    }
 
     public void addMouseListener(MouseListener mouseListener) {
         game.addMouseListener(mouseListener);
@@ -111,6 +94,12 @@ public class GameBoard extends Component {
         game.removeMouseListener(mouseListener);
     }
 
+    /**
+     * Returns the topmost cardStack at that position or null if there is none
+     *
+     * @param location the location to search
+     * @return the cardStack or null
+     */
     public CardStack getCardStackAt(Point location) {
         for (CardStack stack : cardStacks) {
             if (stack.pointInside(location))

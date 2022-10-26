@@ -11,7 +11,8 @@ abstract public class Card extends Component {
     public final int ID;
 
     Image frontOfCardTemp, backOfCardTemp;
-    private Image frontOfCard, backOfCard;
+    private final Image frontOfCard;
+    private final Image backOfCard;
 
     boolean paintFront;
 
@@ -58,19 +59,19 @@ abstract public class Card extends Component {
     }
 
     @Override
-    public void paint() {
+    public void paint(Graphics2D g) {
 
         if (g == null)
             return;
+
+        //I am lazy we just paint the whole card, because otherwise we get problems with corners.
         Graphics2D graphics = (Graphics2D) g.create();
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         int x = getX() + 1;
         int y = getY() + 1;
         int w = getWidth() - 1;
         int h = getHeight() - 1;
         graphics.setColor(Color.DARK_GRAY);
-        graphics.drawRoundRect(x-1, y-1, w, h, ARC_SIZE, ARC_SIZE);
 
         graphics.setClip(new RoundRectangle2D.Float(x, y, w, h, ARC_SIZE, ARC_SIZE));
         if (paintFront) {
@@ -90,6 +91,7 @@ abstract public class Card extends Component {
 
         graphics.setColor(Color.BLACK);
         graphics.drawRoundRect(x, y, w, h, ARC_SIZE, ARC_SIZE); //paint border
+        graphics.dispose();
 
     }
 

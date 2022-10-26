@@ -1,17 +1,21 @@
 package de.henrik.implementation;
 
-import de.henrik.engine.Card;
 import de.henrik.engine.CardStack;
 import de.henrik.engine.GameBoard;
 
 import java.awt.*;
-import java.util.function.Predicate;
 
 public class BasicCardStack extends CardStack {
 
+    @Override
+    public void paint(Graphics2D g) {
+        super.paint(g);
+        g.setColor(Color.green);
+        g.drawRect(getX(),getY(),getWidth(),getHeight());
+    }
 
     public BasicCardStack(String name, Point pos, GameBoard gameBoard) {
-        super(name, TOP_CARD_TURNED, card -> true, new Dimension(200, 300), pos, 20, gameBoard);
+        super(name, ALL_CARDS_TURNED, card -> true, new Dimension(200, 300), pos, 20, gameBoard);
         setTopCardDraggable(true);
         setDrawStackSizeHint(true);
     }

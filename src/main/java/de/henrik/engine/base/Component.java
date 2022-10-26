@@ -7,7 +7,8 @@ import java.util.List;
 public abstract class Component {
     private int x, y, width, height;
     protected Graphics2D g;
-    private List<Component> children;
+    protected Component parent;
+    private final List<Component> children;
 
 
     public Component(int x, int y, int width, int height) {
@@ -15,7 +16,6 @@ public abstract class Component {
         this.y = y;
         this.width = width;
         this.height = height;
-        this.g = g;
         children = new ArrayList<>();
     }
 
@@ -27,39 +27,55 @@ public abstract class Component {
     /**
      * {@link Component#setGraphics(Graphics2D) } has to be called before any paint call
      */
-    abstract public void paint();
+    abstract public void paint(Graphics2D g);
 
-    public void paintChildren() {
+    public void paintChildren(Graphics2D g) {
         for (Component child : children) {
-            child.paint();
+            if (g.getClip() == null || g.getClip().intersects(child.getClip()))
+                child.paint(g);
         }
     }
 
     /**
-     * Repaints all children that were intersected.
-     * @param x x
-     * @param y y
-     * @param width width
+     * This method sets a clip of the given size, calls paint with this graphics, and then calls
+     * the repaint method of all children that were intersected in the area that has to be repainted.
+     * This Method ensures that x and y are within this component, and width and height are at least 1
+     *
+     * @param x      x
+     * @param y      y
+     * @param width  width
      * @param height height
      */
     public void repaint(int x, int y, int width, int height) {
-        g.setClip(x,y,width,height);
-        Rectangle repaintRec = new Rectangle(x, y, width, height);
-        for (Component child : children) {
-            if (new Rectangle(child.getX(), child.getY(), child.getWidth(), child.getHeight()).intersects(repaintRec)) {
-                child.paint();
-            }
-        }
-        g.setClip(null);
+        x = Math.min(getWidth(), Math.max(x, getX()));
+        y = Math.min(getHeight(), Math.max(y, getY()));
+        width = Math.min(width, getWidth() - x);
+        height = Math.min(height, getHeight() - y);
+        if (width < 0 || height < 0)
+            return;
+        Graphics2D graphics = (Graphics2D) g.create();
+        //debug//
+//        graphics.setColor(Color.GREEN);
+//        graphics.setClip(x,y,width,height);
+//        graphics.fillRect(0,0,3000,3000);
+        //debug//
+        paint(graphics);
+        graphics.dispose();
     }
 
+    public Rectangle getClip() {
+        return new Rectangle(getX(), getY(), getWidth(), getHeight());
+    }
+
+
     public void repaint(Rectangle intersection) {
-        repaint(intersection.x, intersection.y,intersection.width,intersection.height);
+        repaint(intersection.x, intersection.y, intersection.width, intersection.height);
     }
 
     public int getX() {
         return x;
     }
+
     public int getY() {
         return y;
     }
@@ -94,14 +110,73 @@ public abstract class Component {
         return new Dimension(getWidth(), getHeight());
     }
 
+
+    /**
+     * Changes the position of this Component, but does not paint it
+     *
+     * @param x new x
+     * @param y new y
+     * @see Component#move(int, int)
+     */
     public void setPosition(int x, int y) {
         this.x = x;
         this.y = y;
-        paint();
     }
 
+
+    /**
+     * Changes the position of this Component, but does not paint it
+     *
+     * @param pos newPos
+     * @see Component#setPosition(int, int)
+     */
     public void setPosition(Point pos) {
         setPosition(pos.x, pos.y);
+    }
+
+    /**
+     * Changes the position of this Component and repaints the affected area.
+     *
+     * @param x new x
+     * @param y new y
+     * @see Component#setPosition(int, int)
+     */
+    public void move(int x, int y) {
+        if (x == getX() && y == getY())
+            return;
+        boolean movementLeft = x - getX() <= 0;
+        boolean movementUp = y - getY() <= 0;
+
+        int oldx = getX();
+        int oldy = getY();
+        setPosition(x, y);
+
+
+        //Repaint parent. (if no parent just this component)
+        Component p = parent;
+        if (p == null)
+            p = this;
+        p.repaint(
+                oldx,
+                movementUp ? getY() + getHeight() : oldy ,
+                getWidth(),
+                Math.min(getHeight(), Math.abs(getY() - oldy)));
+        p.repaint(
+                movementLeft ? getX() + getWidth() : oldx,
+                oldy,
+                Math.min(getWidth(), Math.abs(getX() - oldx)),
+                getHeight());
+        paint(g);
+    }
+
+    /**
+     * Changes the position of this Component and repaints the affected area.
+     *
+     * @param pos newPos
+     * @see Component#move(int, int)
+     */
+    public void move(Point pos) {
+        move(pos.x, pos.y);
     }
 
     public Point getPosition() {
@@ -115,6 +190,7 @@ public abstract class Component {
      * @param g the new Graphics2D
      */
     public void setGraphics(Graphics2D g) {
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         this.g = g;
         for (Component child : children) {
             child.setGraphics(g);
@@ -123,10 +199,12 @@ public abstract class Component {
 
     public void add(Component component) {
         children.add(component);
+        component.parent = this;
     }
 
     public void remove(Component component) {
         children.remove(component);
+        component.parent = null;
     }
 
     /**
@@ -142,6 +220,4 @@ public abstract class Component {
     public List<Component> getChildren() {
         return children;
     }
-
-
 }

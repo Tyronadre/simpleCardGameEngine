@@ -2,11 +2,10 @@ package de.henrik.engine;
 
 import de.henrik.engine.base.Component;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 
 
@@ -29,7 +28,7 @@ import java.util.function.Predicate;
 public abstract class CardStack extends Component {
     static final List<String> givenNames = new ArrayList<>();
 
-    private static final int X_CARD_OFFSET = 3;
+    private static final int X_CARD_OFFSET = 150;
     private static final int Y_CARD_OFFSET = 4;
 
     /**
@@ -106,70 +105,62 @@ public abstract class CardStack extends Component {
 
             @Override
             public void mousePressed(MouseEvent e) {
+                if (gameBoard.isCardDragged())
+                    return;
                 if (!pointInside(e.getLocationOnScreen()))
                     return;
                 if (!gameBoard.getCardStackAt(e.getLocationOnScreen()).equals(CardStack.this))
                     return;
+                if ((card = removeCard()) == null)
+                    return;
+
                 pressed = true;
                 int oldRenderPolicy = getRenderPolicy();
 
-                card = removeCard();
-                if (oldRenderPolicy == TOP_CARD_TURNED) {
+                //if the top card is turned we need to change the render policy temporary or the next card will be visible
+                if (oldRenderPolicy == TOP_CARD_TURNED)
                     setRenderPolicy(ALL_CARDS_UNTURNED);
-                }
-                gameBoard.repaint(getX(), getY(), getWidth() + X_CARD_OFFSET, getHeight() + Y_CARD_OFFSET);
+
+                //render one card less
+                setStackMaxDrawSize(getStackMaxDrawSize() - 1);
+
+                //Card movement
                 new Thread(() -> {
-                    if (gameBoard.isCardDragged())
-                        return;
                     Point offset = new Point(card.getX() - MouseInfo.getPointerInfo().getLocation().x, card.getY() - MouseInfo.getPointerInfo().getLocation().y);
                     Point mousePos;
-                    Point newPos = new Point(card.getX(), card.getY());
-                    boolean movementUp;
-                    boolean movementLeft;
-                    card.paint();
+                    long lastTime = 0L;
+
+                    gameBoard.setCardDragged(card);
                     while (pressed) {
-                        mousePos = MouseInfo.getPointerInfo().getLocation();
-                        newPos.x = mousePos.x + offset.x;
-                        newPos.y = mousePos.y + offset.y;
+                        if (System.currentTimeMillis() - lastTime >= 10){
+                            lastTime = System.currentTimeMillis();
 
-                        movementLeft = newPos.x - card.getX() <= 0;
-                        movementUp = newPos.y - card.getY() <= 0;
-                        gameBoard.repaint(
-                                card.getX(),
-                                movementUp ? newPos.y + card.getHeight() : card.getY(),
-                                card.getWidth(),
-                                Math.min(card.getHeight(), Math.abs(newPos.y - card.getY())));
-                        gameBoard.repaint(
-                                movementLeft ? newPos.x + card.getWidth() : card.getX(),
-                                card.getY(),
-                                Math.min(card.getWidth(), Math.abs(newPos.x - card.getX())),
-                                card.getHeight()
-                        );
-
-                        card.setPosition(mousePos.x + offset.x, mousePos.y + offset.y);
-                        card.paint();
-                        Toolkit.getDefaultToolkit().sync();
+                            mousePos = MouseInfo.getPointerInfo().getLocation();
+                            card.move(mousePos.x + offset.x, mousePos.y + offset.y);
+                            Toolkit.getDefaultToolkit().sync();
+                        }
                     }
+                    gameBoard.setCardDragged(null);
                     CardStack cardStack = gameBoard.getCardStackAt(MouseInfo.getPointerInfo().getLocation());
-                    int x = card.getX();
-                    int y = card.getY();
-                    int w = card.getWidth();
-                    int h = card.getHeight();
 
-                    if (cardStack != null && cardStack.addCard(card)) {
-                        gameBoard.repaint(x,y, w, h);
-                        cardStack.paint();
-                    } else {
-                        addCard(card);
-                        gameBoard.repaint(x,y, w, h);
-                    }
+
+                    //reset temp changes
                     if (oldRenderPolicy == TOP_CARD_TURNED) {
                         setRenderPolicy(TOP_CARD_TURNED);
-                        paint();
+                    }
+                    setStackMaxDrawSize(getStackMaxDrawSize() + 1);
+
+                    if (cardStack != null && cardStack.test(card)) {
+                        cardStack.moveCardToStack(card);
+                        paint(g);
+                    } else {
+                        moveCardToStack(card);
                     }
 
 
-                    gameBoard.setCardDragged(false);
+
+
+
                 }).start();
             }
 
@@ -180,6 +171,12 @@ public abstract class CardStack extends Component {
         };
     }
 
+    private void moveCardToStack(Card card) {
+        Rectangle rec = card.getClip();
+        addCard(card);
+        gameBoard.repaint(rec);
+        paint(g);
+    }
 
 
     private int getRenderPolicy() {
@@ -188,7 +185,7 @@ public abstract class CardStack extends Component {
 
     private void setRenderPolicy(int policy) {
         renderPolicy = policy;
-        paint();
+        paint(g);
     }
 
     /**
@@ -202,7 +199,8 @@ public abstract class CardStack extends Component {
      * @param stackMaxDrawSize the maximal amount of cards that will be painted.
      */
     public void setStackMaxDrawSize(int stackMaxDrawSize) {
-        this.stackMaxDrawSize = stackMaxDrawSize;
+        if (stackMaxDrawSize > 0)
+            this.stackMaxDrawSize = stackMaxDrawSize;
     }
 
 
@@ -215,6 +213,7 @@ public abstract class CardStack extends Component {
 
     /**
      * Test if a card can be added to the stack.
+     *
      * @param card The card to test
      * @return {@code TRUE} if the card can be added, {@code FALSE} otherwise.
      */
@@ -224,7 +223,7 @@ public abstract class CardStack extends Component {
 
     /**
      * Adds one card to the stack. This card will be added at the specified position.
-     * The cards position and size will be set to this stack default position and size. The position may change within {@link CardStack#paint()}
+     * The cards position and size will be set to this stack default position and size. The position may change within {@link CardStack#paint(Graphics2D)}
      * If the stack is full or the card is not allowed by the {@link CardStack#stackAllowed}-Predicate it will not be added.
      * This method uses the {@link CardStack#test(Card)} method to test if the card can be added
      *
@@ -244,7 +243,7 @@ public abstract class CardStack extends Component {
     }
 
     private void resize() {
-        setSize(getWidth() , getHeight());
+        setSize(getWidth(), getHeight());
     }
 
 
@@ -328,7 +327,7 @@ public abstract class CardStack extends Component {
      */
     public void shuffel() {
         Collections.shuffle(cards);
-        paint();
+        paint(g);
     }
 
     /**
@@ -338,56 +337,21 @@ public abstract class CardStack extends Component {
      * This uses the {@link Graphics} from {@link GameBoard}
      */
     @Override
-    public void paint() {
+    public void paint(Graphics2D g) {
         // TODO: 19.10.2022 Test with different resolutions
         //set location and face of cards and then paint it
+        if (!g.getClip().intersects(getClip()))
+            return;
         if (cards.size() > 0) {
-            Point cardPos = getPosition();
+            paintChildren(g);
             int max = Math.min(stackMaxDrawSize, cards.size());
-            switch (renderPolicy) {
-                case ALL_CARDS_TURNED -> {
-                    for (int i = 0; i < max && cards.size() - max + i < cards.size(); i++) {
-                        Card card = getCard(cards.size() - max + i);
-                        card.setPosition(cardPos);
-                        card.setPaintFront(true);
-                        card.paint();
-                        cardPos.x += X_CARD_OFFSET;
-                        cardPos.y += Y_CARD_OFFSET;
-                    }
-                }
-                case ALL_CARDS_UNTURNED -> {
-                    for (int i = 0; i < max && cards.size() - max + i < cards.size(); i++) {
-                        Card card = getCard(cards.size() - max + i);
-                        card.setPosition(cardPos);
-                        card.setPaintFront(false);
-                        card.paint();
-                        cardPos.x += X_CARD_OFFSET;
-                        cardPos.y += Y_CARD_OFFSET;
-                    }
-                }
-                case TOP_CARD_TURNED -> {
-                    for (int i = 0; i < max - 1 && cards.size() - max + i - 1 < cards.size(); i++) {
-                        Card card = getCard(cards.size() - max + i);
-                        card.setPosition(cardPos);
-                        card.setPaintFront(false);
-                        card.paint();
-                        cardPos.x += X_CARD_OFFSET;
-                        cardPos.y += Y_CARD_OFFSET;
-                    }
-                    Card card = getCard();
-                    card.setPosition(cardPos);
-                    card.setPaintFront(true);
-                    card.paint();
-                }
-            }
             //Paint the hint if we want it with some magic numbers.
             if (drawStackSizeHint && max < cards.size()) {
 
                 Point pos = getPosition();
                 int x = pos.x + max * (X_CARD_OFFSET - 1) + 8;
-                int y = pos.y + getHeight() - 7 ;
+                int y = pos.y + getHeight() - 7;
 
-                System.out.println("painting hint at " + pos);
                 g.setColor(Color.BLACK);
                 int width = 58;
 
@@ -395,13 +359,56 @@ public abstract class CardStack extends Component {
                     width = 50;
                 if (cards.size() < 10)
                     width = 42;
-
-                g.drawRoundRect(x-1, y-11, width, 12, 5, 5);
+                Shape oldClip = g.getClip();
+                g.setClip(null);
+                g.drawRoundRect(x - 1, y - 11, width, 12, 5, 5);
                 g.drawString(cards.size() + " cards", x, y);
+                g.setClip(oldClip);
             }
         }
     }
 
+    @Override
+    public void paintChildren(Graphics2D g) {
+        Point cardPos = getPosition();
+        int max = Math.min(stackMaxDrawSize, cards.size());
+        switch (renderPolicy) {
+            case ALL_CARDS_TURNED -> {
+                for (int i = 0; i < max && cards.size() - max + i < cards.size(); i++) {
+                    Card card = getCard(cards.size() - max + i);
+                    card.setPosition(cardPos);
+                    card.setPaintFront(true);
+                    card.paint(g);
+                    cardPos.x += X_CARD_OFFSET;
+                    cardPos.y += Y_CARD_OFFSET;
+                }
+            }
+            case ALL_CARDS_UNTURNED -> {
+                for (int i = 0; i < max && cards.size() - max + i < cards.size(); i++) {
+                    Card card = getCard(cards.size() - max + i);
+                    card.setPosition(cardPos);
+                    card.setPaintFront(false);
+                    card.paint(g);
+                    cardPos.x += X_CARD_OFFSET;
+                    cardPos.y += Y_CARD_OFFSET;
+                }
+            }
+            case TOP_CARD_TURNED -> {
+                for (int i = 0; i < max - 1 && cards.size() - max + i - 1 < cards.size(); i++) {
+                    Card card = getCard(cards.size() - max + i);
+                    card.setPosition(cardPos);
+                    card.setPaintFront(false);
+                    card.paint(g);
+                    cardPos.x += X_CARD_OFFSET;
+                    cardPos.y += Y_CARD_OFFSET;
+                }
+                Card card = getCard();
+                card.setPosition(cardPos);
+                card.setPaintFront(true);
+                card.paint(g);
+            }
+        }
+    }
 
     /**
      * @return the unique name of this stack
@@ -419,12 +426,12 @@ public abstract class CardStack extends Component {
 
     @Override
     public int getWidth() {
-        return cardSize.width + X_CARD_OFFSET * (Math.min(cards.size(), stackMaxDrawSize) - 1);
+        return cardSize.width +X_CARD_OFFSET * Math.max(0,Math.min(cards.size(), stackMaxDrawSize) - 1);
     }
 
     @Override
     public int getHeight() {
-        return cardSize.height + (Y_CARD_OFFSET * Math.min(cards.size(), stackMaxDrawSize) - 1);
+        return cardSize.height + (Y_CARD_OFFSET * Math.max(0,Math.min(cards.size(), stackMaxDrawSize) - 1));
     }
 
     /**
@@ -479,7 +486,7 @@ public abstract class CardStack extends Component {
     public String toString() {
         return "Stack{" +
                 "Name=" + name +
-                ", cards= (" + cards.size() + "/" + maxStackSize +")"+
+                ", cards= (" + cards.size() + "/" + maxStackSize + ")" +
                 ", pos=" + getPosition() +
                 ", size=" + getSize() +
                 '}';
