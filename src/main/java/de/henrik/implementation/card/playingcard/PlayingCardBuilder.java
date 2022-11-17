@@ -56,6 +56,9 @@ public class PlayingCardBuilder {
                     cardBuilder.setFront(GameImage.getImage("/cards/" + line[4]));
                     cardBuilder.setBack(GameImage.getImage("/cards/" + line[5]));
                     cardBuilder.setAction(getAction(line[0]));
+                    for (int i = 0; i < Integer.parseInt(line[6]); i++) {
+                        cards.add(cardBuilder.build());
+                    }
                 } catch (RuntimeException  e) {
                     System.err.println("Failed to load card: " + l);
                     e.printStackTrace();

@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Objects;
-import java.util.Optional;
 
 public class GameImage {
 
@@ -25,10 +24,12 @@ public class GameImage {
             System.err.println("Warning! Could not find image " + path);
             var i = new BufferedImage(Options.getWidth(), Options.getHeight(), BufferedImage.TYPE_INT_RGB);
             var ig = i.getGraphics();
-            ig.setColor(Color.green);
+            ig.setColor(Color.LIGHT_GRAY);
             ig.fillRect(0, 0, i.getWidth(), i.getHeight());
             ig.setColor(Color.BLACK);
-            ig.drawString(path,0,0);
+            ig.setFont(new Font("serif", Font.PLAIN, 200));
+            ig.drawString("image not found ",200,200);
+            ig.drawString(path,200,400);
 
             return i;
         }

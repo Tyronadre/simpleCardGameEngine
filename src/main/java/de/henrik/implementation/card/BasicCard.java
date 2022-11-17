@@ -23,6 +23,7 @@ public class BasicCard extends Card {
     @Override
     public String toString() {
         return "Card{" +
+                "id=" + getID() +
                 "cost=" + cost +
                 ", cardClass=" + cardClass +
                 ", type=" + cardType +

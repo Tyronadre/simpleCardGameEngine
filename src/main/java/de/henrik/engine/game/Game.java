@@ -1,5 +1,6 @@
 package de.henrik.engine.game;
 
+import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
 import de.henrik.implementation.game.Options;
 
@@ -31,7 +32,7 @@ public class Game extends JFrame {
         this.gameBoard = gameBoard;
         Graphics2D g = (Graphics2D) getGraphics().create();
         g.setClip(0, 0, getWidth(), getHeight());
-//        gameBoard.setGraphics(new GameGraphics(g));
+        gameBoard.setGraphics(new GameGraphics(g));
         setVisible(true);
         running = true;
     }
@@ -48,5 +49,11 @@ public class Game extends JFrame {
 
     public GameBoard getGameBoard() {
         return gameBoard;
+    }
+
+    public static GameGraphics getGameGraphics() {
+        if (!isRunning())
+            return null;
+        return new GameGraphics((Graphics2D) game.getGraphics());
     }
 }

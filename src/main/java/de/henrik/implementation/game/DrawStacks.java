@@ -4,6 +4,7 @@ import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
+import de.henrik.engine.card.CardStackArea;
 import de.henrik.implementation.card.BasicCardStack;
 import de.henrik.implementation.card.DraggableCardStack;
 import de.henrik.implementation.card.playingcard.PlayingCardBuilder;
@@ -12,10 +13,12 @@ import java.awt.*;
 import java.util.List;
 
 public class DrawStacks extends GameComponent {
-    private final DrawStackInfo[] drawStacks;
-    private final int drawStacksMaxCount;
+    private final CardStackArea drawStacks;
     private final CardStack startCards;
 
+    private final int startCardsXSpace = 10;
+    private final int startCardsYSpace = 10;
+    private int drawStacksMaxCount;
 
     public DrawStacks(int drawStacksMaxCount, Dimension size, Point pos) {
         super(pos, size);
@@ -24,60 +27,36 @@ public class DrawStacks extends GameComponent {
             playingCards.addAll(PlayingCardBuilder.buildCardsFromCSV("/cardsE1.csv"));
         if (Options.expansion2Selected)
             playingCards.addAll(PlayingCardBuilder.buildCardsFromCSV("/cardsE2.csv"));
-
-        startCards = new BasicCardStack("initStack", 20);
-        drawStacks = new DrawStackInfo[drawStacksMaxCount];
         this.drawStacksMaxCount = drawStacksMaxCount;
-        initDrawStacks();
-//        startCards.setSize((getWidth() - 2 * X_SPACING) / (drawStacksMaxCount + 1) - (X_SPACING));
-//        startCards.setPosition();
+        startCards = new BasicCardStack("initStack", -1);
+        startCards.addCards(playingCards);
+        startCards.setDrawStackSizeHint(true);
+
+        drawStacks = new CardStackArea(drawStacksMaxCount, 10, 10);
+
+        resize();
     }
 
-    final int X_SPACING = 10;
-    final int Y_SPACING = 10;
-
-
-    private void initDrawStacks() {
-        for (int i = 0; i < drawStacks.length; i++) {
-            drawStacks[i] = new DrawStackInfo();
-            drawStacks[i].CardID = -1;
-
-            //2*xspace extra für mainstack
-            int cardWidth = (getWidth() - 2 * X_SPACING) / (drawStacksMaxCount + 1) - (X_SPACING);
-            int cardHeight = (int) (cardWidth / (2 / (double) 3));
-
-            int cardX;
-            int cardY;
-            //Zwei reihen wenn viel karten:
-            if (cardHeight * 2 + 3 * Y_SPACING <= getHeight()) {
-                cardX = getWidth() / (drawStacksMaxCount + 1) * (i % (drawStacksMaxCount / 2)) + X_SPACING;
-                cardY = getHeight() + (getHeight() / 2 - cardHeight) / 2 + Y_SPACING;
-                if (i >= drawStacksMaxCount / 2)
-                    cardY += Y_SPACING + cardHeight;
-            } else {
-                cardX = getWidth() / (drawStacksMaxCount + 1) * i + X_SPACING;
-                cardY = getHeight() + (getHeight() - cardHeight) / 2;
-            }
-
-            drawStacks[i].dimension = new Dimension(cardWidth, cardHeight);
-            drawStacks[i].position = new Point(cardX, cardY);
-        }
+    private void resize() {
+        int startCardsHeight = getHeight() - 2 * startCardsYSpace;
+        int startCardsWidth = (int) (startCardsHeight * (2 / (double) 3));
+        startCards.setPosition(getWidth() - startCardsWidth - startCardsXSpace, startCardsYSpace + getY());
+        startCards.setSize(startCardsWidth, startCardsHeight);
+        drawStacks.setPosition(getPosition());
+        drawStacks.setSize(getWidth() - startCardsWidth - 2 * startCardsXSpace, getHeight());
+        repaint(getClip());
     }
-
 
     @Override
     public void setPosition(int x, int y) {
         super.setSize(x, y);
-        for (int i = 0; i < drawStacksMaxCount; i++)
-            drawStacks[i].position = new Point(X_SPACING + getWidth() / 11 * i, (getHeight() - (getHeight() * 4 / 3)) / 2);
-
+        resize();
     }
 
     @Override
     public void setSize(int width, int height) {
         super.setSize(width, height);
-        for (int i = 0; i < drawStacksMaxCount; i++)
-            drawStacks[i].dimension = new Dimension((getWidth() / 11) - (2 + X_SPACING), getHeight() * 4 / 3);
+        resize();
     }
 
     /**
@@ -86,22 +65,39 @@ public class DrawStacks extends GameComponent {
      * If there are no drawStacks to fill, nothing happens.
      */
     public void fillDrawStacks() {
-        for (DrawStackInfo drawStack : drawStacks) {
-            if (drawStack.cardStack == null) {
-                Card newCard = startCards.removeCard();
-                while (addCardToExistingStack(newCard))
-                    newCard = startCards.removeCard();
-                if (newCard == null)
-                    return;
-                CardStack cardStack = new DraggableCardStack("draw_stack_" + newCard.getID(), newCard, 3);
-                cardStack.addCard(newCard);
-                cardStack.setPosition(drawStack.position);
-                cardStack.setSize(drawStack.dimension);
+        if (startCards.getStackSize() == 0)
+            return;
+        while (anyStackEmpty() && startCards.getStackSize() != 0) {
+            addCardToDrawStack(startCards.removeCard());
+            startCards.repaint();
+        }
+    }
 
-                drawStack.cardStack = cardStack;
-                drawStack.CardID = newCard.ID;
+    private void addCardToDrawStack(Card card) {
+        CardStack emptyStack = null;
+        for (CardStack stack : drawStacks.getStacks()) {
+            if (stack.addCard(card))
+                return;
+            if (stack.getStackSize() == 0) {
+                emptyStack = stack;
             }
         }
+        drawStacks.removeStack(emptyStack);
+        DraggableCardStack draggableCardStack = new DraggableCardStack("draw_stack_" + card.getID(), card, -1);
+        draggableCardStack.addCard(card);
+        drawStacks.addStack(draggableCardStack);
+    }
+
+    private boolean anyStackEmpty() {
+        if (drawStacks.getStacks().size() <= drawStacksMaxCount)
+            return true;
+        for (CardStack stack : drawStacks.getStacks()) {
+            if (stack.getStackSize() == 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -111,38 +107,34 @@ public class DrawStacks extends GameComponent {
      * @return {@code TRUE} if the card was added, otherwise {@code FALSE}
      */
     private boolean addCardToExistingStack(Card card) {
-        if (card == null)
-            return false;
-
-        for (var drawStack : drawStacks) {
-            if (drawStack.CardID == card.ID) {
-                drawStack.cardStack.addCard(card);
-                return true;
-            }
-        }
+//        if (card == null)
+//            return false;
+//
+//        for (var drawStack : drawStacks) {
+//            if (drawStack.CardID == card.ID) {
+//                drawStack.cardStack.addCard(card);
+//                return true;
+//            }
+//        }
         return false;
-    }
-
-    static class DrawStackInfo {
-        CardStack cardStack;
-        int CardID;
-        Dimension dimension;
-        Point position;
     }
 
     @Override
     public void paint(GameGraphics g) {
+        g.setClip(getClip());
         g.getGraphics().fillRect(0, 0, 3000, 3000);
-        for (var drawStack : drawStacks) {
-            if (drawStack.cardStack == null) {
-                g.setColor(Color.green);
-                g.getGraphics().fillRect(drawStack.position.x, drawStack.position.y, drawStack.dimension.width, drawStack.dimension.height);
-                g.setColor(null);
-                continue;
-            }
-            drawStack.cardStack.paint(g);
-        }
-        startCards.paint(g);
-        g.dispose();
+        drawStacks.paint(g.create());
+        startCards.paint(g.create());
+        //        for (var drawStack : drawStacks) {
+//            if (drawStack.cardStack == null) {
+//                g.setColor(Color.green);
+//                g.getGraphics().fillRect(drawStack.position.x, drawStack.position.y, drawStack.dimension.width, drawStack.dimension.height);
+//                g.setColor(null);
+//                continue;
+//            }
+//            drawStack.cardStack.paint(g);
+//        }
+//        startCards.paint(g);
+//        g.dispose();
     }
 }

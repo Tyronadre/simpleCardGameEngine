@@ -30,8 +30,6 @@ import java.util.function.Predicate;
  * </ul>
  */
 public abstract class CardStack extends GameComponent {
-    static final List<String> givenNames = new ArrayList<>();
-
     private static final int X_CARD_OFFSET = 3;
     private static final int Y_CARD_OFFSET = 4;
 
@@ -82,7 +80,9 @@ public abstract class CardStack extends GameComponent {
             throw new IllegalArgumentException("This is not a render policy");
         if (maxStackSize < -1)
             throw new IllegalArgumentException("MaxStackSize has to be greater than -1");
-        givenNames.add(name);
+
+        //Init cardlist
+        cards = new ArrayList<>();
 
         //Init finals//
         this.name = name;
@@ -92,8 +92,7 @@ public abstract class CardStack extends GameComponent {
         this.maxStackSize = maxStackSize;
         this.drawStackSizeHint = false;
 
-        //Init cardlist
-        cards = new ArrayList<>();
+
 
 //        //Init draggable cards
 //        topCardDraggableAdapter = new MouseAdapter() {
@@ -259,12 +258,12 @@ public abstract class CardStack extends GameComponent {
     public boolean addCard(Card card, int pos) {
         if (test(card)) {
             cards.add(pos, card);
-            add(card);
             card.setSize(getCardSize());
-            setSize(getWidth(), getHeight());
+            repaint();
             return true;
         }
         return false;
+
     }
 
 
@@ -338,8 +337,7 @@ public abstract class CardStack extends GameComponent {
         if (pos < 0 || pos >= cards.size())
             return null;
         Card card = cards.remove(pos);
-        remove(card);
-        setSize(getWidth(), getHeight());
+        repaint();
         return card;
     }
 
@@ -359,6 +357,8 @@ public abstract class CardStack extends GameComponent {
      */
     @Override
     public void paint(GameGraphics g) {
+        if (!Game.isRunning())
+            return;
         // TODO: 19.10.2022 Test with different resolutions
         //set location and face of cards and then paint it
         if (cards.size() > 0) {
@@ -383,6 +383,7 @@ public abstract class CardStack extends GameComponent {
                 g.getGraphics().drawString(cards.size() + " cards", x, y);
             }
         }
+        g.dispose();
     }
 
     @Override
@@ -395,7 +396,7 @@ public abstract class CardStack extends GameComponent {
                     Card card = getCard(cards.size() - max + i);
                     card.setPosition(cardPos);
                     card.setPaintFront(true);
-                    card.paint(g.create().setClip(card.getClip()));
+                    card.paint(g.create());
                     cardPos.x += X_CARD_OFFSET;
                     cardPos.y += Y_CARD_OFFSET;
                 }
@@ -514,5 +515,11 @@ public abstract class CardStack extends GameComponent {
     }
 
     public void addChangeListener(ChangeListener changeListener) {
+    }
+
+    @Override
+    public void setSize(int width, int height) {
+        super.setSize(width, height);
+        cards.forEach(card -> card.setSize(width,height));
     }
 }

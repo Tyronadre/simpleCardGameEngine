@@ -1,5 +1,8 @@
 package de.henrik.engine.base;
 
+import de.henrik.engine.game.Game;
+import de.henrik.implementation.game.Options;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +26,7 @@ public abstract class GameComponent {
         this(pos.x, pos.y, size.width, size.height);
     }
 
-    public GameComponent(){
+    public GameComponent() {
         children = new ArrayList<>();
     }
 
@@ -36,7 +39,7 @@ public abstract class GameComponent {
 
     public void paintChildren(GameGraphics g) {
         for (GameComponent child : children) {
-            if (g.getClip() == null || g.getClip().intersects(child.getClip())){
+            if (g.getClip() == null || g.getClip().intersects(child.getClip())) {
                 child.paint(g.create());
             }
         }
@@ -53,34 +56,37 @@ public abstract class GameComponent {
      * @param height height
      */
     public void repaint(int x, int y, int width, int height) {
-        x = Math.min(getWidth(), Math.max(x, getX()));
-        y = Math.min(getHeight(), Math.max(y, getY()));
-        width = Math.min(width, getWidth() - x);
-        height = Math.min(height, getHeight() - y);
+        if (!Game.isRunning())
+            return;
+        g = Game.getGameGraphics();
+        x = Math.min(x, Options.getWidth());
+        y = Math.min(y, Options.getHeight());
+        width = Math.min(width, Options.getWidth() - x);
+        height = Math.min(height, Options.getHeight() - y);
         if (width < 0 || height < 0)
             return;
-        paint(g.create().setClip(x,y,width,height));
-        paintChildren(g.create().setClip(x,y,width,height));
+        paint(g.create().setClip(x, y, width, height));
+        paintChildren(g.create().setClip(x, y, width, height));
     }
 
     /**
-     *
      * @param intersection part that need repainting
      * @see GameComponent#repaint(int, int, int, int)
      */
     public void repaint(Rectangle intersection) {
-        repaint(intersection.x, intersection.y, intersection.width, intersection.height);
+        repaint( intersection.x, intersection.y, intersection.width, intersection.height);
+    }
+
+    public void repaint() {
+        repaint( getClip());
     }
 
     /**
-     *
      * @return a rectangle of this component, specified by {@link GameComponent#getX()}, {@link GameComponent#getY()}, {@link GameComponent#getWidth()}, {@link GameComponent#getHeight()}.
-     * */
+     */
     public Rectangle getClip() {
         return new Rectangle(getX(), getY(), getWidth(), getHeight());
     }
-
-
 
 
     public int getX() {
@@ -110,14 +116,14 @@ public abstract class GameComponent {
 
 
     /**
-     * Changes the size of this component and repaints it
-     * @param width the new width
+     * Changes the size of this component
+     *
+     * @param width  the new width
      * @param height the new height
      */
     public void setSize(int width, int height) {
         setHeight(height);
         setWidth(width);
-        paint(g);
     }
 
     /**
@@ -180,7 +186,7 @@ public abstract class GameComponent {
             p = this;
         p.repaint(
                 oldx,
-                movementUp ? getY() + getHeight() : oldy ,
+                movementUp ? getY() + getHeight() : oldy,
                 getWidth(),
                 Math.min(getHeight(), Math.abs(getY() - oldy)));
         p.repaint(

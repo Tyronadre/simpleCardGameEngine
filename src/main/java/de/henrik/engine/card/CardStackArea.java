@@ -33,17 +33,11 @@ public class CardStackArea extends GameComponent {
      * This resizes the cardStacks
      */
     private void updateLayout() {
-        if (this.getHeight() == 0 || this.getWidth() == 0) {
+        if (this.getHeight() == 0 || this.getWidth() == 0 || cardStacks.size() == 0) {
             return;
         }
-        /*
-         1234 -> 135 -> 147 -> f
-                 246    258
-                        369
-         */
         int cardWidth = 0;
         int cardHeight = 0;
-        boolean finalSize = false;
 
         int maxRows = 1;
         for (int line = 0; line < maxRows; line++) {
@@ -62,11 +56,11 @@ public class CardStackArea extends GameComponent {
         int row = 0;
         int col = 0;
         for (CardStack cardStack : cardStacks) {
-            int posX = xSpace + col * (cardWidth + xSpace);
-            int posY = ySpace + row * (cardHeight + ySpace);
+            int posX = getX() + xSpace + col * (cardWidth + xSpace);
+            int posY = getY() + ySpace + row * (cardHeight + ySpace);
 
-            cardStack.setSize(cardWidth, cardHeight);
             cardStack.setPosition(posX, posY);
+            cardStack.setSize(cardWidth, cardHeight);
 
 
             if (++row % maxRows == 0) {
@@ -75,7 +69,7 @@ public class CardStackArea extends GameComponent {
             }
         }
 
-        paint(g);
+        repaint();
     }
 
     public boolean addStack(CardStack cardStack) {
@@ -98,12 +92,15 @@ public class CardStackArea extends GameComponent {
     public void paint(GameGraphics g) {
         if (!Game.isRunning())
             return;
-        g.setColor(Color.pink);
-        g.getGraphics().fillRect(getX(),getY(),getWidth(),getHeight());
-        g.setColor(null);
         cardStacks.forEach(cS -> {
             cS.paint(g);
-            System.out.println(cS);;
+            System.out.println(cS);
+            ;
         });
+        g.dispose();
+    }
+
+    public List<CardStack> getStacks() {
+        return cardStacks;
     }
 }

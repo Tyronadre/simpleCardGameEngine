@@ -60,6 +60,9 @@ abstract public class Card extends GameComponent {
 
     @Override
     public void paint(GameGraphics g) {
+        if (!Game.isRunning())
+            return;
+
         int x = getX() + 1;
         int y = getY() + 1;
         int w = getWidth() - 1;
@@ -68,19 +71,9 @@ abstract public class Card extends GameComponent {
 
         g.getGraphics().setClip(new RoundRectangle2D.Float(x, y, w, h, ARC_SIZE, ARC_SIZE));
         if (paintFront) {
-            if (frontOfCard != null)
                 g.drawImage(frontOfCardTemp, x, y);
-            else {
-                g.drawString("Image not found", x, y);
-                g.getGraphics().fillRect(x, y, w, h);
-            }
-        } else if (backOfCard != null)
+        } else
             g.drawImage(backOfCardTemp, x, y);
-        else {
-            g.drawString("Image not found", x, y);
-            g.getGraphics().fillRect(x, y, w, h);
-        }
-
 
         g.setColor(Color.BLACK);
         g.getGraphics().drawRoundRect(x, y, w, h, ARC_SIZE, ARC_SIZE); //paint border

@@ -15,10 +15,11 @@ public class GameGraphics {
     }
 
     public GameGraphics create() {
-        graphics2D.create();
-        graphics2D.setClip(graphics2D.getClip());
 
-        return this;
+        var g = graphics2D.create();
+        g.setClip(graphics2D.getClip());
+
+        return new GameGraphics((Graphics2D) g);
     }
 
     public Graphics2D getGraphics() {
