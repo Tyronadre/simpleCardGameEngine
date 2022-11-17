@@ -1,7 +1,10 @@
-package de.henrik.engine;
+package de.henrik.engine.card;
 
-import de.henrik.engine.base.Component;
+import de.henrik.engine.base.GameComponent;
+import de.henrik.engine.game.Game;
+import de.henrik.engine.game.GameBoard;
 
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
@@ -25,33 +28,31 @@ import java.util.function.Predicate;
  *     <li>regeln für den stack (nur bestimmte karten dürfen gestackt werden)</li>
  * </ul>
  */
-public abstract class CardStack extends Component {
+public abstract class CardStack extends GameComponent {
     static final List<String> givenNames = new ArrayList<>();
 
-    private static final int X_CARD_OFFSET = 150;
+    private static final int X_CARD_OFFSET = 3;
     private static final int Y_CARD_OFFSET = 4;
 
     /**
      * Render all card front
      */
-    public static final int ALL_CARDS_TURNED = 0;
+    public static final int RP_ALL_CARDS_TURNED = 0;
 
     /**
      * Render first card front, all other back
      */
-    public static final int TOP_CARD_TURNED = 1;
+    public static final int RP_TOP_CARD_TURNED = 1;
 
     /**
      * Render all cards back
      */
-    public static final int ALL_CARDS_UNTURNED = 2;
+    public static final int RP_ALL_CARDS_UNTURNED = 2;
     final Dimension cardSize;
     final String name;
     int renderPolicy;
     final Predicate<Card> stackAllowed;
     final int maxStackSize;
-    GameBoard gameBoard;
-
 
     final List<Card> cards;
     boolean drawStackSizeHint;
@@ -61,22 +62,22 @@ public abstract class CardStack extends Component {
 
 
     /**
-     * Creates a new CardStack. It will be added to the gameBoard.
+     * Creates a new CardStack.
      *
      * @param name         The unique name of this stack.
-     * @param renderPolicy the renderPolicy. On of {@link CardStack#ALL_CARDS_TURNED}, {@link CardStack#TOP_CARD_TURNED}, {@link CardStack#ALL_CARDS_UNTURNED}
+     * @param renderPolicy the renderPolicy. On of {@link CardStack#RP_ALL_CARDS_TURNED}, {@link CardStack#RP_TOP_CARD_TURNED}, {@link CardStack#RP_ALL_CARDS_UNTURNED}
      * @param stackAllowed if a new card can be added to this stack. If null, all cards will be allowed.
      * @param size         the size of the cards of this stack. The actual size of this stack changes {@link CardStack#getSize()}
      * @param pos          the pos of this stack
      * @param maxStackSize how many cards can be on this stack at most, or -1 if there can be infinite
-     * @param gameBoard    The gameBoard of this cardStack
      * @throws IllegalArgumentException if one of the arguments is wrong
      */
-    public CardStack(String name, int renderPolicy, Predicate<Card> stackAllowed, Dimension size, Point pos, int maxStackSize, GameBoard gameBoard) {
+    public CardStack(String name, int renderPolicy, Predicate<Card> stackAllowed, Dimension size, Point pos, int maxStackSize) {
         super(pos, size);
         //CheckArguments
-        if (givenNames.contains(name))
-            throw new IllegalArgumentException("This name was already used for a CardStack");
+        // TODO: 15.11.2022 funktioniert aktuell nicht mit stacks die sich wiederholen bei drawstacks
+//        if (givenNames.contains(name))
+//            throw new IllegalArgumentException("This name was already used for a CardStack");
         if (0 > renderPolicy || renderPolicy > 2)
             throw new IllegalArgumentException("This is not a render policy");
         if (maxStackSize < -1)
@@ -90,106 +91,130 @@ public abstract class CardStack extends Component {
         this.cardSize = size;
         this.maxStackSize = maxStackSize;
         this.drawStackSizeHint = false;
-        this.gameBoard = gameBoard;
 
         //Init cardlist
         cards = new ArrayList<>();
 
-        //Add to gameboard
-        gameBoard.addCardStack(this);
-
-        //Init draggable cards
-        topCardDraggableAdapter = new MouseAdapter() {
-            Card card;
-            Boolean pressed;
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (gameBoard.isCardDragged())
-                    return;
-                if (!pointInside(e.getLocationOnScreen()))
-                    return;
-                if (!gameBoard.getCardStackAt(e.getLocationOnScreen()).equals(CardStack.this))
-                    return;
-                if ((card = removeCard()) == null)
-                    return;
-
-                pressed = true;
-                int oldRenderPolicy = getRenderPolicy();
-
-                //if the top card is turned we need to change the render policy temporary or the next card will be visible
-                if (oldRenderPolicy == TOP_CARD_TURNED)
-                    setRenderPolicy(ALL_CARDS_UNTURNED);
-
-                //render one card less
-                setStackMaxDrawSize(getStackMaxDrawSize() - 1);
-
-                //Card movement
-                new Thread(() -> {
-                    Point offset = new Point(card.getX() - MouseInfo.getPointerInfo().getLocation().x, card.getY() - MouseInfo.getPointerInfo().getLocation().y);
-                    Point mousePos;
-                    long lastTime = 0L;
-
-                    gameBoard.setCardDragged(card);
-                    while (pressed) {
-                        if (System.currentTimeMillis() - lastTime >= 10){
-                            lastTime = System.currentTimeMillis();
-
-                            mousePos = MouseInfo.getPointerInfo().getLocation();
-                            card.move(mousePos.x + offset.x, mousePos.y + offset.y);
-                            Toolkit.getDefaultToolkit().sync();
-                        }
-                    }
-                    gameBoard.setCardDragged(null);
-                    CardStack cardStack = gameBoard.getCardStackAt(MouseInfo.getPointerInfo().getLocation());
-
-
-                    //reset temp changes
-                    if (oldRenderPolicy == TOP_CARD_TURNED) {
-                        setRenderPolicy(TOP_CARD_TURNED);
-                    }
-                    setStackMaxDrawSize(getStackMaxDrawSize() + 1);
-
-                    if (cardStack != null && cardStack.test(card)) {
-                        cardStack.moveCardToStack(card);
-                        paint(g);
-                    } else {
-                        moveCardToStack(card);
-                    }
-
-
-
-
-
-                }).start();
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                pressed = false;
-            }
-        };
+//        //Init draggable cards
+//        topCardDraggableAdapter = new MouseAdapter() {
+//            Card card;
+//            Boolean pressed;
+//
+//            @Override
+//            public void mousePressed(MouseEvent e) {
+//                if (gameBoard.isCardDragged())
+//                    return;
+//                if (!pointInside(e.getLocationOnScreen()))
+//                    return;
+//                if (!gameBoard.getCardStackAt(e.getLocationOnScreen()).equals(CardStack.this))
+//                    return;
+//                if ((card = removeCard()) == null)
+//                    return;
+//
+//                pressed = true;
+//                int oldRenderPolicy = getRenderPolicy();
+//
+//                //if the top card is turned we need to change the render policy temporary or the next card will be visible
+//                if (oldRenderPolicy == TOP_CARD_TURNED)
+//                    setRenderPolicy(ALL_CARDS_UNTURNED);
+//
+//                //render one card less
+//                setStackMaxDrawSize(getStackMaxDrawSize() - 1);
+//
+//                //Card movement
+//                new Thread(() -> {
+//                    Point offset = new Point(card.getX() - MouseInfo.getPointerInfo().getLocation().x, card.getY() - MouseInfo.getPointerInfo().getLocation().y);
+//                    Point mousePos;
+//                    long lastTime = 0L;
+//
+//                    gameBoard.setCardDragged(card);
+//                    while (pressed) {
+//                        if (System.currentTimeMillis() - lastTime >= 10){
+//                            lastTime = System.currentTimeMillis();
+//
+//                            mousePos = MouseInfo.getPointerInfo().getLocation();
+//                            card.move(mousePos.x + offset.x, mousePos.y + offset.y);
+//                            Toolkit.getDefaultToolkit().sync();
+//                        }
+//                    }
+//                    gameBoard.setCardDragged(null);
+//                    CardStack cardStack = gameBoard.getCardStackAt(MouseInfo.getPointerInfo().getLocation());
+//
+//
+//                    //reset temp changes
+//                    if (oldRenderPolicy == TOP_CARD_TURNED) {
+//                        setRenderPolicy(TOP_CARD_TURNED);
+//                    }
+//                    setStackMaxDrawSize(getStackMaxDrawSize() + 1);
+//
+//                    if (cardStack != null && cardStack.test(card)) {
+//                        cardStack.moveCardToStack(card);
+//                        paint(g);
+//                    } else {
+//                        moveCardToStack(card);
+//                    }
+//                }).start();
+//            }
+//
+//            @Override
+//            public void mouseReleased(MouseEvent e) {
+//                pressed = false;
+//            }
+//        };
     }
 
+
+    /**
+     * Creates a new CardStack. Dimension and Size will be 0
+     *
+     * @param name         The unique name of this stack.
+     * @param renderPolicy the renderPolicy. On of {@link CardStack#RP_ALL_CARDS_TURNED}, {@link CardStack#RP_TOP_CARD_TURNED}, {@link CardStack#RP_ALL_CARDS_UNTURNED}
+     * @param stackAllowed if a new card can be added to this stack. If null, all cards will be allowed.
+     * @param maxStackSize how many cards can be on this stack at most, or -1 if there can be infinite
+     * @throws IllegalArgumentException if one of the arguments is wrong
+     */
+    public CardStack(String name, int renderPolicy, Predicate<Card> stackAllowed, int maxStackSize) {
+        this(name, renderPolicy, stackAllowed, new Dimension(0, 0), new Point(0, 0), maxStackSize);
+    }
+
+    /**
+     * Moves a card from any position to this stack. The affected area and this stack will be redrawn
+     *
+     * @param card The Card to move
+     */
     private void moveCardToStack(Card card) {
         Rectangle rec = card.getClip();
         addCard(card);
-        gameBoard.repaint(rec);
+        Game.game.getGameBoard().repaint(rec);
         paint(g);
     }
 
 
+    /**
+     * @return the applied render policy
+     */
     private int getRenderPolicy() {
         return renderPolicy;
     }
 
+    /**
+     * Changes the render policy and redraws this stack. Has to be one of
+     * <ul>
+     * <li>{@link CardStack#RP_ALL_CARDS_TURNED}</li>
+     * <li>{@link CardStack#RP_TOP_CARD_TURNED}</li>
+     * <li>{@link CardStack#RP_ALL_CARDS_UNTURNED}</li>
+     * </ul>
+     * @param policy the new Policy
+     */
     private void setRenderPolicy(int policy) {
+        if (policy < 0 || policy > 2)
+            throw new IllegalArgumentException("This is not a valid render policy.");
         renderPolicy = policy;
         paint(g);
     }
 
     /**
-     * @param drawStackSizeHint If {@code TRUE} there will be a hint how many cards are in the stack, if there are more cards than {@link CardStack#getStackMaxDrawSize()}
+     * @param drawStackSizeHint If {@code TRUE} there will be a hint at the bottom left how many cards are in the stack, if there are more cards than {@link CardStack#getStackMaxDrawSize()}
      */
     public void setDrawStackSizeHint(boolean drawStackSizeHint) {
         this.drawStackSizeHint = drawStackSizeHint;
@@ -236,14 +261,10 @@ public abstract class CardStack extends Component {
             cards.add(pos, card);
             add(card);
             card.setSize(cardSize);
-            resize();
+            setSize(getWidth(), getHeight());
             return true;
         }
         return false;
-    }
-
-    private void resize() {
-        setSize(getWidth(), getHeight());
     }
 
 
@@ -318,7 +339,7 @@ public abstract class CardStack extends Component {
             return null;
         Card card = cards.remove(pos);
         remove(card);
-        resize();
+        setSize(getWidth(), getHeight());
         return card;
     }
 
@@ -345,7 +366,7 @@ public abstract class CardStack extends Component {
         if (cards.size() > 0) {
             paintChildren(g);
             int max = Math.min(stackMaxDrawSize, cards.size());
-            //Paint the hint if we want it with some magic numbers.
+            //Paint the hint (if we want it) with some magic numbers.
             if (drawStackSizeHint && max < cards.size()) {
 
                 Point pos = getPosition();
@@ -354,11 +375,11 @@ public abstract class CardStack extends Component {
 
                 g.setColor(Color.BLACK);
                 int width = 58;
-
                 if (cards.size() < 100)
                     width = 50;
                 if (cards.size() < 10)
                     width = 42;
+
                 Shape oldClip = g.getClip();
                 g.setClip(null);
                 g.drawRoundRect(x - 1, y - 11, width, 12, 5, 5);
@@ -373,7 +394,7 @@ public abstract class CardStack extends Component {
         Point cardPos = getPosition();
         int max = Math.min(stackMaxDrawSize, cards.size());
         switch (renderPolicy) {
-            case ALL_CARDS_TURNED -> {
+            case RP_ALL_CARDS_TURNED -> {
                 for (int i = 0; i < max && cards.size() - max + i < cards.size(); i++) {
                     Card card = getCard(cards.size() - max + i);
                     card.setPosition(cardPos);
@@ -383,7 +404,7 @@ public abstract class CardStack extends Component {
                     cardPos.y += Y_CARD_OFFSET;
                 }
             }
-            case ALL_CARDS_UNTURNED -> {
+            case RP_ALL_CARDS_UNTURNED -> {
                 for (int i = 0; i < max && cards.size() - max + i < cards.size(); i++) {
                     Card card = getCard(cards.size() - max + i);
                     card.setPosition(cardPos);
@@ -393,7 +414,7 @@ public abstract class CardStack extends Component {
                     cardPos.y += Y_CARD_OFFSET;
                 }
             }
-            case TOP_CARD_TURNED -> {
+            case RP_TOP_CARD_TURNED -> {
                 for (int i = 0; i < max - 1 && cards.size() - max + i - 1 < cards.size(); i++) {
                     Card card = getCard(cards.size() - max + i);
                     card.setPosition(cardPos);
@@ -426,12 +447,12 @@ public abstract class CardStack extends Component {
 
     @Override
     public int getWidth() {
-        return cardSize.width +X_CARD_OFFSET * Math.max(0,Math.min(cards.size(), stackMaxDrawSize) - 1);
+        return cardSize.width + X_CARD_OFFSET * Math.max(0, Math.min(cards.size(), stackMaxDrawSize) - 1);
     }
 
     @Override
     public int getHeight() {
-        return cardSize.height + (Y_CARD_OFFSET * Math.max(0,Math.min(cards.size(), stackMaxDrawSize) - 1));
+        return cardSize.height + (Y_CARD_OFFSET * Math.max(0, Math.min(cards.size(), stackMaxDrawSize) - 1));
     }
 
     /**
@@ -475,10 +496,10 @@ public abstract class CardStack extends Component {
     public void setTopCardDraggable(boolean b) {
         // TODO: 19.10.2022 setTopCardDraggable
         //  Init adapter for dragging
-        if (b)
-            gameBoard.addMouseListener(topCardDraggableAdapter);
-        else
-            gameBoard.removeMouseListener(topCardDraggableAdapter);
+//        if (b)
+//            gameBoard.addMouseListener(topCardDraggableAdapter);
+//        else
+//            gameBoard.removeMouseListener(topCardDraggableAdapter);
 
     }
 
@@ -490,5 +511,12 @@ public abstract class CardStack extends Component {
                 ", pos=" + getPosition() +
                 ", size=" + getSize() +
                 '}';
+    }
+
+    public Collection<? extends Card> getCards() {
+        return cards;
+    }
+
+    public void addChangeListener(ChangeListener changeListener) {
     }
 }

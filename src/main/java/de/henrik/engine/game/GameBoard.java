@@ -1,6 +1,8 @@
-package de.henrik.engine;
+package de.henrik.engine.game;
 
-import de.henrik.engine.base.Component;
+import de.henrik.engine.card.Card;
+import de.henrik.engine.card.CardStack;
+import de.henrik.engine.base.GameComponent;
 
 import java.awt.*;
 import java.awt.event.MouseListener;
@@ -20,7 +22,7 @@ import java.util.List;
  *     <li>es muss build() aufgerufen werden um  das GameBoard zu bauen. dann können keine stacks mehr entfernt oder hinzugefügt werden</li>
  * </ul>>
  */
-public class GameBoard extends Component {
+public class GameBoard extends GameComponent {
     private BufferedImage backgroundImage;
     private final List<CardStack> cardStacks;
     private boolean build;

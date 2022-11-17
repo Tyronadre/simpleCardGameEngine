@@ -1,13 +1,12 @@
-package de.henrik.engine;
+package de.henrik.engine.card;
 
-import de.henrik.engine.base.Component;
+import de.henrik.engine.base.GameComponent;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
-abstract public class Card extends Component {
+abstract public class Card extends GameComponent {
     public static final int ARC_SIZE = 15;
-    private static int IDCount = 0;
     public final int ID;
 
     Image frontOfCardTemp, backOfCardTemp;
@@ -19,24 +18,23 @@ abstract public class Card extends Component {
     /**
      * CONSTRUCTOR
      */
-    public Card(Image frontOfCard, Image backOfCard, int x, int y, int width, int height, boolean paintFront) {
-        super(x,y,width,height);
+    public Card(int ID, Image frontOfCard, Image backOfCard, int x, int y, int width, int height, boolean paintFront) {
+        super(x, y, width, height);
         if (frontOfCard == null || backOfCard == null)
             throw new IllegalArgumentException();
-
-        this.ID = IDCount++;
+        this.ID = ID;
 
         this.backOfCard = backOfCard;
         this.frontOfCard = frontOfCard;
         this.paintFront = paintFront;
     }
 
-    public Card(Image frontOfCard, Image backOfCard, int x, int y, int width, int height) {
-        this(frontOfCard, backOfCard, x, y, width, height, false);
+    public Card(int ID, Image frontOfCard, Image backOfCard, int x, int y, int width, int height) {
+        this(ID, frontOfCard, backOfCard, x, y, width, height, false);
     }
 
-    public Card(Image frontOfCard, Image backOfCard) {
-        this(frontOfCard, backOfCard, 0, 0, 0, 0, false);
+    public Card(int ID, Image frontOfCard, Image backOfCard) {
+        this(ID, frontOfCard, backOfCard, 0, 0, 0, 0, false);
     }
 
     public int getID() {
@@ -101,8 +99,8 @@ abstract public class Card extends Component {
 
     @Override
     public void setSize(int width, int height) {
-        backOfCardTemp = backOfCard.getScaledInstance(width - 1, height- 1, Image.SCALE_SMOOTH);
-        frontOfCardTemp = frontOfCard.getScaledInstance(width- 1, height- 1, Image.SCALE_SMOOTH);
+        backOfCardTemp = backOfCard.getScaledInstance(width - 1, height - 1, Image.SCALE_SMOOTH);
+        frontOfCardTemp = frontOfCard.getScaledInstance(width - 1, height - 1, Image.SCALE_SMOOTH);
         super.setSize(width, height);
     }
 
@@ -120,4 +118,5 @@ abstract public class Card extends Component {
                 ", size=" + getSize() +
                 '}';
     }
+
 }

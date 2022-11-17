@@ -4,14 +4,14 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Component {
+public abstract class GameComponent {
     private int x, y, width, height;
     protected Graphics2D g;
-    protected Component parent;
-    private final List<Component> children;
+    protected GameComponent parent;
+    private final List<GameComponent> children;
 
 
-    public Component(int x, int y, int width, int height) {
+    public GameComponent(int x, int y, int width, int height) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -19,18 +19,26 @@ public abstract class Component {
         children = new ArrayList<>();
     }
 
-    public Component(Point pos, Dimension size) {
+    public GameComponent(Point pos, Dimension size) {
         this(pos.x, pos.y, size.width, size.height);
     }
 
+    public GameComponent(){
+        children = new ArrayList<>();
+    }
+
+
 
     /**
-     * {@link Component#setGraphics(Graphics2D) } has to be called before any paint call
+     * {@link GameComponent#setGraphics(Graphics2D) } has to be called before any paint call
      */
-    abstract public void paint(Graphics2D g);
+    public void paint(Graphics2D g) {
+        g.setClip(this.getClip());
+
+    }
 
     public void paintChildren(Graphics2D g) {
-        for (Component child : children) {
+        for (GameComponent child : children) {
             if (g.getClip() == null || g.getClip().intersects(child.getClip()))
                 child.paint(g);
         }
@@ -54,23 +62,36 @@ public abstract class Component {
         if (width < 0 || height < 0)
             return;
         Graphics2D graphics = (Graphics2D) g.create();
+        g.setClip(x,y,width,height);
         //debug//
 //        graphics.setColor(Color.GREEN);
 //        graphics.setClip(x,y,width,height);
 //        graphics.fillRect(0,0,3000,3000);
         //debug//
         paint(graphics);
+        paintChildren(graphics);
         graphics.dispose();
     }
 
+    /**
+     *
+     * @param intersection part that need repainting
+     * @see GameComponent#repaint(int, int, int, int)
+     */
+    public void repaint(Rectangle intersection) {
+        repaint(intersection.x, intersection.y, intersection.width, intersection.height);
+    }
+
+    /**
+     *
+     * @return a rectangle of this component, specified by {@link GameComponent#getX()}, {@link GameComponent#getY()}, {@link GameComponent#getWidth()}, {@link GameComponent#getHeight()}.
+     * */
     public Rectangle getClip() {
         return new Rectangle(getX(), getY(), getWidth(), getHeight());
     }
 
 
-    public void repaint(Rectangle intersection) {
-        repaint(intersection.x, intersection.y, intersection.width, intersection.height);
-    }
+
 
     public int getX() {
         return x;
@@ -97,11 +118,22 @@ public abstract class Component {
         this.height = height;
     }
 
+
+    /**
+     * Changes the size of this component and repaints it
+     * @param width the new width
+     * @param height the new height
+     */
     public void setSize(int width, int height) {
         setHeight(height);
         setWidth(width);
+        paint(g);
     }
 
+    /**
+     * @param size the new size
+     * @see GameComponent#setSize(int, int)
+     */
     public void setSize(Dimension size) {
         setSize(size.width, size.height);
     }
@@ -116,7 +148,7 @@ public abstract class Component {
      *
      * @param x new x
      * @param y new y
-     * @see Component#move(int, int)
+     * @see GameComponent#move(int, int)
      */
     public void setPosition(int x, int y) {
         this.x = x;
@@ -128,7 +160,7 @@ public abstract class Component {
      * Changes the position of this Component, but does not paint it
      *
      * @param pos newPos
-     * @see Component#setPosition(int, int)
+     * @see GameComponent#setPosition(int, int)
      */
     public void setPosition(Point pos) {
         setPosition(pos.x, pos.y);
@@ -139,7 +171,7 @@ public abstract class Component {
      *
      * @param x new x
      * @param y new y
-     * @see Component#setPosition(int, int)
+     * @see GameComponent#setPosition(int, int)
      */
     public void move(int x, int y) {
         if (x == getX() && y == getY())
@@ -153,7 +185,7 @@ public abstract class Component {
 
 
         //Repaint parent. (if no parent just this component)
-        Component p = parent;
+        GameComponent p = parent;
         if (p == null)
             p = this;
         p.repaint(
@@ -173,7 +205,7 @@ public abstract class Component {
      * Changes the position of this Component and repaints the affected area.
      *
      * @param pos newPos
-     * @see Component#move(int, int)
+     * @see GameComponent#move(int, int)
      */
     public void move(Point pos) {
         move(pos.x, pos.y);
@@ -192,17 +224,17 @@ public abstract class Component {
     public void setGraphics(Graphics2D g) {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         this.g = g;
-        for (Component child : children) {
+        for (GameComponent child : children) {
             child.setGraphics(g);
         }
     }
 
-    public void add(Component component) {
+    public void add(GameComponent component) {
         children.add(component);
         component.parent = this;
     }
 
-    public void remove(Component component) {
+    public void remove(GameComponent component) {
         children.remove(component);
         component.parent = null;
     }
@@ -217,7 +249,7 @@ public abstract class Component {
         return point.x >= getX() && point.x <= getX() + getWidth() && point.y >= getY() && point.y <= getY() + getHeight();
     }
 
-    public List<Component> getChildren() {
+    public List<GameComponent> getChildren() {
         return children;
     }
 }
