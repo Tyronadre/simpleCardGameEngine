@@ -6,7 +6,7 @@ import java.util.List;
 
 public abstract class GameComponent {
     private int x, y, width, height;
-    protected Graphics2D g;
+    protected GameGraphics g;
     protected GameComponent parent;
     private final List<GameComponent> children;
 
@@ -28,19 +28,17 @@ public abstract class GameComponent {
     }
 
 
-
     /**
-     * {@link GameComponent#setGraphics(Graphics2D) } has to be called before any paint call
+     * {@link GameComponent#setGraphics(GameGraphics) } has to be called before any paint call
      */
-    public void paint(Graphics2D g) {
-        g.setClip(this.getClip());
+    abstract public void paint(GameGraphics g);
 
-    }
 
-    public void paintChildren(Graphics2D g) {
+    public void paintChildren(GameGraphics g) {
         for (GameComponent child : children) {
-            if (g.getClip() == null || g.getClip().intersects(child.getClip()))
-                child.paint(g);
+            if (g.getClip() == null || g.getClip().intersects(child.getClip())){
+                child.paint(g.create());
+            }
         }
     }
 
@@ -61,16 +59,8 @@ public abstract class GameComponent {
         height = Math.min(height, getHeight() - y);
         if (width < 0 || height < 0)
             return;
-        Graphics2D graphics = (Graphics2D) g.create();
-        g.setClip(x,y,width,height);
-        //debug//
-//        graphics.setColor(Color.GREEN);
-//        graphics.setClip(x,y,width,height);
-//        graphics.fillRect(0,0,3000,3000);
-        //debug//
-        paint(graphics);
-        paintChildren(graphics);
-        graphics.dispose();
+        paint(g.create().setClip(x,y,width,height));
+        paintChildren(g.create().setClip(x,y,width,height));
     }
 
     /**
@@ -106,7 +96,7 @@ public abstract class GameComponent {
         return width;
     }
 
-    private void setWidth(int width) {
+    protected void setWidth(int width) {
         this.width = width;
     }
 
@@ -114,7 +104,7 @@ public abstract class GameComponent {
         return height;
     }
 
-    private void setHeight(int height) {
+    protected void setHeight(int height) {
         this.height = height;
     }
 
@@ -221,8 +211,8 @@ public abstract class GameComponent {
      *
      * @param g the new Graphics2D
      */
-    public void setGraphics(Graphics2D g) {
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    public void setGraphics(GameGraphics g) {
+        g.getGraphics().setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         this.g = g;
         for (GameComponent child : children) {
             child.setGraphics(g);

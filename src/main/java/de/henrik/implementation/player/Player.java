@@ -1,5 +1,6 @@
 package de.henrik.implementation.player;
 
+import de.henrik.engine.base.GameGraphics;
 import de.henrik.implementation.game.Options;
 import de.henrik.engine.base.GameComponent;
 
@@ -58,4 +59,8 @@ public class Player extends GameComponent {
         this.coins += coins;
     }
 
+    @Override
+    public void paint(GameGraphics g) {
+
+    }
 }

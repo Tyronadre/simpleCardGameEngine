@@ -1,5 +1,6 @@
 package de.henrik.engine.card;
 
+import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.game.Game;
 import de.henrik.engine.game.GameBoard;
@@ -48,7 +49,6 @@ public abstract class CardStack extends GameComponent {
      * Render all cards back
      */
     public static final int RP_ALL_CARDS_UNTURNED = 2;
-    final Dimension cardSize;
     final String name;
     int renderPolicy;
     final Predicate<Card> stackAllowed;
@@ -88,7 +88,7 @@ public abstract class CardStack extends GameComponent {
         this.name = name;
         this.renderPolicy = renderPolicy;
         this.stackAllowed = Objects.requireNonNullElseGet(stackAllowed, () -> card -> true);
-        this.cardSize = size;
+        setSize(size);
         this.maxStackSize = maxStackSize;
         this.drawStackSizeHint = false;
 
@@ -248,7 +248,7 @@ public abstract class CardStack extends GameComponent {
 
     /**
      * Adds one card to the stack. This card will be added at the specified position.
-     * The cards position and size will be set to this stack default position and size. The position may change within {@link CardStack#paint(Graphics2D)}
+     * The cards position and size will be set to this stack default position and size. The position may change within {@link CardStack#paint(GameGraphics)}
      * If the stack is full or the card is not allowed by the {@link CardStack#stackAllowed}-Predicate it will not be added.
      * This method uses the {@link CardStack#test(Card)} method to test if the card can be added
      *
@@ -260,7 +260,7 @@ public abstract class CardStack extends GameComponent {
         if (test(card)) {
             cards.add(pos, card);
             add(card);
-            card.setSize(cardSize);
+            card.setSize(getCardSize());
             setSize(getWidth(), getHeight());
             return true;
         }
@@ -358,11 +358,9 @@ public abstract class CardStack extends GameComponent {
      * This uses the {@link Graphics} from {@link GameBoard}
      */
     @Override
-    public void paint(Graphics2D g) {
+    public void paint(GameGraphics g) {
         // TODO: 19.10.2022 Test with different resolutions
         //set location and face of cards and then paint it
-        if (!g.getClip().intersects(getClip()))
-            return;
         if (cards.size() > 0) {
             paintChildren(g);
             int max = Math.min(stackMaxDrawSize, cards.size());
@@ -380,17 +378,15 @@ public abstract class CardStack extends GameComponent {
                 if (cards.size() < 10)
                     width = 42;
 
-                Shape oldClip = g.getClip();
                 g.setClip(null);
-                g.drawRoundRect(x - 1, y - 11, width, 12, 5, 5);
-                g.drawString(cards.size() + " cards", x, y);
-                g.setClip(oldClip);
+                g.getGraphics().drawRoundRect(x - 1, y - 11, width, 12, 5, 5);
+                g.getGraphics().drawString(cards.size() + " cards", x, y);
             }
         }
     }
 
     @Override
-    public void paintChildren(Graphics2D g) {
+    public void paintChildren(GameGraphics g) {
         Point cardPos = getPosition();
         int max = Math.min(stackMaxDrawSize, cards.size());
         switch (renderPolicy) {
@@ -399,7 +395,7 @@ public abstract class CardStack extends GameComponent {
                     Card card = getCard(cards.size() - max + i);
                     card.setPosition(cardPos);
                     card.setPaintFront(true);
-                    card.paint(g);
+                    card.paint(g.create().setClip(card.getClip()));
                     cardPos.x += X_CARD_OFFSET;
                     cardPos.y += Y_CARD_OFFSET;
                 }
@@ -409,7 +405,7 @@ public abstract class CardStack extends GameComponent {
                     Card card = getCard(cards.size() - max + i);
                     card.setPosition(cardPos);
                     card.setPaintFront(false);
-                    card.paint(g);
+                    card.paint(g.create().setClip(card.getClip()));
                     cardPos.x += X_CARD_OFFSET;
                     cardPos.y += Y_CARD_OFFSET;
                 }
@@ -419,14 +415,14 @@ public abstract class CardStack extends GameComponent {
                     Card card = getCard(cards.size() - max + i);
                     card.setPosition(cardPos);
                     card.setPaintFront(false);
-                    card.paint(g);
+                    card.paint(g.create().setClip(card.getClip()));
                     cardPos.x += X_CARD_OFFSET;
                     cardPos.y += Y_CARD_OFFSET;
                 }
                 Card card = getCard();
                 card.setPosition(cardPos);
                 card.setPaintFront(true);
-                card.paint(g);
+                card.paint(g.create().setClip(card.getClip()));
             }
         }
     }
@@ -447,19 +443,19 @@ public abstract class CardStack extends GameComponent {
 
     @Override
     public int getWidth() {
-        return cardSize.width + X_CARD_OFFSET * Math.max(0, Math.min(cards.size(), stackMaxDrawSize) - 1);
+        return super.getWidth() + X_CARD_OFFSET * Math.max(0, Math.min(cards.size(), stackMaxDrawSize) - 1);
     }
 
     @Override
     public int getHeight() {
-        return cardSize.height + (Y_CARD_OFFSET * Math.max(0, Math.min(cards.size(), stackMaxDrawSize) - 1));
+        return super.getHeight() + (Y_CARD_OFFSET * Math.max(0, Math.min(cards.size(), stackMaxDrawSize) - 1));
     }
 
     /**
      * @return the dimension of one card
      */
     public Dimension getCardSize() {
-        return cardSize;
+        return new Dimension(super.getWidth(), super.getHeight());
     }
 
     public void addMouseMotionListener(MouseMotionListener mouseMotionListener) {

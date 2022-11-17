@@ -1,17 +1,13 @@
 package de.henrik;
 
+import de.henrik.engine.card.CardStackArea;
 import de.henrik.engine.game.Game;
 import de.henrik.engine.game.GameBoard;
 import de.henrik.engine.util.GameImage;
-import de.henrik.implementation.game.DrawStacks;
+import de.henrik.implementation.card.EmptyCardStack;
 import de.henrik.implementation.game.Options;
 
 import java.awt.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
@@ -19,11 +15,23 @@ public class Main {
         Game game = Game.game;
         GameBoard gameBoard = new GameBoard(GameImage.getImage("/background/gameboard.png"), Toolkit.getDefaultToolkit().getScreenSize());
 
-        DrawStacks drawStacks = new DrawStacks(23,new Dimension(Options.getWidth(), Options.getHeight()/3),new Point(0,Options.getHeight()/3));
-        gameBoard.add(drawStacks);
-        game.start(gameBoard);
+//        DrawStacks drawStacks = new DrawStacks(23,new Dimension(Options.getWidth(), Options.getHeight()/3),new Point(0,Options.getHeight()/3));
+//        gameBoard.add(drawStacks);
 
-        drawStacks.fillDrawStacks();
+        CardStackArea cardStackArea = new CardStackArea(10, 2, 2);
+
+
+        for (int i = 0; i < 100; i++) {
+            cardStackArea.addStack(new EmptyCardStack("empty_stack_"+ i,GameImage.getImage("/emptyStack.png")));
+        }
+
+        cardStackArea.setSize(Options.getWidth() / 3,Options.getHeight()/3);
+        gameBoard.add(cardStackArea);
+
+
+        game.start(gameBoard);
+        System.out.println("Resolution: " + Options.getHeight() + "," + Options.getWidth());
+//        drawStacks.fillDrawStacks();
 
     }
 

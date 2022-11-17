@@ -1,5 +1,6 @@
 package de.henrik.engine.game;
 
+import de.henrik.engine.base.GameGraphics;
 import de.henrik.implementation.game.Options;
 
 import javax.swing.*;
@@ -8,12 +9,12 @@ import java.awt.*;
 public class Game extends JFrame {
 
     public static final Game game;
-    public static final Graphics2D grapics;
+    private static boolean running;
 
     static {
+        running = false;
         game = new Game();
         Options.init();
-        grapics = (Graphics2D) game.getGraphics();
     }
 
     private GameBoard gameBoard;
@@ -23,7 +24,6 @@ public class Game extends JFrame {
         setUndecorated(true);
         setVisible(true);
         setVisible(false);
-
     }
 
     public void start(GameBoard gameBoard) {
@@ -31,16 +31,19 @@ public class Game extends JFrame {
         this.gameBoard = gameBoard;
         Graphics2D g = (Graphics2D) getGraphics().create();
         g.setClip(0, 0, getWidth(), getHeight());
-        gameBoard.setGraphics(g);
-        repaint();
+//        gameBoard.setGraphics(new GameGraphics(g));
         setVisible(true);
+        running = true;
+    }
+
+    public static boolean isRunning() {
+        return running;
     }
 
     @Override
     public void paint(Graphics g) {
-        super.paint(g);
-        if (gameBoard != null)
-            gameBoard.paint((Graphics2D) g);
+        if (isRunning())
+            gameBoard.paint(new GameGraphics((Graphics2D) getGraphics()));
     }
 
     public GameBoard getGameBoard() {

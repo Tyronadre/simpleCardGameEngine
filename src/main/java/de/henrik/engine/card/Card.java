@@ -1,6 +1,8 @@
 package de.henrik.engine.card;
 
 import de.henrik.engine.base.GameComponent;
+import de.henrik.engine.base.GameGraphics;
+import de.henrik.engine.game.Game;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
@@ -57,40 +59,32 @@ abstract public class Card extends GameComponent {
     }
 
     @Override
-    public void paint(Graphics2D g) {
-
-        if (g == null)
-            return;
-
-        //I am lazy we just paint the whole card, because otherwise we get problems with corners.
-        Graphics2D graphics = (Graphics2D) g.create();
-
+    public void paint(GameGraphics g) {
         int x = getX() + 1;
         int y = getY() + 1;
         int w = getWidth() - 1;
         int h = getHeight() - 1;
-        graphics.setColor(Color.DARK_GRAY);
+        g.setColor(Color.DARK_GRAY);
 
-        graphics.setClip(new RoundRectangle2D.Float(x, y, w, h, ARC_SIZE, ARC_SIZE));
+        g.getGraphics().setClip(new RoundRectangle2D.Float(x, y, w, h, ARC_SIZE, ARC_SIZE));
         if (paintFront) {
             if (frontOfCard != null)
-                graphics.drawImage(frontOfCardTemp, x, y, null);
+                g.drawImage(frontOfCardTemp, x, y);
             else {
-                graphics.drawString("Image not found", x, y);
-                graphics.fillRect(x, y, w, h);
+                g.drawString("Image not found", x, y);
+                g.getGraphics().fillRect(x, y, w, h);
             }
         } else if (backOfCard != null)
-            graphics.drawImage(backOfCardTemp, x, y, null);
+            g.drawImage(backOfCardTemp, x, y);
         else {
-            graphics.drawString("Image not found", x, y);
-            graphics.fillRect(x, y, w, h);
+            g.drawString("Image not found", x, y);
+            g.getGraphics().fillRect(x, y, w, h);
         }
 
 
-        graphics.setColor(Color.BLACK);
-        graphics.drawRoundRect(x, y, w, h, ARC_SIZE, ARC_SIZE); //paint border
-        graphics.dispose();
-
+        g.setColor(Color.BLACK);
+        g.getGraphics().drawRoundRect(x, y, w, h, ARC_SIZE, ARC_SIZE); //paint border
+        g.dispose();
     }
 
     public void setPaintFront(boolean paintFront) {

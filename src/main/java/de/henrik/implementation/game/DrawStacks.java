@@ -1,6 +1,7 @@
 package de.henrik.implementation.game;
 
 import de.henrik.engine.base.GameComponent;
+import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
 import de.henrik.implementation.card.BasicCardStack;
@@ -130,20 +131,18 @@ public class DrawStacks extends GameComponent {
     }
 
     @Override
-    public void paint(Graphics2D g) {
-        var graphics = g.create();
-        graphics.setClip(getClip());
-        graphics.fillRect(0, 0, 3000, 3000);
+    public void paint(GameGraphics g) {
+        g.getGraphics().fillRect(0, 0, 3000, 3000);
         for (var drawStack : drawStacks) {
             if (drawStack.cardStack == null) {
-                graphics.setColor(Color.green);
-                graphics.fillRect(drawStack.position.x, drawStack.position.y, drawStack.dimension.width, drawStack.dimension.height);
-                graphics.setColor(null);
+                g.setColor(Color.green);
+                g.getGraphics().fillRect(drawStack.position.x, drawStack.position.y, drawStack.dimension.width, drawStack.dimension.height);
+                g.setColor(null);
                 continue;
             }
             drawStack.cardStack.paint(g);
         }
         startCards.paint(g);
-        graphics.dispose();
+        g.dispose();
     }
 }

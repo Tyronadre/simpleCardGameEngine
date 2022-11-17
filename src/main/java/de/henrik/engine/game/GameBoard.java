@@ -1,5 +1,6 @@
 package de.henrik.engine.game;
 
+import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
 import de.henrik.engine.base.GameComponent;
@@ -81,9 +82,9 @@ public class GameBoard extends GameComponent {
     }
 
     @Override
-    public void paint(Graphics2D g) {
-        g.drawImage(backgroundImage, getX(), getY(), null);
-        paintChildren(g);
+    public void paint(GameGraphics g) {
+        g.drawImage(backgroundImage, getX(), getY());
+        paintChildren(g.create());
     }
 
 
