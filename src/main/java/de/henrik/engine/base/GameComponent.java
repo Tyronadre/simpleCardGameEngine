@@ -33,11 +33,19 @@ public abstract class GameComponent {
 
     /**
      * {@link GameComponent#setGraphics(GameGraphics) } has to be called before any paint call
+     * checks if the game is running then calls {@link GameComponent#paintChildren(GameGraphics)}
      */
-    abstract public void paint(GameGraphics g);
+    public void paint(GameGraphics g) {
+        if (Game.isRunning()) {
+            paintChildren(g);
+        }
+    }
 
 
     public void paintChildren(GameGraphics g) {
+        if (!Game.isRunning()) {
+            return;
+        }
         for (GameComponent child : children) {
             if (g.getClip() == null || g.getClip().intersects(child.getClip())) {
                 child.paint(g.create());
@@ -46,9 +54,9 @@ public abstract class GameComponent {
     }
 
     /**
-     * This method sets a clip of the given size, calls paint with this graphics, and then calls
-     * the repaint method of all children that were intersected in the area that has to be repainted.
-     * This Method ensures that x and y are within this component, and width and height are at least 1
+     * This method creates a graphic with a clip of the given size, calls the paint method of the parent of this component with this graphics.
+     * This Method ensures that x and y are within this component, and width and height are at least 1, if not no paint call will happen.
+     * If there is no parent, the paint method of this component will be called
      *
      * @param x      x
      * @param y      y
@@ -63,10 +71,11 @@ public abstract class GameComponent {
         y = Math.min(y, Options.getHeight());
         width = Math.min(width, Options.getWidth() - x);
         height = Math.min(height, Options.getHeight() - y);
-        if (width < 0 || height < 0)
+        if (width <= 0 || height <= 0 || g == null)
             return;
-        paint(g.create().setClip(x, y, width, height));
-        paintChildren(g.create().setClip(x, y, width, height));
+        if (parent == null) {
+            paint(g.create().setClip(x, y, width, height));
+        } else parent.paint(g.create().setClip(x, y, width, height));
     }
 
     /**
@@ -74,11 +83,11 @@ public abstract class GameComponent {
      * @see GameComponent#repaint(int, int, int, int)
      */
     public void repaint(Rectangle intersection) {
-        repaint( intersection.x, intersection.y, intersection.width, intersection.height);
+        repaint(intersection.x, intersection.y, intersection.width, intersection.height);
     }
 
     public void repaint() {
-        repaint( getClip());
+        repaint(getClip());
     }
 
     /**

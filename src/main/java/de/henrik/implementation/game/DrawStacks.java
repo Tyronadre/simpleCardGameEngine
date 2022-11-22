@@ -17,7 +17,7 @@ public class DrawStacks extends GameComponent {
     private final CardStack startCards;
 
     private final int startCardsXSpace = 10;
-    private final int startCardsYSpace = 10;
+    private final int startCardsYSpace = 20;
     private int drawStacksMaxCount;
 
     public DrawStacks(int drawStacksMaxCount, Dimension size, Point pos) {
@@ -29,11 +29,11 @@ public class DrawStacks extends GameComponent {
             playingCards.addAll(PlayingCardBuilder.buildCardsFromCSV("/cardsE2.csv"));
         this.drawStacksMaxCount = drawStacksMaxCount;
         startCards = new BasicCardStack("initStack", -1);
-        startCards.addCards(playingCards);
+        startCards.addCards(playingCards); // TODO: 22.11.2022
         startCards.setDrawStackSizeHint(true);
-
         drawStacks = new CardStackArea(drawStacksMaxCount, 10, 10);
-
+        add(drawStacks);
+        add(startCards);
         resize();
     }
 
@@ -69,7 +69,6 @@ public class DrawStacks extends GameComponent {
             return;
         while (anyStackEmpty() && startCards.getStackSize() != 0) {
             addCardToDrawStack(startCards.removeCard());
-            startCards.repaint();
         }
     }
 
@@ -121,20 +120,8 @@ public class DrawStacks extends GameComponent {
 
     @Override
     public void paint(GameGraphics g) {
-        g.setClip(getClip());
+        g.setColor(Color.DARK_GRAY);
         g.getGraphics().fillRect(0, 0, 3000, 3000);
-        drawStacks.paint(g.create());
-        startCards.paint(g.create());
-        //        for (var drawStack : drawStacks) {
-//            if (drawStack.cardStack == null) {
-//                g.setColor(Color.green);
-//                g.getGraphics().fillRect(drawStack.position.x, drawStack.position.y, drawStack.dimension.width, drawStack.dimension.height);
-//                g.setColor(null);
-//                continue;
-//            }
-//            drawStack.cardStack.paint(g);
-//        }
-//        startCards.paint(g);
-//        g.dispose();
+        super.paint(g);
     }
 }

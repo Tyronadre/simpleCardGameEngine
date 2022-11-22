@@ -60,7 +60,7 @@ public class CardStackArea extends GameComponent {
             int posY = getY() + ySpace + row * (cardHeight + ySpace);
 
             cardStack.setPosition(posX, posY);
-            cardStack.setSize(cardWidth, cardHeight);
+            cardStack.setSize(cardWidth, cardHeight); // TODO: 22.11.2022 very langsam
 
 
             if (++row % maxRows == 0) {
@@ -76,6 +76,7 @@ public class CardStackArea extends GameComponent {
         if (cardStacks.size() == maxNumberOfStack)
             return false;
         cardStacks.add(cardStack);
+        add(cardStack);
         updateLayout();
         return true;
     }
@@ -84,20 +85,18 @@ public class CardStackArea extends GameComponent {
         if (!cardStacks.contains(cardStack))
             return false;
         cardStacks.remove(cardStack);
+        remove(cardStack);
         updateLayout();
         return true;
     }
 
     @Override
-    public void paint(GameGraphics g) {
+    public void paintChildren(GameGraphics g) {
         if (!Game.isRunning())
             return;
-        cardStacks.forEach(cS -> {
-            cS.paint(g);
-            System.out.println(cS);
-            ;
-        });
-        g.dispose();
+        for (int i = getChildren().size() - 1; i >= 0 ; i--) {
+            getChildren().get(i).paint(g.create());
+        }
     }
 
     public List<CardStack> getStacks() {

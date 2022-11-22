@@ -17,7 +17,7 @@ public class PlayingCardBuilder {
     private int cost;
     private CardClass cardClass;
     private CardType type;
-    private Image back, front;
+    private GameImage back, front;
     private ActionListener action;
 
     public static List<Card> buildCardsFromCSV(String csv) {
@@ -53,8 +53,8 @@ public class PlayingCardBuilder {
                         default -> throw new IllegalStateException("Unexpected value: " + line[2]);
                     });
                     cardBuilder.setCost(Integer.parseInt(line[3]));
-                    cardBuilder.setFront(GameImage.getImage("/cards/" + line[4]));
-                    cardBuilder.setBack(GameImage.getImage("/cards/" + line[5]));
+                    cardBuilder.setFront(new GameImage("/cards/" + line[4]));
+                    cardBuilder.setBack(new GameImage("/cards/" + line[5]));
                     cardBuilder.setAction(getAction(line[0]));
                     for (int i = 0; i < Integer.parseInt(line[6]); i++) {
                         cards.add(cardBuilder.build());
@@ -83,12 +83,12 @@ public class PlayingCardBuilder {
         return this;
     }
 
-    public PlayingCardBuilder setFront(Image front) {
+    public PlayingCardBuilder setFront(GameImage front) {
         this.front = front;
         return this;
     }
 
-    public PlayingCardBuilder setBack(Image back) {
+    public PlayingCardBuilder setBack(GameImage back) {
         this.back = back;
         return this;
     }

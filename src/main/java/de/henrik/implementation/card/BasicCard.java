@@ -1,6 +1,7 @@
 package de.henrik.implementation.card;
 
 import de.henrik.engine.card.Card;
+import de.henrik.engine.util.GameImage;
 import de.henrik.implementation.card.playingcard.CardClass;
 import de.henrik.implementation.card.playingcard.CardType;
 
@@ -13,7 +14,7 @@ public class BasicCard extends Card {
     private final CardClass cardClass;
     private final CardType cardType;
 
-    public BasicCard(int ID, int cost, CardClass cardClass, CardType cardType, Image frontOfCard, Image backOfCard) {
+    public BasicCard(int ID, int cost, CardClass cardClass, CardType cardType, GameImage frontOfCard, GameImage backOfCard) {
         super(ID, frontOfCard, backOfCard);
         this.cost = cost;
         this.cardClass = cardClass;

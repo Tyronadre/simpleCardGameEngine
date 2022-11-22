@@ -59,8 +59,4 @@ public class Player extends GameComponent {
         this.coins += coins;
     }
 
-    @Override
-    public void paint(GameGraphics g) {
-
-    }
 }

@@ -3,24 +3,26 @@ package de.henrik.engine.card;
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.game.Game;
+import de.henrik.engine.util.GameImage;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
 
 abstract public class Card extends GameComponent {
     public static final int ARC_SIZE = 15;
     public final int ID;
 
-    Image frontOfCardTemp, backOfCardTemp;
-    private final Image frontOfCard;
-    private final Image backOfCard;
+    GameImage frontOfCardTemp, backOfCardTemp;
+    private final GameImage frontOfCard;
+    private final GameImage backOfCard;
 
     boolean paintFront;
 
     /**
      * CONSTRUCTOR
      */
-    public Card(int ID, Image frontOfCard, Image backOfCard, int x, int y, int width, int height, boolean paintFront) {
+    public Card(int ID, GameImage frontOfCard, GameImage backOfCard, int x, int y, int width, int height, boolean paintFront) {
         super(x, y, width, height);
         if (frontOfCard == null || backOfCard == null)
             throw new IllegalArgumentException();
@@ -31,11 +33,11 @@ abstract public class Card extends GameComponent {
         this.paintFront = paintFront;
     }
 
-    public Card(int ID, Image frontOfCard, Image backOfCard, int x, int y, int width, int height) {
+    public Card(int ID, GameImage frontOfCard, GameImage backOfCard, int x, int y, int width, int height) {
         this(ID, frontOfCard, backOfCard, x, y, width, height, false);
     }
 
-    public Card(int ID, Image frontOfCard, Image backOfCard) {
+    public Card(int ID, GameImage frontOfCard, GameImage backOfCard) {
         this(ID, frontOfCard, backOfCard, 0, 0, 0, 0, false);
     }
 
@@ -54,11 +56,6 @@ abstract public class Card extends GameComponent {
     }
 
     @Override
-    public int hashCode() {
-        return ID;
-    }
-
-    @Override
     public void paint(GameGraphics g) {
         if (!Game.isRunning())
             return;
@@ -71,13 +68,12 @@ abstract public class Card extends GameComponent {
 
         g.getGraphics().setClip(new RoundRectangle2D.Float(x, y, w, h, ARC_SIZE, ARC_SIZE));
         if (paintFront) {
-                g.drawImage(frontOfCardTemp, x, y);
+                g.drawImage(frontOfCardTemp.getImage(), x, y);
         } else
-            g.drawImage(backOfCardTemp, x, y);
+            g.drawImage(backOfCardTemp.getImage(), x, y);
 
         g.setColor(Color.BLACK);
         g.getGraphics().drawRoundRect(x, y, w, h, ARC_SIZE, ARC_SIZE); //paint border
-        g.dispose();
     }
 
     public void setPaintFront(boolean paintFront) {

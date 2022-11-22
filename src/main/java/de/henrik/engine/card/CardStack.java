@@ -93,7 +93,6 @@ public abstract class CardStack extends GameComponent {
         this.drawStackSizeHint = false;
 
 
-
 //        //Init draggable cards
 //        topCardDraggableAdapter = new MouseAdapter() {
 //            Card card;
@@ -203,6 +202,7 @@ public abstract class CardStack extends GameComponent {
      * <li>{@link CardStack#RP_TOP_CARD_TURNED}</li>
      * <li>{@link CardStack#RP_ALL_CARDS_UNTURNED}</li>
      * </ul>
+     *
      * @param policy the new Policy
      */
     private void setRenderPolicy(int policy) {
@@ -336,8 +336,9 @@ public abstract class CardStack extends GameComponent {
     public Card removeCard(int pos) {
         if (pos < 0 || pos >= cards.size())
             return null;
+        Rectangle clip = getClip();
         Card card = cards.remove(pos);
-        repaint();
+        repaint(clip);
         return card;
     }
 
@@ -349,21 +350,47 @@ public abstract class CardStack extends GameComponent {
         paint(g);
     }
 
-    /**
-     * Paints this cardStack if the associated {@link GameBoard} has been build.
-     * If a card has to be painted, it will be moved to the position and then be painted.
-     * <p>
-     * This uses the {@link Graphics} from {@link GameBoard}
-     */
     @Override
-    public void paint(GameGraphics g) {
-        if (!Game.isRunning())
-            return;
-        // TODO: 19.10.2022 Test with different resolutions
-        //set location and face of cards and then paint it
+    public void paintChildren(GameGraphics g) {
         if (cards.size() > 0) {
-            paintChildren(g);
+            Point cardPos = getPosition();
             int max = Math.min(stackMaxDrawSize, cards.size());
+            switch (renderPolicy) {
+                case RP_ALL_CARDS_TURNED -> {
+                    for (int i = 0; i < max && cards.size() - max + i < cards.size(); i++) {
+                        Card card = getCard(cards.size() - max + i);
+                        card.setPosition(cardPos);
+                        card.setPaintFront(true);
+                        card.paint(g.create());
+                        cardPos.x += X_CARD_OFFSET;
+                        cardPos.y += Y_CARD_OFFSET;
+                    }
+                }
+                case RP_ALL_CARDS_UNTURNED -> {
+                    for (int i = 0; i < max && cards.size() - max + i < cards.size(); i++) {
+                        Card card = getCard(cards.size() - max + i);
+                        card.setPosition(cardPos);
+                        card.setPaintFront(false);
+                        card.paint(g.create().setClip(card.getClip()));
+                        cardPos.x += X_CARD_OFFSET;
+                        cardPos.y += Y_CARD_OFFSET;
+                    }
+                }
+                case RP_TOP_CARD_TURNED -> {
+                    for (int i = 0; i < max - 1 && cards.size() - max + i - 1 < cards.size(); i++) {
+                        Card card = getCard(cards.size() - max + i);
+                        card.setPosition(cardPos);
+                        card.setPaintFront(false);
+                        card.paint(g.create().setClip(card.getClip()));
+                        cardPos.x += X_CARD_OFFSET;
+                        cardPos.y += Y_CARD_OFFSET;
+                    }
+                    Card card = getCard();
+                    card.setPosition(cardPos);
+                    card.setPaintFront(true);
+                    card.paint(g.create().setClip(card.getClip()));
+                }
+            }
             //Paint the hint (if we want it) with some magic numbers.
             if (drawStackSizeHint && max < cards.size()) {
 
@@ -381,49 +408,6 @@ public abstract class CardStack extends GameComponent {
                 g.setClip(null);
                 g.getGraphics().drawRoundRect(x - 1, y - 11, width, 12, 5, 5);
                 g.getGraphics().drawString(cards.size() + " cards", x, y);
-            }
-        }
-        g.dispose();
-    }
-
-    @Override
-    public void paintChildren(GameGraphics g) {
-        Point cardPos = getPosition();
-        int max = Math.min(stackMaxDrawSize, cards.size());
-        switch (renderPolicy) {
-            case RP_ALL_CARDS_TURNED -> {
-                for (int i = 0; i < max && cards.size() - max + i < cards.size(); i++) {
-                    Card card = getCard(cards.size() - max + i);
-                    card.setPosition(cardPos);
-                    card.setPaintFront(true);
-                    card.paint(g.create());
-                    cardPos.x += X_CARD_OFFSET;
-                    cardPos.y += Y_CARD_OFFSET;
-                }
-            }
-            case RP_ALL_CARDS_UNTURNED -> {
-                for (int i = 0; i < max && cards.size() - max + i < cards.size(); i++) {
-                    Card card = getCard(cards.size() - max + i);
-                    card.setPosition(cardPos);
-                    card.setPaintFront(false);
-                    card.paint(g.create().setClip(card.getClip()));
-                    cardPos.x += X_CARD_OFFSET;
-                    cardPos.y += Y_CARD_OFFSET;
-                }
-            }
-            case RP_TOP_CARD_TURNED -> {
-                for (int i = 0; i < max - 1 && cards.size() - max + i - 1 < cards.size(); i++) {
-                    Card card = getCard(cards.size() - max + i);
-                    card.setPosition(cardPos);
-                    card.setPaintFront(false);
-                    card.paint(g.create().setClip(card.getClip()));
-                    cardPos.x += X_CARD_OFFSET;
-                    cardPos.y += Y_CARD_OFFSET;
-                }
-                Card card = getCard();
-                card.setPosition(cardPos);
-                card.setPaintFront(true);
-                card.paint(g.create().setClip(card.getClip()));
             }
         }
     }
@@ -520,6 +504,6 @@ public abstract class CardStack extends GameComponent {
     @Override
     public void setSize(int width, int height) {
         super.setSize(width, height);
-        cards.forEach(card -> card.setSize(width,height));
+        cards.forEach(card -> card.setSize(width, height));
     }
 }

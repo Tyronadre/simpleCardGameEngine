@@ -4,6 +4,7 @@ import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
 import de.henrik.engine.base.GameComponent;
+import de.henrik.engine.util.GameImage;
 
 import java.awt.*;
 import java.awt.event.MouseListener;
@@ -24,7 +25,7 @@ import java.util.List;
  * </ul>>
  */
 public class GameBoard extends GameComponent {
-    private BufferedImage backgroundImage;
+    private GameImage backgroundImage;
     private final List<CardStack> cardStacks;
     private boolean build;
 
@@ -32,14 +33,14 @@ public class GameBoard extends GameComponent {
     private final Game game = Game.game;
 
 
-    public GameBoard(BufferedImage backgroundImage, Dimension size) {
+    public GameBoard(GameImage backgroundImage, Dimension size) {
         super(0, 0, size.width, size.height);
         cardStacks = new ArrayList<>();
         this.backgroundImage = backgroundImage;
     }
 
 
-    public void setBackgroundImage(BufferedImage backgroundImage) {
+    public void setBackgroundImage(GameImage backgroundImage) {
         this.backgroundImage = backgroundImage;
     }
 
@@ -83,8 +84,8 @@ public class GameBoard extends GameComponent {
 
     @Override
     public void paint(GameGraphics g) {
-        g.drawImage(backgroundImage, getX(), getY());
-        paintChildren(g.create());
+        g.drawImage(backgroundImage.getImage(), getX(), getY());
+        super.paint(g);
     }
 
 
