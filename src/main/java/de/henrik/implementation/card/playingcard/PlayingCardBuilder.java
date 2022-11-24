@@ -4,11 +4,14 @@ import de.henrik.engine.card.Card;
 import de.henrik.engine.util.GameImage;
 import de.henrik.implementation.card.BasicCard;
 
+import javax.tools.Tool;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.*;
 import java.util.List;
 
@@ -22,8 +25,7 @@ public class PlayingCardBuilder {
 
     public static List<Card> buildCardsFromCSV(String csv) {
         List<Card> cards = new ArrayList<>();
-
-        try (var reader = new BufferedReader(new FileReader(Objects.requireNonNull(PlayingCardBuilder.class.getResource(csv)).getFile()))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(PlayingCardBuilder.class.getResourceAsStream(csv))))) {
             String l;
             while ((l = reader.readLine()) != null) {
                 try {

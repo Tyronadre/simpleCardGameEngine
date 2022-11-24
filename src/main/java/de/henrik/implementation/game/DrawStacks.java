@@ -29,7 +29,8 @@ public class DrawStacks extends GameComponent {
             playingCards.addAll(PlayingCardBuilder.buildCardsFromCSV("/cardsE2.csv"));
         this.drawStacksMaxCount = drawStacksMaxCount;
         startCards = new BasicCardStack("initStack", -1);
-        startCards.addCards(playingCards); // TODO: 22.11.2022
+        startCards.addCards(playingCards);
+        startCards.shuffel();
         startCards.setDrawStackSizeHint(true);
         drawStacks = new CardStackArea(drawStacksMaxCount, 10, 10);
         add(drawStacks);
@@ -121,7 +122,7 @@ public class DrawStacks extends GameComponent {
     @Override
     public void paint(GameGraphics g) {
         g.setColor(Color.DARK_GRAY);
-        g.getGraphics().fillRect(0, 0, 3000, 3000);
+        g.getGraphics().fillRect(getX(), getY(), getWidth(), getHeight());
         super.paint(g);
     }
 }

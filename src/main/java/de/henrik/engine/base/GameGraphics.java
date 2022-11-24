@@ -9,7 +9,7 @@ public class GameGraphics {
         this.graphics2D = graphics2D;
     }
 
-    public GameGraphics setClip(Rectangle clip){
+    public GameGraphics setClip(Shape clip){
         graphics2D.setClip(clip);
         return this;
     }

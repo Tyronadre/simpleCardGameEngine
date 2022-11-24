@@ -30,8 +30,8 @@ import java.util.function.Predicate;
  * </ul>
  */
 public abstract class CardStack extends GameComponent {
-    private static final int X_CARD_OFFSET = 3;
-    private static final int Y_CARD_OFFSET = 4;
+    protected static final int X_CARD_OFFSET = 3;
+    protected static final int Y_CARD_OFFSET = 4;
 
     /**
      * Render all card front
@@ -410,6 +410,7 @@ public abstract class CardStack extends GameComponent {
                 g.getGraphics().drawString(cards.size() + " cards", x, y);
             }
         }
+        Toolkit.getDefaultToolkit().sync();
     }
 
     /**

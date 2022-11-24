@@ -24,7 +24,5 @@ public class Main {
         System.out.println("Resolution: " + Options.getWidth() + "x" + Options.getHeight());
 
         drawStacks.fillDrawStacks();
-
     }
-
 }

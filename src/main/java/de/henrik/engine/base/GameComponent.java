@@ -48,13 +48,13 @@ public abstract class GameComponent {
         }
         for (GameComponent child : children) {
             if (g.getClip() == null || g.getClip().intersects(child.getClip())) {
-                child.paint(g.create());
+                child.paint(g.create().setClip(g.getClip()));
             }
         }
     }
 
     /**
-     * This method creates a graphic with a clip of the given size, calls the paint method of the parent of this component with this graphics.
+     * This method creates a graphic with a clip of the given size, and calls the paint method of this component.
      * This Method ensures that x and y are within this component, and width and height are at least 1, if not no paint call will happen.
      * If there is no parent, the paint method of this component will be called
      *
@@ -256,5 +256,9 @@ public abstract class GameComponent {
 
     public List<GameComponent> getChildren() {
         return children;
+    }
+
+    public GameComponent getParent() {
+        return parent;
     }
 }

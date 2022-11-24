@@ -8,7 +8,6 @@ import de.henrik.engine.util.GameImage;
 
 import java.awt.*;
 import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 

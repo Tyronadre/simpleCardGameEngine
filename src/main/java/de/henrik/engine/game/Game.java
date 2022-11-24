@@ -1,6 +1,5 @@
 package de.henrik.engine.game;
 
-import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
 import de.henrik.implementation.game.Options;
 
@@ -25,6 +24,7 @@ public class Game extends JFrame {
         setUndecorated(true);
         setVisible(true);
         setVisible(false);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
     public void start(GameBoard gameBoard) {

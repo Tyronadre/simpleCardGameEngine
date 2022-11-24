@@ -20,7 +20,15 @@ abstract public class Card extends GameComponent {
     boolean paintFront;
 
     /**
-     * CONSTRUCTOR
+     * Creates a new Card.
+     * @param ID the CardID
+     * @param frontOfCard the image for the front of this Card
+     * @param backOfCard
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param paintFront
      */
     public Card(int ID, GameImage frontOfCard, GameImage backOfCard, int x, int y, int width, int height, boolean paintFront) {
         super(x, y, width, height);
@@ -45,6 +53,12 @@ abstract public class Card extends GameComponent {
         return ID;
     }
 
+    /**
+     * Tests if another Object is equals to this card.
+     * This test for ID and not for a unique Object.
+     * @param o the other Card
+     * @return {@code TRUE} if the other Object is a card and has the same ID
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -55,7 +69,13 @@ abstract public class Card extends GameComponent {
         return ID == card.ID;
     }
 
+    /**
+     * Always paints the whole card
+     *
+     * @param g the Graphics
+     */
     @Override
+
     public void paint(GameGraphics g) {
         if (!Game.isRunning())
             return;
@@ -68,7 +88,7 @@ abstract public class Card extends GameComponent {
 
         g.getGraphics().setClip(new RoundRectangle2D.Float(x, y, w, h, ARC_SIZE, ARC_SIZE));
         if (paintFront) {
-                g.drawImage(frontOfCardTemp.getImage(), x, y);
+            g.drawImage(frontOfCardTemp.getImage(), x, y);
         } else
             g.drawImage(backOfCardTemp.getImage(), x, y);
 
