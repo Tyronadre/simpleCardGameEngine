@@ -22,7 +22,7 @@ public class DrawStacks extends GameComponent {
 
     public DrawStacks(int drawStacksMaxCount, Dimension size, Point pos) {
         super(pos, size);
-        List<Card> playingCards = PlayingCardBuilder.buildCardsFromCSV("/cardsE0.csv");
+        List<Card> playingCards = PlayingCardBuilder.buildCardsFromCSV("/cardsE0Many.csv");
         if (Options.expansion1Selected)
             playingCards.addAll(PlayingCardBuilder.buildCardsFromCSV("/cardsE1.csv"));
         if (Options.expansion2Selected)

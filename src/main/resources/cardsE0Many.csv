@@ -1,0 +1,15 @@
+1,1,feld,1,Weizenfeld.png,Back.png,60
+2,1,feld,1,Bauernhof.png,Back.png,60
+3,1,resource,1,Baeckerei.png,Back.png,60
+4,2,factory,2,Cafe.png,Back.png,60
+5,1,resource,2,Mini-Markt.png,Back.png,60
+6,1,tier,3,Wald.png,Back.png,60
+7,2,laden,6,Stadion.png,Back.png,60
+8,4,major,7,Fernsehsender.png,Back.png,60
+9,2,factory,8,Buerohaus.png,Back.png,60
+10,2,laden,5,Molkerei.png,Back.png,60
+11,3,restaurant,3,Moebelfabrik.png,Back.png,60
+12,3,restaurant,6,Bergwerk.png,Back.png,60
+13,4,major,3,Familienrestaurant.png,Back.png,60
+14,2,laden,3,Apfelplantage.png,Back.png,60
+15,4,major,2,Markthalle.png,Back.png,60
