@@ -5,19 +5,21 @@ import de.henrik.implementation.game.Options;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashMap;
 
 public class Game extends JFrame {
 
-    public static final Game game;
-    private static boolean running;
+    public static final Game game = new Game();
+    private static boolean running = false;
+    ;
+
+    private static HashMap<String, Board> gameBoards = new HashMap<>();
 
     static {
-        running = false;
-        game = new Game();
         Options.init();
     }
 
-    private GameBoard gameBoard;
+    private Board gameBoard;
 
     private Game() {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -27,7 +29,11 @@ public class Game extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
-    public void start(GameBoard gameBoard) {
+    public Board getActiveGameBoard() {
+        return gameBoard;
+    }
+
+    public void start(Board gameBoard) {
         System.out.println("Game started");
         this.gameBoard = gameBoard;
         Graphics2D g = (Graphics2D) getGraphics().create();
@@ -43,17 +49,33 @@ public class Game extends JFrame {
 
     @Override
     public void paint(Graphics g) {
-        if (isRunning())
-            gameBoard.paint(new GameGraphics((Graphics2D) getGraphics()));
+        if (isRunning()) gameBoard.paint(new GameGraphics((Graphics2D) getGraphics()));
     }
 
-    public GameBoard getGameBoard() {
+    public Board getGameBoard() {
         return gameBoard;
     }
 
     public static GameGraphics getGameGraphics() {
-        if (!isRunning())
-            return null;
+        if (!isRunning()) return null;
         return new GameGraphics((Graphics2D) game.getGraphics());
     }
+
+    public static void registerGameBoard(String gameBoardName, Board gameBoard) {
+        if (gameBoards.containsKey(gameBoardName))
+            throw new IllegalArgumentException("This gameBoard is already registered!");
+        gameBoards.put(gameBoardName, gameBoard);
+    }
+
+    public void switchGameBoard(String gameBoardName) {
+        if (!gameBoards.containsKey(gameBoardName))
+            throw new IllegalArgumentException("This gameBoard is not registered!");
+        this.gameBoard.deavtivte();
+        this.gameBoard = gameBoards.get(gameBoardName);
+        this.gameBoard.activate();
+        repaint();
+
+    }
+
+
 }

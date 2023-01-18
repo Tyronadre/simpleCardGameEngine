@@ -23,10 +23,8 @@ public class DrawStacks extends GameComponent {
     public DrawStacks(int drawStacksMaxCount, Dimension size, Point pos) {
         super(pos, size);
         List<Card> playingCards = PlayingCardBuilder.buildCardsFromCSV("/cardsE0Many.csv");
-        if (Options.expansion1Selected)
-            playingCards.addAll(PlayingCardBuilder.buildCardsFromCSV("/cardsE1.csv"));
-        if (Options.expansion2Selected)
-            playingCards.addAll(PlayingCardBuilder.buildCardsFromCSV("/cardsE2.csv"));
+        if (Options.expansion1Selected) playingCards.addAll(PlayingCardBuilder.buildCardsFromCSV("/cardsE1.csv"));
+        if (Options.expansion2Selected) playingCards.addAll(PlayingCardBuilder.buildCardsFromCSV("/cardsE2.csv"));
         this.drawStacksMaxCount = drawStacksMaxCount;
         startCards = new BasicCardStack("initStack", -1);
         startCards.addCards(playingCards);
@@ -66,8 +64,7 @@ public class DrawStacks extends GameComponent {
      * If there are no drawStacks to fill, nothing happens.
      */
     public void fillDrawStacks() {
-        if (startCards.getStackSize() == 0)
-            return;
+        if (startCards.getStackSize() == 0) return;
         while (anyStackEmpty() && startCards.getStackSize() != 0) {
             addCardToDrawStack(startCards.removeCard());
         }
@@ -76,8 +73,7 @@ public class DrawStacks extends GameComponent {
     private void addCardToDrawStack(Card card) {
         CardStack emptyStack = null;
         for (CardStack stack : drawStacks.getStacks()) {
-            if (stack.addCard(card))
-                return;
+            if (stack.addCard(card)) return;
             if (stack.getStackSize() == 0) {
                 emptyStack = stack;
             }
@@ -89,8 +85,7 @@ public class DrawStacks extends GameComponent {
     }
 
     private boolean anyStackEmpty() {
-        if (drawStacks.getStacks().size() <= drawStacksMaxCount)
-            return true;
+        if (drawStacks.getStacks().size() <= drawStacksMaxCount) return true;
         for (CardStack stack : drawStacks.getStacks()) {
             if (stack.getStackSize() == 0) {
                 return true;

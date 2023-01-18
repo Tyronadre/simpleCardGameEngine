@@ -3,7 +3,6 @@ package de.henrik.engine.card;
 import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.game.Game;
-import de.henrik.engine.game.GameBoard;
 
 import javax.swing.event.ChangeListener;
 import java.awt.*;

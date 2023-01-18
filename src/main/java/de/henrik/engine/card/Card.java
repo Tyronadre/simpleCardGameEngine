@@ -3,19 +3,16 @@ package de.henrik.engine.card;
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.game.Game;
-import de.henrik.engine.util.GameImage;
+import de.henrik.engine.base.GameImage;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
-import java.awt.image.BufferedImage;
 
 abstract public class Card extends GameComponent {
     public static final int ARC_SIZE = 15;
     public final int ID;
-
-    GameImage frontOfCardTemp, backOfCardTemp;
-    private final GameImage frontOfCard;
-    private final GameImage backOfCard;
+    private GameImage frontOfCard;
+    private GameImage backOfCard;
 
     boolean paintFront;
 
@@ -88,9 +85,9 @@ abstract public class Card extends GameComponent {
 
         g.getGraphics().setClip(new RoundRectangle2D.Float(x, y, w, h, ARC_SIZE, ARC_SIZE));
         if (paintFront) {
-            g.drawImage(frontOfCardTemp.getImage(), x, y);
+            g.drawImage(frontOfCard.getImage(), x, y);
         } else
-            g.drawImage(backOfCardTemp.getImage(), x, y);
+            g.drawImage(backOfCard.getImage(), x, y);
 
         g.setColor(Color.BLACK);
         g.getGraphics().drawRoundRect(x, y, w, h, ARC_SIZE, ARC_SIZE); //paint border
@@ -102,14 +99,9 @@ abstract public class Card extends GameComponent {
 
     @Override
     public void setSize(int width, int height) {
-        backOfCardTemp = backOfCard.getScaledInstance(width - 1, height - 1, Image.SCALE_SMOOTH);
-        frontOfCardTemp = frontOfCard.getScaledInstance(width - 1, height - 1, Image.SCALE_SMOOTH);
+        backOfCard = backOfCard.getScaledInstance(width - 1, height - 1);
+        frontOfCard = frontOfCard.getScaledInstance(width - 1, height - 1);
         super.setSize(width, height);
-    }
-
-    @Override
-    public void setPosition(int x, int y) {
-        super.setPosition(x, y);
     }
 
     @Override

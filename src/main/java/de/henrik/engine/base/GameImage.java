@@ -1,19 +1,11 @@
-package de.henrik.engine.util;
+package de.henrik.engine.base;
 
-import com.sun.tools.javac.Main;
 import de.henrik.implementation.game.Options;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
-import java.io.File;
 import java.io.IOException;
-import java.net.JarURLConnection;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.Buffer;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -42,13 +34,11 @@ public class GameImage {
         try {
             //LOAD NEW IMG//
             BufferedImage image = ImageIO.read(Objects.requireNonNull(getClass().getResource(path)));
-            if (image.getHeight(null) <= 0 || image.getWidth(null) <= 0)
-                throw new NullPointerException();
+            if (image.getHeight(null) <= 0 || image.getWidth(null) <= 0) throw new NullPointerException();
             BufferedImage new_image = GFX_CONFIG.createCompatibleImage(image.getWidth(), image.getHeight(), image.getTransparency());
             Graphics2D g2d = (Graphics2D) new_image.getGraphics();
             g2d.drawImage(image, 0, 0, null);
             g2d.dispose();
-
 
             this.image = new_image;
             System.out.println("Loaded image: " + path);
@@ -73,8 +63,17 @@ public class GameImage {
         loadedImages.get(path).put(defaultImageDim, image);
     }
 
-    private GameImage(BufferedImage image) {
+    private GameImage(BufferedImage image, String path) {
         this.image = image;
+        this.path = path;
+    }
+
+    public GameImage(Color color) {
+        this.path = String.valueOf(color);
+        image = GFX_CONFIG.createCompatibleImage(Options.getWidth(), Options.getHeight());
+        Graphics2D ig = (Graphics2D) image.getGraphics();
+        ig.setColor(color);
+        ig.fillRect(0, 0, image.getWidth(), image.getHeight());
     }
 
 
@@ -92,15 +91,15 @@ public class GameImage {
     }
 
 
-    public GameImage getScaledInstance(int width, int height, int hints) {
-        if (loadedImages.get(path).containsKey(new Dimension(width, height))) {
-            return new GameImage(loadedImages.get(path).get(new Dimension(width, height)));
-        }
+    public GameImage getScaledInstance(int width, int height) {
+        if (loadedImages.get(path).containsKey(new Dimension(width, height)))
+            return new GameImage(loadedImages.get(path).get(new Dimension(width, height)), this.path);
+
 
         BufferedImage new_image = GFX_CONFIG.createCompatibleImage(width, height, image.getTransparency());
         Graphics2D g2d = new_image.createGraphics();
-        g2d.drawImage(image.getScaledInstance(width, height, hints), 0, 0, null);
+        g2d.drawImage(image.getScaledInstance(width, height, Image.SCALE_SMOOTH), 0, 0, null);
         loadedImages.get(path).put(new Dimension(width, height), new_image);
-        return new GameImage(new_image);
+        return new GameImage(new_image, this.path);
     }
 }

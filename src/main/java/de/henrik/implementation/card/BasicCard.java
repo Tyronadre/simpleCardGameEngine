@@ -1,11 +1,9 @@
 package de.henrik.implementation.card;
 
 import de.henrik.engine.card.Card;
-import de.henrik.engine.util.GameImage;
+import de.henrik.engine.base.GameImage;
 import de.henrik.implementation.card.playingcard.CardClass;
 import de.henrik.implementation.card.playingcard.CardType;
-
-import java.awt.*;
 
 // FIXME: 27.10.2022 Implementation
 

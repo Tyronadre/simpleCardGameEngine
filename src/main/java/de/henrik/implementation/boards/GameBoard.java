@@ -1,41 +1,25 @@
-package de.henrik.engine.game;
+package de.henrik.implementation.boards;
 
 import de.henrik.engine.base.GameGraphics;
+import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
-import de.henrik.engine.base.GameComponent;
-import de.henrik.engine.util.GameImage;
+import de.henrik.engine.game.Board;
+import de.henrik.engine.game.Game;
 
 import java.awt.*;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
-
-/**
- * Funktionen:
- * <ul>
- *     <li>Feste Größe</li>
- *     <li>Hintergrundbild definieren</li>
- *     <li>Definieren von Positionen an denen Kartenstapel liegen. Dabei ist Dimension der stapel fest. Die maximale Anzahl der karten kann festgelegt werden.</li>
- *     <li>Rückgabe von Karten die auf kartenstapel liegen</li>
- *     <li>bewegen von karten von einem stapel zum anderen</li>
- *     <li>es muss build() aufgerufen werden um  das GameBoard zu bauen. dann können keine stacks mehr entfernt oder hinzugefügt werden</li>
- * </ul>>
- */
-public class GameBoard extends GameComponent {
-    private GameImage backgroundImage;
+public class GameBoard extends Board {
     private final List<CardStack> cardStacks;
     private boolean build;
 
     private Card cardDragged;
     private final Game game = Game.game;
 
-
-    public GameBoard(GameImage backgroundImage, Dimension size) {
-        super(0, 0, size.width, size.height);
-        cardStacks = new ArrayList<>();
-        this.backgroundImage = backgroundImage;
+    public GameBoard(GameImage backgroundImage) {
+        super(backgroundImage);
     }
 
 
@@ -63,16 +47,15 @@ public class GameBoard extends GameComponent {
      * sets the card that should be dragged.
      * <p>
      * If null the dragged card will be removed. If there is no dragged card, nothing will happen.
+     *
      * @param card The dragged Card
-     * @exception IllegalArgumentException if there is already a card being dragged.
+     * @throws IllegalArgumentException if there is already a card being dragged.
      */
     public void setCardDragged(Card card) {
         if (card == null) {
             remove(cardDragged);
-        } else if (isCardDragged())
-            throw new IllegalArgumentException();
-        else
-            add(card);
+        } else if (isCardDragged()) throw new IllegalArgumentException();
+        else add(card);
         this.cardDragged = card;
 
     }
@@ -87,15 +70,16 @@ public class GameBoard extends GameComponent {
         super.paint(g);
     }
 
+    @Override
+    public void activate() {
 
-    public void addMouseListener(MouseListener mouseListener) {
-        game.addMouseListener(mouseListener);
     }
 
+    @Override
+    public void deavtivte() {
 
-    public void removeMouseListener(MouseListener mouseListener) {
-        game.removeMouseListener(mouseListener);
     }
+
 
     /**
      * Returns the topmost cardStack at that position or null if there is none
@@ -105,12 +89,8 @@ public class GameBoard extends GameComponent {
      */
     public CardStack getCardStackAt(Point location) {
         for (CardStack stack : cardStacks) {
-            if (stack.pointInside(location))
-                return stack;
+            if (stack.pointInside(location)) return stack;
         }
         return null;
     }
-
-
 }
-

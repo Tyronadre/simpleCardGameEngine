@@ -1,12 +1,9 @@
 package de.henrik.implementation.card;
 
 import de.henrik.engine.base.GameGraphics;
-import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
-import de.henrik.engine.util.GameImage;
 
 import java.awt.*;
-import java.util.function.Predicate;
 
 public class EmptyCardStack extends CardStack {
     private final Image image;

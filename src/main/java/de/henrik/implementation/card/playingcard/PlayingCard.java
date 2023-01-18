@@ -1,9 +1,8 @@
 package de.henrik.implementation.card.playingcard;
 
-import de.henrik.engine.util.GameImage;
+import de.henrik.engine.base.GameImage;
 import de.henrik.implementation.card.BasicCard;
 
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 

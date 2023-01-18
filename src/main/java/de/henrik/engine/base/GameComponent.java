@@ -1,10 +1,13 @@
 package de.henrik.engine.base;
 
+import de.henrik.engine.game.Board;
 import de.henrik.engine.game.Game;
 import de.henrik.implementation.game.Options;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public abstract class GameComponent {
@@ -64,17 +67,17 @@ public abstract class GameComponent {
      * @param height height
      */
     public void repaint(int x, int y, int width, int height) {
-        if (!Game.isRunning())
-            return;
+        if (!Game.isRunning()) return;
         g = Game.getGameGraphics();
         x = Math.min(x, Options.getWidth());
         y = Math.min(y, Options.getHeight());
         width = Math.min(width, Options.getWidth() - x);
         height = Math.min(height, Options.getHeight() - y);
-        if (width <= 0 || height <= 0 || g == null)
-            return;
+        if (width <= 0 || height <= 0 || g == null) return;
         if (parent == null) {
-            paint(g.create().setClip(x, y, width, height));
+            if (this instanceof Board) {
+                paint(g.create().setClip(x, y, width, height));
+            }
         } else parent.paint(g.create().setClip(x, y, width, height));
     }
 
@@ -179,8 +182,7 @@ public abstract class GameComponent {
      * @see GameComponent#setPosition(int, int)
      */
     public void move(int x, int y) {
-        if (x == getX() && y == getY())
-            return;
+        if (x == getX() && y == getY()) return;
         boolean movementLeft = x - getX() <= 0;
         boolean movementUp = y - getY() <= 0;
 
@@ -191,18 +193,9 @@ public abstract class GameComponent {
 
         //Repaint parent. (if no parent just this component)
         GameComponent p = parent;
-        if (p == null)
-            p = this;
-        p.repaint(
-                oldx,
-                movementUp ? getY() + getHeight() : oldy,
-                getWidth(),
-                Math.min(getHeight(), Math.abs(getY() - oldy)));
-        p.repaint(
-                movementLeft ? getX() + getWidth() : oldx,
-                oldy,
-                Math.min(getWidth(), Math.abs(getX() - oldx)),
-                getHeight());
+        if (p == null) p = this;
+        p.repaint(oldx, movementUp ? getY() + getHeight() : oldy, getWidth(), Math.min(getHeight(), Math.abs(getY() - oldy)));
+        p.repaint(movementLeft ? getX() + getWidth() : oldx, oldy, Math.min(getWidth(), Math.abs(getX() - oldx)), getHeight());
         paint(g);
     }
 
@@ -260,5 +253,72 @@ public abstract class GameComponent {
 
     public GameComponent getParent() {
         return parent;
+    }
+
+    HashMap<Integer, MouseListener> mouseListenerHashMap = new HashMap<>();
+    HashMap<Integer, MouseMotionListener> mouseMotionListenerHashMap = new HashMap<>();
+
+    public void addMouseListener(MouseListener mouseListener) {
+        var mouseListenerForObject = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (pointInside(e.getLocationOnScreen()) && childOf(Game.game.getActiveGameBoard()))
+                    mouseListener.mouseClicked(e);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (pointInside(e.getLocationOnScreen()) && childOf(Game.game.getActiveGameBoard()))
+                    mouseListener.mousePressed(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (pointInside(e.getLocationOnScreen()) && childOf(Game.game.getActiveGameBoard()))
+                    mouseListener.mouseReleased(e);
+            }
+        };
+
+        var mouseMotionListenerForObject = new MouseMotionAdapter() {
+            Point lastLocation = new Point();
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (!pointInside(lastLocation) && pointInside(e.getLocationOnScreen()) && childOf(Game.game.getActiveGameBoard()))
+                    mouseListener.mouseEntered(e);
+                if (pointInside(lastLocation) && !pointInside(e.getLocationOnScreen()) && childOf(Game.game.getActiveGameBoard()))
+                    mouseListener.mouseExited(e);
+                lastLocation = e.getLocationOnScreen();
+            }
+        };
+        mouseListenerHashMap.put(mouseListener.hashCode(), mouseListenerForObject);
+        mouseMotionListenerHashMap.put(mouseListener.hashCode(), mouseMotionListenerForObject);
+        Game.game.addMouseListener(mouseListenerForObject);
+        Game.game.addMouseMotionListener(mouseMotionListenerForObject);
+    }
+
+    public boolean childOf(Board activeBoard) {
+        for (GameComponent child : activeBoard.getChildren()) {
+            if (child == this || childOf(child, this)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean childOf(GameComponent parent, GameComponent searchChild) {
+        if (parent == searchChild) return true;
+        if (children.size() == 0) return false;
+        for (GameComponent child : children) {
+            if (childOf(child, searchChild)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public void removeMouseListener(MouseListener mouseListener) {
+        Game.game.removeMouseListener(mouseListenerHashMap.get(mouseListener.hashCode()));
     }
 }
