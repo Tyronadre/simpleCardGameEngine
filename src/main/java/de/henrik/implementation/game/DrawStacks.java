@@ -5,8 +5,8 @@ import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
 import de.henrik.engine.card.CardStackArea;
-import de.henrik.implementation.card.BasicCardStack;
-import de.henrik.implementation.card.DraggableCardStack;
+import de.henrik.implementation.card.stack.BasicCardStack;
+import de.henrik.implementation.card.stack.DraggableCardStack;
 import de.henrik.implementation.card.playingcard.PlayingCardBuilder;
 
 import java.awt.*;
@@ -22,7 +22,7 @@ public class DrawStacks extends GameComponent {
 
     public DrawStacks(int drawStacksMaxCount, Dimension size, Point pos) {
         super(pos, size);
-        List<Card> playingCards = PlayingCardBuilder.buildCardsFromCSV("/cardsE0Many.csv");
+        List<Card> playingCards = PlayingCardBuilder.buildCardsFromCSV("/cardsE0.csv");
         if (Options.expansion1Selected) playingCards.addAll(PlayingCardBuilder.buildCardsFromCSV("/cardsE1.csv"));
         if (Options.expansion2Selected) playingCards.addAll(PlayingCardBuilder.buildCardsFromCSV("/cardsE2.csv"));
         this.drawStacksMaxCount = drawStacksMaxCount;

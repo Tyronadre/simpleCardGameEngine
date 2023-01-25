@@ -1,6 +1,5 @@
-package de.henrik.engine.game;
+package de.henrik.engine.base;
 
-import de.henrik.engine.base.GameGraphics;
 import de.henrik.implementation.game.Options;
 
 import javax.swing.*;
@@ -11,7 +10,8 @@ public class Game extends JFrame {
 
     public static final Game game = new Game();
     private static boolean running = false;
-    ;
+
+    private Player activePlayer;
 
     private static HashMap<String, Board> gameBoards = new HashMap<>();
 
@@ -36,6 +36,7 @@ public class Game extends JFrame {
     public void start(Board gameBoard) {
         System.out.println("Game started");
         this.gameBoard = gameBoard;
+        gameBoard.activate();
         Graphics2D g = (Graphics2D) getGraphics().create();
         g.setClip(0, 0, getWidth(), getHeight());
         gameBoard.setGraphics(new GameGraphics(g));
@@ -70,12 +71,18 @@ public class Game extends JFrame {
     public void switchGameBoard(String gameBoardName) {
         if (!gameBoards.containsKey(gameBoardName))
             throw new IllegalArgumentException("This gameBoard is not registered!");
-        this.gameBoard.deavtivte();
+        this.gameBoard.deactivate();
         this.gameBoard = gameBoards.get(gameBoardName);
         this.gameBoard.activate();
         repaint();
-
     }
 
+    public Player getActivePlayer() {
+        return activePlayer;
+    }
+
+    public void setActivePlayer(Player activePlayer) {
+        this.activePlayer = activePlayer;
+    }
 
 }

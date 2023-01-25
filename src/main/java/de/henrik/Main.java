@@ -1,8 +1,8 @@
 package de.henrik;
 
 import de.henrik.engine.base.GameImage;
-import de.henrik.engine.game.Board;
-import de.henrik.engine.game.Game;
+import de.henrik.engine.base.Board;
+import de.henrik.engine.base.Game;
 
 import de.henrik.implementation.boards.GameBoard;
 import de.henrik.implementation.boards.MainMenu;
@@ -22,6 +22,11 @@ public class Main {
 
         DrawStacks drawStacks = new DrawStacks(20, new Dimension(Options.getWidth(), Options.getHeight() / 3), new Point(0, Options.getHeight() / 3));
         gameBoard.add(drawStacks);
+        gameBoard.addActivationListener(e -> {
+            drawStacks.fillDrawStacks();
+            System.out.println(e);
+        });
+        Options.expansion1Selected = true;
 
         game.start(mainMenu);
         System.out.println("Resolution: " + Options.getWidth() + "x" + Options.getHeight());

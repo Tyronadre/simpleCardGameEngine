@@ -1,8 +1,7 @@
 package de.henrik.implementation.game;
 
-import de.henrik.engine.game.Game;
+import de.henrik.engine.base.Game;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,8 +11,8 @@ import java.util.Random;
  * Saves Settings and other static stuff
  */
 public class Options {
-    static boolean expansion1Selected;
-    static boolean expansion2Selected;
+    public static boolean expansion1Selected;
+    public static boolean expansion2Selected;
     static int soundLevel;
     static int playerCount;
     static int width;
@@ -39,6 +38,10 @@ public class Options {
 
     public static int getPlayerCount() {
         return playerCount;
+    }
+
+    public static void setPlayerCount(int playerCount) {
+        Options.playerCount = playerCount;
     }
 
     enum AiLevel {EASY, MEDIUM, HARD}

@@ -24,4 +24,8 @@ public class Pane extends GameComponent {
         background = background.getScaledInstance(width - 1, height - 1);
         super.setSize(width, height);
     }
+
+    public void setBackground(GameImage background) {
+        this.background = background;
+    }
 }

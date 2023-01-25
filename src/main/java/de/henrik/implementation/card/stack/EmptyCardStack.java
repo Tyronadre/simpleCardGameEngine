@@ -1,4 +1,4 @@
-package de.henrik.implementation.card;
+package de.henrik.implementation.card.stack;
 
 import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.card.CardStack;

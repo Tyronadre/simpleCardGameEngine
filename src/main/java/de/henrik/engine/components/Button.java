@@ -3,7 +3,7 @@ package de.henrik.engine.components;
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.base.GameImage;
-import de.henrik.engine.game.Game;
+import de.henrik.engine.base.Game;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -23,7 +23,7 @@ public class Button extends GameComponent {
     public static final int state_HOVERED = 1;
     public static final int state_CLICKED = 2;
     private int state = state_DEFAULT;
-    private List<ActionListener> actionListeners = new ArrayList<>();
+    private final List<ActionListener> actionListeners = new ArrayList<>();
 
     public Button(String description, GameImage background, int x, int y, int width, int height) {
         super(x, y, width, height);
@@ -35,32 +35,41 @@ public class Button extends GameComponent {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                state = state_CLICKED;
-                for (var actionListener : actionListeners) {
-                    actionListener.actionPerformed(new ActionEvent(this, 0, "buttonClicked"));
+                if (board.active) {
+                    state = state_CLICKED;
+                    for (var actionListener : actionListeners) {
+                        actionListener.actionPerformed(new ActionEvent(this, 0, "buttonClicked"));
+                    }
+                    repaint();
                 }
-                repaint();
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                state = state_HOVERED;
-                repaint();
+                if (board.active) {
+                    state = state_HOVERED;
+                    repaint();
+                }
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                state = state_HOVERED;
-                repaint();
+                if (board.active) {
+                    state = state_HOVERED;
+                    repaint();
+                }
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                state = state_DEFAULT;
-                repaint();
+                if (board.active) {
+                    state = state_DEFAULT;
+                    repaint();
+                }
             }
         });
     }
+
 
     public Button(String description, int x, int y, int width, int height) {
         this(description, null, x, y, width, height);

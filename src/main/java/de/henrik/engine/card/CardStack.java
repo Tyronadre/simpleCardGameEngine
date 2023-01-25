@@ -2,7 +2,7 @@ package de.henrik.engine.card;
 
 import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.base.GameComponent;
-import de.henrik.engine.game.Game;
+import de.henrik.engine.base.Game;
 
 import javax.swing.event.ChangeListener;
 import java.awt.*;
@@ -55,7 +55,6 @@ public abstract class CardStack extends GameComponent {
     boolean drawStackSizeHint;
     int stackMaxDrawSize = 5;
 
-    MouseAdapter topCardDraggableAdapter;
 
 
     /**
@@ -93,71 +92,7 @@ public abstract class CardStack extends GameComponent {
 
 
 //        //Init draggable cards
-//        topCardDraggableAdapter = new MouseAdapter() {
-//            Card card;
-//            Boolean pressed;
-//
-//            @Override
-//            public void mousePressed(MouseEvent e) {
-//                if (gameBoard.isCardDragged())
-//                    return;
-//                if (!pointInside(e.getLocationOnScreen()))
-//                    return;
-//                if (!gameBoard.getCardStackAt(e.getLocationOnScreen()).equals(CardStack.this))
-//                    return;
-//                if ((card = removeCard()) == null)
-//                    return;
-//
-//                pressed = true;
-//                int oldRenderPolicy = getRenderPolicy();
-//
-//                //if the top card is turned we need to change the render policy temporary or the next card will be visible
-//                if (oldRenderPolicy == TOP_CARD_TURNED)
-//                    setRenderPolicy(ALL_CARDS_UNTURNED);
-//
-//                //render one card less
-//                setStackMaxDrawSize(getStackMaxDrawSize() - 1);
-//
-//                //Card movement
-//                new Thread(() -> {
-//                    Point offset = new Point(card.getX() - MouseInfo.getPointerInfo().getLocation().x, card.getY() - MouseInfo.getPointerInfo().getLocation().y);
-//                    Point mousePos;
-//                    long lastTime = 0L;
-//
-//                    gameBoard.setCardDragged(card);
-//                    while (pressed) {
-//                        if (System.currentTimeMillis() - lastTime >= 10){
-//                            lastTime = System.currentTimeMillis();
-//
-//                            mousePos = MouseInfo.getPointerInfo().getLocation();
-//                            card.move(mousePos.x + offset.x, mousePos.y + offset.y);
-//                            Toolkit.getDefaultToolkit().sync();
-//                        }
-//                    }
-//                    gameBoard.setCardDragged(null);
-//                    CardStack cardStack = gameBoard.getCardStackAt(MouseInfo.getPointerInfo().getLocation());
-//
-//
-//                    //reset temp changes
-//                    if (oldRenderPolicy == TOP_CARD_TURNED) {
-//                        setRenderPolicy(TOP_CARD_TURNED);
-//                    }
-//                    setStackMaxDrawSize(getStackMaxDrawSize() + 1);
-//
-//                    if (cardStack != null && cardStack.test(card)) {
-//                        cardStack.moveCardToStack(card);
-//                        paint(g);
-//                    } else {
-//                        moveCardToStack(card);
-//                    }
-//                }).start();
-//            }
-//
-//            @Override
-//            public void mouseReleased(MouseEvent e) {
-//                pressed = false;
-//            }
-//        };
+
     }
 
 
@@ -179,7 +114,7 @@ public abstract class CardStack extends GameComponent {
      *
      * @param card The Card to move
      */
-    private void moveCardToStack(Card card) {
+    public void moveCardToStack(Card card) {
         Rectangle rec = card.getClip();
         addCard(card);
         Game.game.getGameBoard().repaint(rec);
@@ -190,7 +125,7 @@ public abstract class CardStack extends GameComponent {
     /**
      * @return the applied render policy
      */
-    private int getRenderPolicy() {
+    protected int getRenderPolicy() {
         return renderPolicy;
     }
 
@@ -204,7 +139,7 @@ public abstract class CardStack extends GameComponent {
      *
      * @param policy the new Policy
      */
-    private void setRenderPolicy(int policy) {
+    protected void setRenderPolicy(int policy) {
         if (policy < 0 || policy > 2)
             throw new IllegalArgumentException("This is not a valid render policy.");
         renderPolicy = policy;
@@ -465,9 +400,6 @@ public abstract class CardStack extends GameComponent {
 //        gameBoard.removeMouseMotionListener(topCardDraggableAdapter);
     }
 
-    public void addMouseListener(MouseListener mouseListener) {
-        // TODO: 19.10.2022 addMouseListener
-    }
 
     public void removeMouseListener(MouseListener mouseListener) {
         // TODO: 19.10.2022 removeMouseListener
@@ -496,9 +428,6 @@ public abstract class CardStack extends GameComponent {
 
     public Collection<? extends Card> getCards() {
         return cards;
-    }
-
-    public void addChangeListener(ChangeListener changeListener) {
     }
 
     @Override

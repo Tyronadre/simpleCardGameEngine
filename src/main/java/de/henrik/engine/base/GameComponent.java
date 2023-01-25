@@ -1,12 +1,11 @@
 package de.henrik.engine.base;
 
-import de.henrik.engine.game.Board;
-import de.henrik.engine.game.Game;
 import de.henrik.implementation.game.Options;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -14,7 +13,8 @@ public abstract class GameComponent {
     private int x, y, width, height;
     protected GameGraphics g;
     protected GameComponent parent;
-    private final List<GameComponent> children;
+    protected final List<GameComponent> children;
+    protected Board board;
 
 
     public GameComponent(int x, int y, int width, int height) {
@@ -22,7 +22,7 @@ public abstract class GameComponent {
         this.y = y;
         this.width = width;
         this.height = height;
-        children = new ArrayList<>();
+        children = Collections.synchronizedList(new ArrayList<>());
     }
 
     public GameComponent(Point pos, Dimension size) {
@@ -74,10 +74,8 @@ public abstract class GameComponent {
         width = Math.min(width, Options.getWidth() - x);
         height = Math.min(height, Options.getHeight() - y);
         if (width <= 0 || height <= 0 || g == null) return;
-        if (parent == null) {
-            if (this instanceof Board) {
-                paint(g.create().setClip(x, y, width, height));
-            }
+        if (parent == null || this instanceof Board) {
+            paint(g.create().setClip(x, y, width, height));
         } else parent.paint(g.create().setClip(x, y, width, height));
     }
 
@@ -194,9 +192,9 @@ public abstract class GameComponent {
         //Repaint parent. (if no parent just this component)
         GameComponent p = parent;
         if (p == null) p = this;
-        p.repaint(oldx, movementUp ? getY() + getHeight() : oldy, getWidth(), Math.min(getHeight(), Math.abs(getY() - oldy)));
-        p.repaint(movementLeft ? getX() + getWidth() : oldx, oldy, Math.min(getWidth(), Math.abs(getX() - oldx)), getHeight());
-        paint(g);
+        p.repaint(Math.max(oldx, 0), Math.max(movementUp ? Math.max(getY() + getHeight(), oldy) : oldy, 0), getWidth(), Math.min(getHeight(), Math.abs(getY() - oldy)));
+        p.repaint(Math.max(movementLeft ? Math.max(getX() + getWidth(), oldx) : oldx, 0), Math.max(oldy, 0), Math.min(getWidth(), Math.abs(getX() - oldx)), getHeight());
+        repaint();
     }
 
     /**
@@ -230,6 +228,15 @@ public abstract class GameComponent {
     public void add(GameComponent component) {
         children.add(component);
         component.parent = this;
+        if (component.board == null) setBoardRecursively(this);
+    }
+
+    protected void setBoardRecursively(GameComponent parent) {
+        if (parent.children.size() == 0) return;
+        for (GameComponent child : parent.children) {
+            child.board = parent.board;
+            child.setBoardRecursively(child);
+        }
     }
 
     public void remove(GameComponent component) {
@@ -262,20 +269,17 @@ public abstract class GameComponent {
         var mouseListenerForObject = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (pointInside(e.getLocationOnScreen()) && childOf(Game.game.getActiveGameBoard()))
-                    mouseListener.mouseClicked(e);
+                if (pointInside(e.getLocationOnScreen())) mouseListener.mouseClicked(e);
             }
 
             @Override
             public void mousePressed(MouseEvent e) {
-                if (pointInside(e.getLocationOnScreen()) && childOf(Game.game.getActiveGameBoard()))
-                    mouseListener.mousePressed(e);
+                if (pointInside(e.getLocationOnScreen())) mouseListener.mousePressed(e);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (pointInside(e.getLocationOnScreen()) && childOf(Game.game.getActiveGameBoard()))
-                    mouseListener.mouseReleased(e);
+                if (pointInside(e.getLocationOnScreen())) mouseListener.mouseReleased(e);
             }
         };
 
@@ -284,10 +288,8 @@ public abstract class GameComponent {
 
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (!pointInside(lastLocation) && pointInside(e.getLocationOnScreen()) && childOf(Game.game.getActiveGameBoard()))
-                    mouseListener.mouseEntered(e);
-                if (pointInside(lastLocation) && !pointInside(e.getLocationOnScreen()) && childOf(Game.game.getActiveGameBoard()))
-                    mouseListener.mouseExited(e);
+                if (!pointInside(lastLocation) && pointInside(e.getLocationOnScreen())) mouseListener.mouseEntered(e);
+                if (pointInside(lastLocation) && !pointInside(e.getLocationOnScreen())) mouseListener.mouseExited(e);
                 lastLocation = e.getLocationOnScreen();
             }
         };
@@ -297,26 +299,25 @@ public abstract class GameComponent {
         Game.game.addMouseMotionListener(mouseMotionListenerForObject);
     }
 
-    public boolean childOf(Board activeBoard) {
-        for (GameComponent child : activeBoard.getChildren()) {
-            if (child == this || childOf(child, this)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean childOf(GameComponent parent, GameComponent searchChild) {
-        if (parent == searchChild) return true;
-        if (children.size() == 0) return false;
-        for (GameComponent child : children) {
-            if (childOf(child, searchChild)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+//    public boolean childOf(Board activeBoard) {
+//        for (GameComponent child : activeBoard.getChildren()) {
+//            if (child == this || childOf(child, this)) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+//
+//    private boolean childOf(GameComponent parent, GameComponent searchChild) {
+//        if (parent == searchChild) return true;
+//        if (children.size() == 0) return false;
+//        for (GameComponent child : children) {
+//            if (childOf(child, searchChild)) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     public void removeMouseListener(MouseListener mouseListener) {
         Game.game.removeMouseListener(mouseListenerHashMap.get(mouseListener.hashCode()));

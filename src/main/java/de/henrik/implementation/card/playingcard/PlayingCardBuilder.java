@@ -37,7 +37,6 @@ public class PlayingCardBuilder {
                         case 2 -> CardType.SECONDARY_INDUSTRY;
                         case 3 -> CardType.RESTAURANTS;
                         case 4 -> CardType.MAYOR_ESTABLISHMENT;
-                        case 5 -> CardType.LANDMARK;
                         default -> throw new IllegalStateException("Unexpected value: " + line[2]);
                     });
                     cardBuilder.setCardClass(switch (line[2]) {
@@ -69,6 +68,8 @@ public class PlayingCardBuilder {
     }
 
     private static ActionListener getAction(String cardName) {
+
+        // TODO: 18.01.2023 implement card actions
         return e -> System.out.println(cardName);
     }
 

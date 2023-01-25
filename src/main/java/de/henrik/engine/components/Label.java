@@ -2,7 +2,7 @@ package de.henrik.engine.components;
 
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
-import de.henrik.engine.game.Game;
+import de.henrik.engine.base.Game;
 
 import java.awt.*;
 

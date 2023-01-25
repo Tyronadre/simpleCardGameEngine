@@ -70,10 +70,16 @@ public class GameImage {
 
     public GameImage(Color color) {
         this.path = String.valueOf(color);
+        if (loadedImages.containsKey(path)) {
+            image = loadedImages.get(path).get(new Dimension(Options.getWidth(), Options.getHeight()));
+            return;
+        }
         image = GFX_CONFIG.createCompatibleImage(Options.getWidth(), Options.getHeight());
         Graphics2D ig = (Graphics2D) image.getGraphics();
         ig.setColor(color);
         ig.fillRect(0, 0, image.getWidth(), image.getHeight());
+        loadedImages.put(path, new HashMap<>());
+        loadedImages.get(path).put(new Dimension(Options.getWidth(), Options.getHeight()), image);
     }
 
 
