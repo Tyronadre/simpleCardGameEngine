@@ -2,74 +2,67 @@ package de.henrik.implementation.player;
 
 import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.CardStack;
-import de.henrik.engine.components.Label;
 import de.henrik.engine.card.CardStackArea;
+import de.henrik.engine.components.Label;
 import de.henrik.engine.components.Pane;
+import de.henrik.engine.game.Player;
+import de.henrik.engine.game.PlayerPane;
+import de.henrik.implementation.card.SelfStackingCardStackArea;
 import de.henrik.implementation.card.landmark.Landmark;
-import de.henrik.implementation.card.landmark.LandmarkBuilder;
 import de.henrik.implementation.card.stack.BasicCardStack;
 import de.henrik.implementation.game.Options;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
 
-public class Player extends de.henrik.engine.base.Player {
-    int coins;
-    HashMap<Landmark, Boolean> landmarkHashMap;
-    CardStackArea landmarks = new CardStackArea(-1, 4, 4);
-
+public class PlayerPaneImpl extends PlayerPane {
+    PlayerImpl player;
+    CardStackArea landmarks;
+    SelfStackingCardStackArea ownedCards;
     Label coinLabel;
+    public PlayerPaneImpl(PlayerImpl player) {
+        super(new GameImage(Color.BLACK), calcInitDim(player)[0], calcInitDim(player)[1],calcInitDim(player)[2],calcInitDim(player)[3]);
+        this.player = player;
 
 
-    public Player(int id, String name) {
-        super(id, name);
-        coins = 5;
-        loadLandmarks();
-        initPlayerPane();
-    }
+        // --- LANDMARKS, COINS, PLAYERNAME --- //
+        GameImage landmarkBG = new GameImage("/player/landmarkBackground.png");
+        Pane landmarksAndInfo = new Pane(landmarkBG, getX(), getY(), getWidth() / 4 - 3, getHeight());
+        add(landmarksAndInfo);
 
-    private void loadLandmarks() {
-        landmarkHashMap = new HashMap<>();
-        for (Landmark landmark : LandmarkBuilder.buildLandmarkFromCSV("/landmarksE0.csv")) {
-            landmarkHashMap.put(landmark, false);
+        landmarks = new CardStackArea(20, 3, 3);
+        landmarksAndInfo.add(landmarks);
+        landmarks.setSize(landmarksAndInfo.getWidth(), landmarksAndInfo.getHeight() - 40);
+        landmarks.setPosition(landmarksAndInfo.getX(), landmarksAndInfo.getY() + 40);
+        for (Landmark landmark : player.landmarkHashMap.keySet()) {
+            CardStack landmarkStack = new BasicCardStack("player_" + player.getId() + "_landmark_" + landmark.ID, landmark, 1);
+            landmarkStack.addCard(landmark);
+            landmarks.addStack(landmarkStack);
         }
-        if (Options.expansion1Selected) {
-            for (Landmark landmark : LandmarkBuilder.buildLandmarkFromCSV("/landmarksE1.csv")) {
-                landmarkHashMap.put(landmark, false);
-            }
-        }
-        if (Options.expansion2Selected) {
-            for (Landmark landmark : LandmarkBuilder.buildLandmarkFromCSV("/landmarksE2.csv")) {
-                landmarkHashMap.put(landmark, false);
-            }
-        }
+
+        de.henrik.engine.components.Label playerName = new de.henrik.engine.components.Label(player.getName(), landmarksAndInfo.getX(), landmarksAndInfo.getY(), 150, 30);
+        coinLabel = new Label("Coins: " + player.getCoins(), 150 + landmarksAndInfo.getX(), landmarksAndInfo.getY(), 150, 30);
+
+        landmarksAndInfo.add(playerName);
+        landmarksAndInfo.add(coinLabel);
+
+        // --- PLAYER CARDS --- //
+        Pane playerCardsPane = new Pane(new GameImage("/player/cardsBackground.png"), getX() + getWidth() / 4 + 5, getY(), getWidth() / 4 * 3 - 5, getHeight());
+        ownedCards = new SelfStackingCardStackArea(-1, 3, 3);
+        ownedCards.setPosition(playerCardsPane.getPosition());
+        ownedCards.setSize(playerCardsPane.getSize());
+        playerCardsPane.add(ownedCards);
+        add(playerCardsPane);
     }
 
-    public int getCoins() {
-        return coins;
+    protected void updateCoinLabel(int coins) {
+        coinLabel.setDescription("Coins: " + player.getCoins());
     }
 
-    public int removeCoins(int coins) {
-        if (this.coins <= coins) {
-            int retCoins = coins - this.coins;
-            this.coins = 0;
-            return retCoins;
-        }
-        this.coins -= coins;
-        return coins;
-    }
-
-    public void addCoins(int coins) {
-        this.coins += coins;
-    }
-
-    @Override
-    public void initPlayerPane() {
+    private static int[] calcInitDim(Player player) {
         int x, y, width, height;
         switch (Options.getPlayerCount()) {
             case 2 -> {
-                switch (this.id) {
+                switch (player.getId()) {
                     case 0 -> {
                         x = 0;
                         y = 0;
@@ -86,7 +79,7 @@ public class Player extends de.henrik.engine.base.Player {
                 }
             }
             case 3 -> {
-                switch (this.id) {
+                switch (player.getId()) {
                     case 0 -> {
                         x = 0;
                         y = 0;
@@ -109,7 +102,7 @@ public class Player extends de.henrik.engine.base.Player {
                 }
             }
             case 4 -> {
-                switch (this.id) {
+                switch (player.getId()) {
                     case 0 -> {
                         x = 0;
                         y = 0;
@@ -139,33 +132,10 @@ public class Player extends de.henrik.engine.base.Player {
             }
             default -> throw new IllegalArgumentException();
         }
+        return new int[]{x, y, width, height};
+    }
 
-        playerPane = new Pane(new GameImage(Color.BLACK), x, y, width, height);
-        GameImage cardsBG = new GameImage("/player/cardsBackground.png");
-
-
-        // --- LANDMARKS, COINS, PLAYERNAME --- //
-        GameImage landmarkBG = new GameImage("/player/landmarkBackground.png");
-        Pane landmarksAndInfo = new Pane(landmarkBG, x, y, width / 4 - 3, height);
-        playerPane.add(landmarksAndInfo);
-
-        CardStackArea landmarks = new CardStackArea(20, 3, 3);
-        landmarksAndInfo.add(landmarks);
-        landmarks.setSize(landmarksAndInfo.getWidth(), landmarksAndInfo.getHeight()-40);
-        landmarks.setPosition(landmarksAndInfo.getX(), landmarksAndInfo.getY()+40);
-        for (Landmark landmark : landmarkHashMap.keySet()) {
-            CardStack landmarkStack = new BasicCardStack("player_" + this.id + "_landmark_" + landmark.ID, landmark, 1);
-            landmarkStack.addCard(landmark);
-            landmarks.addStack(landmarkStack);
-        }
-
-        Label playerName = new Label("Player " + id, landmarksAndInfo.getX(), landmarksAndInfo.getY(), 150, 30);
-        coinLabel = new Label("Coins: " + coins, 150 + landmarksAndInfo.getX(), landmarksAndInfo.getY(), 150, 30);
-
-        landmarksAndInfo.add(playerName);
-        landmarksAndInfo.add(coinLabel);
-
-        // --- PLAYER CARDS --- //
-        playerPane.add(new Pane(new GameImage(Color.BLUE), x + width / 4 + 5, y, width / 4 * 3 - 5, height));
+    public SelfStackingCardStackArea getCardArea() {
+        return ownedCards;
     }
 }

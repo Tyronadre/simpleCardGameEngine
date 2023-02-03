@@ -2,7 +2,7 @@ package de.henrik.engine.components;
 
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
-import de.henrik.engine.base.Game;
+import de.henrik.engine.game.Game;
 
 import java.awt.*;
 
@@ -13,19 +13,21 @@ public class Label extends GameComponent {
     public Label(String description, int x, int y, int width, int height) {
         super(x, y, width, height);
         this.description = description;
-        font = Game.game.getFont().deriveFont((float) getHeight());
+        font = Game.game.getFont().deriveFont((float) getHeight() - 5);
     }
 
     @Override
     public void paint(GameGraphics g) {
+        if (!visible)
+            return;
         g.getGraphics().setFont(font);
-        g.drawString(description, getX() + 1, getY() + getHeight() - getHeight() / 10);
+        g.drawString(description, getX() + 5, getY() + getHeight() - getHeight() / 10 - 5);
         super.paint(g);
     }
 
     @Override
     public void setSize(int width, int height) {
-        font = Game.game.getFont().deriveFont((float) getHeight());
+        font = Game.game.getFont().deriveFont((float) getHeight() - 5);
         super.setSize(width, height);
     }
 

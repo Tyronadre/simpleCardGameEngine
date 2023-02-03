@@ -1,5 +1,9 @@
 package de.henrik.engine.base;
 
+import de.henrik.engine.events.GameMouseListener;
+import de.henrik.engine.game.Board;
+import de.henrik.engine.game.Border;
+import de.henrik.engine.game.Game;
 import de.henrik.implementation.game.Options;
 
 import java.awt.*;
@@ -15,6 +19,9 @@ public abstract class GameComponent {
     protected GameComponent parent;
     protected final List<GameComponent> children;
     protected Board board;
+    protected Border border;
+
+    protected boolean visible = true;
 
 
     public GameComponent(int x, int y, int width, int height) {
@@ -39,19 +46,24 @@ public abstract class GameComponent {
      * checks if the game is running then calls {@link GameComponent#paintChildren(GameGraphics)}
      */
     public void paint(GameGraphics g) {
-        if (Game.isRunning()) {
+        if (Game.isRunning() && visible) {
             paintChildren(g);
+            if (border != null) {
+                border.paint(g);
+            }
         }
     }
 
 
     public void paintChildren(GameGraphics g) {
-        if (!Game.isRunning()) {
+        if (!Game.isRunning() || !visible) {
             return;
         }
-        for (GameComponent child : children) {
-            if (g.getClip() == null || g.getClip().intersects(child.getClip())) {
-                child.paint(g.create().setClip(g.getClip()));
+        synchronized (children){
+            for (GameComponent child : children) {
+                if (g.getClip() == null || g.getClip().intersects(child.getClip())) {
+                    child.paint(g.create().setClip(g.getClip()));
+                }
             }
         }
     }
@@ -95,7 +107,7 @@ public abstract class GameComponent {
      * @return a rectangle of this component, specified by {@link GameComponent#getX()}, {@link GameComponent#getY()}, {@link GameComponent#getWidth()}, {@link GameComponent#getHeight()}.
      */
     public Rectangle getClip() {
-        return new Rectangle(getX(), getY(), getWidth(), getHeight());
+        return new Rectangle(getX(), getY(), getWidth() + 1, getHeight() + 1);
     }
 
 
@@ -245,7 +257,7 @@ public abstract class GameComponent {
     }
 
     /**
-     * Checks if a given point is inside the stack. The size of the stack is a rectangle that encumbers all cards. It changes with the amount of cards displayed.
+     * Checks if a given point is inside this component. The size of this component should be a rectangle that encumbers all cards.
      *
      * @param point the point to check
      * @return {@code TRUE} if the point is inside the stacks' area, otherwise {@code FALSE}
@@ -265,13 +277,8 @@ public abstract class GameComponent {
     HashMap<Integer, MouseListener> mouseListenerHashMap = new HashMap<>();
     HashMap<Integer, MouseMotionListener> mouseMotionListenerHashMap = new HashMap<>();
 
-    public void addMouseListener(MouseListener mouseListener) {
+    public void addMouseListener(GameMouseListener mouseListener) {
         var mouseListenerForObject = new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (pointInside(e.getLocationOnScreen())) mouseListener.mouseClicked(e);
-            }
-
             @Override
             public void mousePressed(MouseEvent e) {
                 if (pointInside(e.getLocationOnScreen())) mouseListener.mousePressed(e);
@@ -280,17 +287,31 @@ public abstract class GameComponent {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (pointInside(e.getLocationOnScreen())) mouseListener.mouseReleased(e);
+                mouseListener.mouseReleasedAnywhere(e);
             }
         };
 
         var mouseMotionListenerForObject = new MouseMotionAdapter() {
             Point lastLocation = new Point();
+            Point init = null;
+            boolean dragging = false;
 
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (!pointInside(lastLocation) && pointInside(e.getLocationOnScreen())) mouseListener.mouseEntered(e);
                 if (pointInside(lastLocation) && !pointInside(e.getLocationOnScreen())) mouseListener.mouseExited(e);
                 lastLocation = e.getLocationOnScreen();
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (init == null) {
+                    if (pointInside(e.getLocationOnScreen())) {
+                        init = e.getLocationOnScreen();
+                    }
+                } else if (init != e.getLocationOnScreen()) {
+                    mouseListener.mouseDragged(e);
+                }
             }
         };
         mouseListenerHashMap.put(mouseListener.hashCode(), mouseListenerForObject);
@@ -321,5 +342,22 @@ public abstract class GameComponent {
 
     public void removeMouseListener(MouseListener mouseListener) {
         Game.game.removeMouseListener(mouseListenerHashMap.get(mouseListener.hashCode()));
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+        repaint();
+    }
+
+    public void setBorder(Border border) {
+        this.border = border;
+    }
+
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+
+    public void setParent(GameComponent parent) {
+        this.parent = parent;
     }
 }

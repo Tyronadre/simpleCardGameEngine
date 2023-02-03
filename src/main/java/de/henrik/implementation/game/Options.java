@@ -1,6 +1,6 @@
 package de.henrik.implementation.game;
 
-import de.henrik.engine.base.Game;
+import de.henrik.engine.game.Game;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +13,10 @@ import java.util.Random;
 public class Options {
     public static boolean expansion1Selected;
     public static boolean expansion2Selected;
+    public static String player1Name;
+    public static String player2Name;
+    public static String player3Name;
+    public static String player4Name;
     static int soundLevel;
     static int playerCount;
     static int width;
@@ -53,9 +57,9 @@ public class Options {
         expansion1Selected = false;
         expansion2Selected = false;
         soundLevel = 100;
-        playerCount = 0;
         aiLevel = AiLevel.EASY;
         players = new ArrayList<>(4);
+        playerCount = 2;
         setWidth(Game.game.getWidth());
         setHeight(Game.game.getHeight());
     }

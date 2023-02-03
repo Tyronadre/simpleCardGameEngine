@@ -1,5 +1,6 @@
-package de.henrik.engine.base;
+package de.henrik.engine.game;
 
+import de.henrik.engine.base.GameGraphics;
 import de.henrik.implementation.game.Options;
 
 import javax.swing.*;

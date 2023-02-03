@@ -1,6 +1,8 @@
 package de.henrik.engine.components;
 
-import de.henrik.engine.base.Game;
+import de.henrik.engine.events.GameMouseListener;
+import de.henrik.engine.events.GameMouseListenerAdapter;
+import de.henrik.engine.game.Game;
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
 
@@ -18,11 +20,11 @@ public class TextField extends GameComponent {
     public TextField(String initalString, int x, int y, int width, int height) {
         super(x, y, width, height);
         savedString = initalString;
-        font = Game.game.getFont().deriveFont((float) getHeight());
+        font = Game.game.getFont().deriveFont((float) getHeight() - 5);
 
-        addMouseListener(new MouseAdapter() {
+        addMouseListener(new GameMouseListenerAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 if (board.active) {
                     state = state_CLICKED;
                     repaint();
@@ -61,19 +63,22 @@ public class TextField extends GameComponent {
 
     @Override
     public void setSize(int width, int height) {
-        font = Game.game.getFont().deriveFont((float) getHeight());
+        font = Game.game.getFont().deriveFont((float) getHeight() - 5);
         super.setSize(width, height);
     }
 
     public void setDescription(String description) {
-        this.savedString = description;
+        savedString = description;
         repaint();
     }
 
 
     @Override
     public void paint(GameGraphics g) {
+        g.setClip(this.getClip());
         super.paint(g);
+        if (!visible)
+            return;
         switch (state) {
             case state_CLICKED:
                 g.setColor(new Color(147, 147, 147, 26));
@@ -88,7 +93,10 @@ public class TextField extends GameComponent {
         }
         g.setColor(Color.black);
         g.getGraphics().setFont(font);
-        g.getGraphics().drawString(savedString, this.getX(), this.getY() + getHeight());
+        g.drawString(savedString, getX() + 5, getY() + getHeight() - getHeight() / 10 - 5);
+    }
 
+    public String getText() {
+        return savedString;
     }
 }

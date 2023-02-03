@@ -3,7 +3,9 @@ package de.henrik.engine.components;
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.base.GameImage;
-import de.henrik.engine.base.Game;
+import de.henrik.engine.events.GameMouseListener;
+import de.henrik.engine.events.GameMouseListenerAdapter;
+import de.henrik.engine.game.Game;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -29,10 +31,10 @@ public class Button extends GameComponent {
         super(x, y, width, height);
         if (description != null) {
             this.description = description;
-            font = Game.game.getFont().deriveFont((float) getHeight());
+            font = Game.game.getFont().deriveFont((float) getHeight() - 5);
         }
         if (background != null) this.background = background.getScaledInstance(width, height);
-        addMouseListener(new MouseAdapter() {
+        addMouseListener(new GameMouseListenerAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (board.active) {
@@ -86,18 +88,19 @@ public class Button extends GameComponent {
 
     @Override
     public void paint(GameGraphics g) {
+        if (!visible)
+            return;
         if (background != null) {
             g.drawImage(background.getImage(), getX(), getY());
 
         }
         if (description != null && !description.equals("")) {
             g.getGraphics().setFont(font);
-            g.drawString(description, getX() + 1, getY() + getHeight() - getHeight() / 10);
+            g.drawString(description, getX() + 5, getY() + getHeight() - getHeight() / 10 - 5);
         }
         switch (state) {
             case state_DEFAULT -> {
                 g.getGraphics().drawRoundRect(getX(), getY(), getWidth(), getHeight(), 3, 3);
-
             }
             case state_HOVERED -> {
                 g.setColor(new Color(76, 90, 162));
@@ -116,7 +119,7 @@ public class Button extends GameComponent {
 
     @Override
     public void setSize(int width, int height) {
-        if (description != null) font = Game.game.getFont().deriveFont((float) getHeight());
+        if (description != null) font = Game.game.getFont().deriveFont((float) getHeight() - 5);
         if (background != null) background = background.getScaledInstance(width - 1, height - 1);
         super.setSize(width, height);
     }

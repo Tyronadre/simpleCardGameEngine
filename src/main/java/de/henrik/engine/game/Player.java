@@ -1,4 +1,4 @@
-package de.henrik.engine.base;
+package de.henrik.engine.game;
 
 import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.Card;
@@ -9,13 +9,14 @@ import de.henrik.implementation.game.Options;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 abstract public class Player {
     protected int id;
     String name;
-    List<Card> cardList;
+    protected List<Card> cardList;
 
-    protected Pane playerPane;
+    protected PlayerPane playerPane;
 
     public Player(int id, String name) {
         this.id = id;
@@ -23,11 +24,17 @@ abstract public class Player {
         this.cardList = new ArrayList<>();
     }
 
-    abstract public void initPlayerPane();
-
-
-
-    public Pane getPlayerPane() {
+    public PlayerPane getPlayerPane() {
         return playerPane;
+    }
+
+    abstract public Predicate<Card> isActiveCard();
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
     }
 }

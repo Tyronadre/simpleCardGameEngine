@@ -32,5 +32,9 @@ public class BasicCard extends Card {
     }
 
 
+    public int getCost() {
+        return cost;
+    }
+
 
 }

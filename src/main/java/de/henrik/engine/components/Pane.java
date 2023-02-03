@@ -26,6 +26,7 @@ public class Pane extends GameComponent {
     }
 
     public void setBackground(GameImage background) {
-        this.background = background;
+        this.background = background.getScaledInstance(getWidth(),getHeight());
+        repaint();
     }
 }

@@ -2,7 +2,7 @@ package de.henrik.engine.card;
 
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
-import de.henrik.engine.base.Game;
+import de.henrik.engine.game.Game;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -122,7 +122,9 @@ public class CardStackArea extends GameComponent {
             GameComponent child = getChildren().get(i);
             // verringert draw timing, aber dann dürfen sich die stacks nicht überlappen, sonst siehts doof aus
              if (g.getClip() == null || g.getClip().intersects(child.getClip()))
-                child.paint(g.create().setClip(g.getClip()));
+                child.paint(g.create().setClip(child.getClip()));
+            // langsamer sieht aber besser aus
+//            child.paint(g.create().setClip(null));
         }
     }
 

@@ -2,9 +2,8 @@ package de.henrik.engine.card;
 
 import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.base.GameComponent;
-import de.henrik.engine.base.Game;
+import de.henrik.engine.game.Game;
 
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
@@ -118,14 +117,14 @@ public abstract class CardStack extends GameComponent {
         Rectangle rec = card.getClip();
         addCard(card);
         Game.game.getGameBoard().repaint(rec);
-        paint(g);
+        repaint();
     }
 
 
     /**
      * @return the applied render policy
      */
-    protected int getRenderPolicy() {
+    public int getRenderPolicy() {
         return renderPolicy;
     }
 
@@ -139,7 +138,7 @@ public abstract class CardStack extends GameComponent {
      *
      * @param policy the new Policy
      */
-    protected void setRenderPolicy(int policy) {
+    public void setRenderPolicy(int policy) {
         if (policy < 0 || policy > 2)
             throw new IllegalArgumentException("This is not a valid render policy.");
         renderPolicy = policy;

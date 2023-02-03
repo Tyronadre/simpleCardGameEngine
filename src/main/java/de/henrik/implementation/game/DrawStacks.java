@@ -5,11 +5,13 @@ import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
 import de.henrik.engine.card.CardStackArea;
+import de.henrik.engine.events.GameEventListener;
+import de.henrik.implementation.card.playingcard.PlayingCardBuilder;
 import de.henrik.implementation.card.stack.BasicCardStack;
 import de.henrik.implementation.card.stack.DraggableCardStack;
-import de.henrik.implementation.card.playingcard.PlayingCardBuilder;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DrawStacks extends GameComponent {
@@ -19,6 +21,7 @@ public class DrawStacks extends GameComponent {
     private final int startCardsXSpace = 10;
     private final int startCardsYSpace = 20;
     private int drawStacksMaxCount;
+    private List<GameEventListener> gameEventListeners = new ArrayList<>();
 
     public DrawStacks(int drawStacksMaxCount, Dimension size, Point pos) {
         super(pos, size);
@@ -30,7 +33,7 @@ public class DrawStacks extends GameComponent {
         startCards.addCards(playingCards);
         startCards.shuffel();
         startCards.setDrawStackSizeHint(true);
-        drawStacks = new CardStackArea(drawStacksMaxCount, 10, 10);
+        drawStacks = new CardStackArea(drawStacksMaxCount, 20, 20);
         add(drawStacks);
         add(startCards);
         resize();
@@ -82,6 +85,7 @@ public class DrawStacks extends GameComponent {
         DraggableCardStack draggableCardStack = new DraggableCardStack("draw_stack_" + card.getID(), card, -1);
         draggableCardStack.addCard(card);
         drawStacks.addStack(draggableCardStack);
+//        draggableCardStack.addMouseListener(draggableCardStack.getDragAdapter());
     }
 
     private boolean anyStackEmpty() {
@@ -93,6 +97,10 @@ public class DrawStacks extends GameComponent {
         }
 
         return false;
+    }
+
+    public List<CardStack> getCardStacks() {
+        return drawStacks.getStacks();
     }
 
     /**
@@ -119,5 +127,9 @@ public class DrawStacks extends GameComponent {
         g.setColor(Color.DARK_GRAY);
         g.getGraphics().fillRect(getX(), getY(), getWidth(), getHeight());
         super.paint(g);
+    }
+
+    public boolean canFillDrawStacks() {
+        return startCards.getStackSize() > 0;
     }
 }

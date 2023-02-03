@@ -1,10 +1,11 @@
-package de.henrik.engine.base;
+package de.henrik.engine.game;
 
 import de.henrik.engine.base.GameGraphics;
-import de.henrik.engine.card.Card;
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.CardStack;
+import de.henrik.engine.events.GameEvent;
+import de.henrik.engine.events.GameEventListener;
 import de.henrik.implementation.game.Options;
 
 import java.awt.*;
@@ -13,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+import java.util.EventListener;
 import java.util.List;
 
 
@@ -31,6 +33,7 @@ abstract public class Board extends GameComponent {
     private GameImage backgroundImage;
     private List<ActionListener> onActivate;
     private List<ActionListener> onDeactivate;
+    private List<GameEventListener> gameListener;
 
     public Board(GameImage backgroundImage) {
         super(0, 0, Options.getWidth(), Options.getHeight());
@@ -47,8 +50,8 @@ abstract public class Board extends GameComponent {
     @Override
     public void add(GameComponent component) {
         children.add(component);
-        component.parent = this;
-        component.board = this;
+        component.setParent(this);
+        component.setBoard(this);
         setBoardRecursively(component);
     }
 
@@ -116,6 +119,20 @@ abstract public class Board extends GameComponent {
                 }
             }
         });
+    }
+
+    protected void addEventListener(GameEventListener eventListener) {
+        this.gameListener.add(eventListener);
+    }
+
+    protected void removeGameListener() {
+        this.gameListener = new ArrayList<>();
+    }
+
+    public void event(GameEvent event) {
+        for (GameEventListener gameEventListener : gameListener) {
+            gameEventListener.handleEvent(event);
+        }
     }
 }
 
