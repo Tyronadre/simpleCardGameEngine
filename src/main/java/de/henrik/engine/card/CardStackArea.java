@@ -10,13 +10,23 @@ import java.util.List;
 
 public class CardStackArea extends GameComponent {
     List<CardStack> cardStacks;
-    final int xSpace, ySpace, maxNumberOfStack;
+    final int xSpace, ySpace, maxNumberOfStack,maxCardHeight, maxCardWidth;
 
 
+    public CardStackArea(int maxNumberOfStack, int xSpace, int ySpace, int maxCardHeight, int maxCardWidth) {
+        this.cardStacks = new ArrayList<>();
+        this.xSpace = xSpace;
+        this.ySpace = ySpace;
+        this.maxCardHeight = maxCardHeight;
+        this.maxCardWidth = maxCardWidth;
+        this.maxNumberOfStack = maxNumberOfStack;
+    }
     public CardStackArea(int maxNumberOfStack, int xSpace, int ySpace) {
         this.cardStacks = new ArrayList<>();
         this.xSpace = xSpace;
         this.ySpace = ySpace;
+        this.maxCardHeight = Integer.MAX_VALUE;
+        this.maxCardWidth = Integer.MAX_VALUE;
         this.maxNumberOfStack = maxNumberOfStack;
     }
 
@@ -63,20 +73,24 @@ public class CardStackArea extends GameComponent {
                 maxRows++;
             }
         }
+        if (cardWidth > maxCardWidth) {
+            cardWidth = maxCardWidth;
+            cardHeight = (int) (cardWidth / (2 / (double) 3));
+        }
+        if (cardHeight > maxCardHeight) {
+            cardHeight = maxCardHeight;
+            cardWidth = (int) (cardHeight * (2 / (double) 3));
+        }
 
         boolean layout_changed = (cardStacks.size() == 0) || (cardWidth != cardStacks.get(0).getCardSize().getWidth()) || (cardHeight != cardStacks.get(0).getCardSize().getHeight());
 
         //Karten können über die Kante Gucken, dann müssen wir den Parent an der Stelle neu malen. Wir wollen nicht jeden stack rendern, sondern berechnen die ganze fläche die aus der area rausguckt
-        Rectangle overflowRender = new Rectangle();
 
         int row = 0;
         int col = 0;
         for (CardStack cardStack : cardStacks) {
             int posX = getX() + xSpace + col * (cardWidth + xSpace);
             int posY = getY() + ySpace + row * (cardHeight + ySpace);
-
-            if (!overflowRender.contains(cardStack.getClip()))
-                overflowRender = (Rectangle) overflowRender.createUnion(cardStack.getClip());
 
             cardStack.setPosition(posX, posY);
             cardStack.setSize(cardWidth, cardHeight);
@@ -87,16 +101,14 @@ public class CardStackArea extends GameComponent {
             }
         }
 
-        //We don't need to do repaint everything if the layout doesn't change
-        if (layout_changed) {
-            repaint();
-            overflowRender.setLocation(getPosition());
-            repaint(overflowRender);
-        } else {
-            cardStacks.get(cardStacks.size() - 1).repaint();
-        }
-
-        Toolkit.getDefaultToolkit().sync();
+//        //We don't need to do repaint everything if the layout doesn't change
+//        if (layout_changed) {
+//            repaint();
+//        } else {
+//            cardStacks.get(cardStacks.size() - 1).repaint();
+//        }
+//
+//        Toolkit.getDefaultToolkit().sync();
     }
 
     public boolean addStack(CardStack cardStack) {

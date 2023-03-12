@@ -1,20 +1,21 @@
 package de.henrik.implementation.boards;
 
-import de.henrik.engine.base.*;
+import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
-import de.henrik.engine.events.GameMouseListenerAdapter;
+import de.henrik.engine.events.GameEvent;
+import de.henrik.engine.events.GameEventListener;
 import de.henrik.engine.game.Board;
 import de.henrik.engine.game.Border;
-import de.henrik.implementation.GameEvent.DraggingCardEvent;
-import de.henrik.implementation.card.BasicCard;
+import de.henrik.engine.game.Game;
+import de.henrik.engine.game.GameEventThread;
+import de.henrik.implementation.GameEvent.*;
 import de.henrik.implementation.card.playingcard.PlayingCard;
 import de.henrik.implementation.game.DrawStacks;
-import de.henrik.implementation.player.PlayerImpl;
 import de.henrik.implementation.game.Options;
+import de.henrik.implementation.player.PlayerImpl;
 
 import java.awt.*;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -25,16 +26,136 @@ public class GameBoard extends Board {
 
     private Card cardDragged;
 
-    DrawStacks drawStacks;
+    public DrawStacks drawStacks;
+    int gameState;
+
+    public static final int NEW_PLAYER_STATE = 0;
+    public static final int ROLL_DICE_STATE = 1;
+    public static final int BUY_CARD_STATE = 2;
+
 
     public GameBoard(GameImage backgroundImage) {
         super(backgroundImage);
         this.players = new ArrayList<>();
-        drawStacks = new DrawStacks(20, new Dimension(Options.getWidth(), Options.getHeight() / 3), new Point(0, Options.getHeight() / 3));
+        drawStacks = new DrawStacks(10, new Dimension(Options.getWidth(), Options.getHeight() / 3), new Point(0, Options.getHeight() / 3));
         add(drawStacks);
-        addActivationListener(e -> {
-            drawStacks.fillDrawStacks();
-        });
+    }
+
+    private GameEventListener onPlayerSwitchListener() {
+        return event -> {
+            if (event instanceof PlayerChangeEvent playerChangeEvent) {
+                drawStacks.activePlayerLabel.setDescription("Active: " + playerChangeEvent.newPlayer);
+
+                // MARK DICE GREEN
+                drawStacks.dice.setBorder(new Border(Color.GREEN, true, 2, drawStacks.dice, 3));
+                drawStacks.dice.addActionListener(e -> {
+                    int roll = new Random().nextInt(6) + 1;
+                    drawStacks.diceRoll.setDescription("Rolled: " + roll);
+                    event(new DiceRollEvent(roll));
+                });
+                if (playerChangeEvent.newPlayer.hasLandmark(0)) {
+                    drawStacks.twoDice.setBorder(new Border(Color.GREEN, true, 2, drawStacks.twoDice, 3));
+                    drawStacks.twoDice.addActionListener(e -> {
+                        int roll = new Random().nextInt(12) + 1;
+                        drawStacks.diceRoll.setDescription("Rolled: " + roll);
+                        event(new DiceRollEvent(roll));
+                    });
+                }
+                activePlayer = playerChangeEvent.newPlayer;
+                game.setActivePlayer(activePlayer);
+
+                event(new GameStateChangeEvent(ROLL_DICE_STATE));
+            }
+        };
+    }
+
+    private GameEventListener onDiceRollListener() {
+        return event -> {
+            if (event instanceof DiceRollEvent diceRollEvent && gameState == ROLL_DICE_STATE) {
+                for (int i = 1; i <= Options.getPlayerCount(); i++) {
+                    PlayerImpl player = players.get((activePlayer.getId() + i) % Options.getPlayerCount());
+                    for (Card c : player.getCardList()) {
+                        PlayingCard card = (PlayingCard) c;
+                        card.event(new CardEvent(activePlayer, player, diceRollEvent.roll, this));
+                    }
+                }
+                drawStacks.dice.removeActionListener();
+                drawStacks.dice.setBorder(null);
+                drawStacks.twoDice.removeActionListener();
+                drawStacks.twoDice.setBorder(null);
+                event(new GameStateChangeEvent(BUY_CARD_STATE));
+            }
+        };
+    }
+
+    private GameEventListener onDragAndDropListener() {
+        return new GameEventListener() {
+            @Override
+            public void handleEvent(GameEvent event) {
+                if (event instanceof DraggingCardEvent draggingCardEvent && gameState == BUY_CARD_STATE) {
+                    PlayerImpl player = draggingCardEvent.player;
+                    if (draggingCardEvent.startDragging && draggingCardEvent.card.getCost() <= player.getCoins()) {
+                        player.getPlayerPane().setBorder(new Border(Color.GREEN, true, 3, player.getPlayerPane(), 3));
+                        player.getPlayerPane().repaint();
+                    } else if (draggingCardEvent.endDragging) {
+                        player.getPlayerPane().setBorder(null);
+                        if (player.getPlayerPane().pointInside(draggingCardEvent.pos)) {
+                            if (player.addCard(draggingCardEvent.card)) {
+                                ((CardStack) draggingCardEvent.getParent()).removeCard();
+                                event(new GameStateChangeEvent(NEW_PLAYER_STATE));
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public String toString() {
+                return "onDragAndDropListener";
+            }
+        };
+    }
+
+    private GameEventListener onChoiceListener() {
+        return event -> {
+            if (event instanceof ChoiceEvent choiceEvent) {
+                for (PlayerImpl player : players) {
+                    if (choiceEvent.type.test(player.getPlayerPane())) {
+                        player.getPlayerPane().setBorder(new Border(Color.GREEN, true, 3, player.getPlayerPane(), 3));
+                    }
+                    for (CardStack cardStack : player.getCardStacks()) {
+                        if (choiceEvent.type.test(cardStack)) {
+                            cardStack.setBorder(new Border(Color.GREEN, true, 3, cardStack, 3));
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    private GameEventListener onGameStateChangeListener() {
+        return event -> {
+            if (event instanceof GameStateChangeEvent gameStateChangeEvent) {
+                for (PlayerImpl player : players) {
+                    player.removeBorders();
+                }
+                this.gameState = gameStateChangeEvent.newState;
+                drawStacks.removeBorders();
+                switch (gameStateChangeEvent.newState) {
+                    case NEW_PLAYER_STATE -> {
+                        drawStacks.fillDrawStacks();
+                        nextPlayer();
+                    }
+                    case ROLL_DICE_STATE -> {
+
+                    }
+                    case BUY_CARD_STATE -> {
+                        activePlayer.updateGameBoard(this);
+                    }
+                }
+                repaint();
+            }
+        };
     }
 
     /**
@@ -71,122 +192,23 @@ public class GameBoard extends Board {
             add(p.getPlayerPane());
         }
         super.activate();
-        updateActivePlayer(players.get(new Random().nextInt(Options.getPlayerCount())));
+        game.addEventListener(onChoiceListener());
+        game.addEventListener(onDiceRollListener());
+        game.addEventListener(onDragAndDropListener());
+        game.addEventListener(onPlayerSwitchListener());
+        game.addEventListener(onGameStateChangeListener());
+        game.waitForEventListener();
+        event(new GameStateChangeEvent(NEW_PLAYER_STATE));
     }
 
-    private void updateActivePlayer(PlayerImpl player) {
-        this.activePlayer = player;
-        for (CardStack stack : drawStacks.getCardStacks()) {
-            Card topCard = stack.getCard();
-            if (topCard == null) {
-                if (drawStacks.canFillDrawStacks()) {
-                    drawStacks.fillDrawStacks();
-                } else {
-                    drawStacks.remove(stack);
-                }
-                continue;
-            }
-            if (((BasicCard) topCard).getCost() <= player.getCoins()) {
-                stack.setBorder(new Border(Color.GREEN, true, 2, stack, 5));
-                stack.addMouseListener(new GameMouseListenerAdapter() {
-                    DraggingCardEvent cardEvent;
-                    boolean pressed = true;
-                    int oldRenderPolicy;
+    public void nextPlayer() {
+        if (activePlayer != null)
+            event(new PlayerChangeEvent(players.get((activePlayer.getId() + 1) % (players.size()))));
+        else event(new PlayerChangeEvent(players.get(new Random().nextInt(Options.getPlayerCount()))));
+    }
 
-                    @Override
-                    public void mousePressed(MouseEvent e) {
-
-                        if (!GameBoard.this.isCardDragged() && stack.getCard() != null) {
-                            cardEvent = new DraggingCardEvent(10, "Drag from draw stack", stack, (PlayingCard) stack.removeCard());
-                            Card draggedCard = cardEvent.card;
-                            cardEvent.startDragging = true;
-                            GameBoard.this.setCardDragged(draggedCard);
-                            pressed = true;
-                            oldRenderPolicy = stack.getRenderPolicy();
-
-                            //if the top card is turned we need to change the render policy temporary or the next card will be visible
-                            if (oldRenderPolicy == CardStack.RP_TOP_CARD_TURNED)
-                                stack.setRenderPolicy(CardStack.RP_ALL_CARDS_UNTURNED);
-
-                            //render one card less
-                            stack.setStackMaxDrawSize(stack.getStackMaxDrawSize() - 1);
-
-                            //Card movement
-                            new Thread(() -> {
-                                Point offset = new Point(draggedCard.getX() - MouseInfo.getPointerInfo().getLocation().x, draggedCard.getY() - MouseInfo.getPointerInfo().getLocation().y);
-                                Point mousePos;
-                                long lastTime = 0L;
-
-                                while (pressed) {
-                                    if (System.currentTimeMillis() - lastTime >= 10) {
-                                        lastTime = System.currentTimeMillis();
-
-                                        mousePos = MouseInfo.getPointerInfo().getLocation();
-                                        draggedCard.move(mousePos.x + offset.x, mousePos.y + offset.y);
-                                        Toolkit.getDefaultToolkit().sync();
-                                    }
-                                }
-
-                                //reset temp changes
-                                if (oldRenderPolicy == CardStack.RP_TOP_CARD_TURNED) {
-                                    stack.setRenderPolicy(CardStack.RP_TOP_CARD_TURNED);
-                                }
-                                stack.setStackMaxDrawSize(stack.getStackMaxDrawSize() + 1);
-
-                                if (activePlayer.getPlayerPane().pointInside(MouseInfo.getPointerInfo().getLocation())) {
-                                    stack.repaint();
-                                } else {
-                                    stack.moveCardToStack(cardEvent.card);
-                                }
-                                GameBoard.this.setCardDragged(null);
-                                event(cardEvent);
-                                cardEvent.endDragging = false;
-                                cardEvent = null;
-                                cardDragged = null;
-
-                            }).start();
-                            cardEvent.startDragging = true;
-                            event(cardEvent);
-                            cardEvent.startDragging = false;
-                        }
-                    }
-
-                    @Override
-                    public void mouseReleasedAnywhere(MouseEvent e) {
-                        if (cardEvent != null) {
-                            cardEvent.endDragging = true;
-                            pressed = false;
-                        }
-                    }
-
-                    @Override
-                    public void mouseDragged(MouseEvent e) {
-                        if (cardEvent != null) {
-                            cardEvent.pos = e.getLocationOnScreen();
-                            event(cardEvent);
-                        }
-                    }
-                });
-            } else stack.setBorder(null);
-        }
-        this.removeGameListener();
-        this.addEventListener(event -> {
-            if (event instanceof DraggingCardEvent draggingCardEvent) {
-                if (draggingCardEvent.startDragging) {
-                    player.getPlayerPane().setBorder(new Border(Color.GREEN, true, 3, player.getPlayerPane(), 3));
-                    player.getPlayerPane().repaint();
-                } else if (draggingCardEvent.endDragging) {
-                    player.getPlayerPane().setBorder(null);
-                    if (player.getPlayerPane().pointInside(draggingCardEvent.pos)) {
-                        player.addCard(draggingCardEvent.card);
-                        // --- NEXT PLAYER --- //
-                        updateActivePlayer(players.get((player.getId() + 1) % (players.size())));
-                    }
-                    player.getPlayerPane().repaint();
-                }
-            }
-        });
-        repaint();
+    public List<PlayerImpl> getPlayer() {
+        return players;
     }
 
 

@@ -34,12 +34,15 @@ abstract public class Board extends GameComponent {
     private List<ActionListener> onActivate;
     private List<ActionListener> onDeactivate;
     private List<GameEventListener> gameListener;
+    protected static final Game game = Game.game;
+
 
     public Board(GameImage backgroundImage) {
         super(0, 0, Options.getWidth(), Options.getHeight());
         this.backgroundImage = backgroundImage;
         this.onActivate = new ArrayList<>();
         this.onDeactivate = new ArrayList<>();
+        this.gameListener = new ArrayList<>();
     }
 
     public void setBackgroundImage(GameImage backgroundImage) {
@@ -66,6 +69,7 @@ abstract public class Board extends GameComponent {
      */
     protected void activate() {
         this.active = true;
+        repaint();
         for (ActionListener actionListener : onActivate) {
             actionListener.actionPerformed(new ActionEvent(this, 0, "GameBoardActivate"));
         }
@@ -81,6 +85,7 @@ abstract public class Board extends GameComponent {
         for (ActionListener actionListener : onDeactivate) {
             actionListener.actionPerformed(new ActionEvent(this, 1, "GameBoardDeactivate"));
         }
+        game.clearEventListener();
     }
 
     public void addActivationListener(ActionListener actionListener) {
@@ -121,18 +126,14 @@ abstract public class Board extends GameComponent {
         });
     }
 
-    protected void addEventListener(GameEventListener eventListener) {
-        this.gameListener.add(eventListener);
-    }
-
-    protected void removeGameListener() {
-        this.gameListener = new ArrayList<>();
-    }
-
     public void event(GameEvent event) {
-        for (GameEventListener gameEventListener : gameListener) {
-            gameEventListener.handleEvent(event);
-        }
+//        List<GameEventListener> gameEventListenersCopy = List.copyOf(gameListener);
+//        System.out.println("Listener: " + gameEventListenersCopy);
+//        for (GameEventListener gameEventListener : gameEventListenersCopy) {
+//            gameEventListener.handleEvent(event);
+//        }
+        Game.game.event(event);
+
     }
 }
 

@@ -2,14 +2,18 @@ package de.henrik.implementation.card.playingcard;
 
 import de.henrik.engine.card.Card;
 import de.henrik.engine.base.GameImage;
+import de.henrik.engine.card.CardStack;
+import de.henrik.implementation.GameEvent.*;
 import de.henrik.implementation.card.BasicCard;
+import de.henrik.implementation.player.PlayerImpl;
+import de.henrik.implementation.player.PlayerPaneImpl;
 
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PlayingCardBuilder {
     private int id;
@@ -17,7 +21,7 @@ public class PlayingCardBuilder {
     private CardClass cardClass;
     private CardType type;
     private GameImage back, front;
-    private ActionListener action;
+    private CardEventListener listener;
 
     public static List<Card> buildCardsFromCSV(String csv) {
         List<Card> cards = new ArrayList<>();
@@ -52,11 +56,11 @@ public class PlayingCardBuilder {
                     cardBuilder.setCost(Integer.parseInt(line[3]));
                     cardBuilder.setFront(new GameImage("/cards/" + line[4]));
                     cardBuilder.setBack(new GameImage("/cards/" + line[5]));
-                    cardBuilder.setAction(getAction(line[0]));
+                    cardBuilder.setAction(getEventListener(cardBuilder.id));
                     for (int i = 0; i < Integer.parseInt(line[6]); i++) {
                         cards.add(cardBuilder.build());
                     }
-                } catch (RuntimeException  e) {
+                } catch (RuntimeException e) {
                     System.err.println("Failed to load card: " + l);
                     e.printStackTrace();
                 }
@@ -67,14 +71,100 @@ public class PlayingCardBuilder {
         return cards;
     }
 
-    private static ActionListener getAction(String cardName) {
+    private static CardEventListener getEventListener(int id) {
 
         // TODO: 18.01.2023 implement card actions
-        return e -> System.out.println(cardName);
+        switch (id) {
+            case 1:
+                return event -> {
+                    if (event.roll == 1) {
+                        event.owner.addCoins(1);
+                    }
+                };
+            case 2:
+                return event -> {
+                    if (event.roll == 2) {
+                        event.owner.addCoins(2);
+                    }
+                };
+            case 3:
+                return event -> {
+                    if ((event.roll == 2 || event.roll == 3) && event.activePlayer == event.owner) {
+                        event.owner.addCoins(1);
+                    }
+                };
+            case 4:
+                return event -> {
+                    if (event.roll == 3 && event.activePlayer != event.owner) {
+                        event.owner.addCoins(event.activePlayer.removeCoins(1));
+                    }
+                };
+            case 5:
+                return event -> {
+                    if (event.roll == 4 && event.activePlayer == event.owner) {
+                        event.owner.addCoins(3);
+                    }
+                };
+            case 6:
+                return event -> {
+                    if (event.roll == 5) {
+                        event.owner.addCoins(3);
+                    }
+                };
+            case 7:
+                return event -> {
+                    if (event.roll == 6) {
+                        for (PlayerImpl player : event.gameBoard.getPlayer()) {
+                            if (player != event.owner) {
+                                event.owner.addCoins(player.removeCoins(2));
+                            }
+                        }
+                    }
+                };
+            case 8:
+                return event -> {
+                    if (event.roll == 6 && event.owner == event.activePlayer) {
+                        event.gameBoard.event(
+                                new ChoiceEvent(
+                                        gameComponent -> gameComponent instanceof PlayerPaneImpl &&
+                                                gameComponent != event.activePlayer.getPlayerPane(),
+                                        event1 -> event.owner.addCoins(((PlayerPaneImpl) event1.selected).getPlayer().removeCoins(5))));
+
+                    }
+                };
+            case 9:
+                return event -> {
+                    if (event.roll == 6 && event.owner == event.activePlayer) {
+                        event.gameBoard.event(
+                                new ChoiceEvent(
+                                        gameComponent -> gameComponent instanceof CardStack &&
+                                                !event.gameBoard.drawStacks.getCardStacks().contains(gameComponent) &&
+                                                event.owner.getCardStacks().contains(gameComponent),
+                                        event1 -> {
+                                            new ChoiceEvent(gameComponent -> gameComponent instanceof CardStack &&
+                                                    !event.gameBoard.drawStacks.getCardStacks().contains(gameComponent) &&
+                                                    !event.owner.getCardStacks().contains(gameComponent),
+                                                    event2 -> {
+                                                        event2.owner.addCard((PlayingCard) ((CardStack) event1.selected).removeCard());
+                                                        event.owner.addCard((PlayingCard) ((CardStack) event2.selected).removeCard());
+                                                    }
+                                            );
+                                        }
+                                ));
+                    }
+                };
+
+            default:
+                return event -> {
+                    System.out.println("CARD " + id + " EVENT");
+
+                };
+//                throw new IllegalArgumentException("This id is not a valid Card ID: " + id);
+        }
     }
 
     public BasicCard build() {
-        return new PlayingCard(id, cost, cardClass, type, front, back, action);
+        return new PlayingCard(id, cost, cardClass, type, front, back, listener);
     }
 
     public PlayingCardBuilder setID(int id) {
@@ -107,8 +197,8 @@ public class PlayingCardBuilder {
         return this;
     }
 
-    public PlayingCardBuilder setAction(ActionListener action) {
-        this.action = action;
+    public PlayingCardBuilder setAction(CardEventListener listener) {
+        this.listener = listener;
         return this;
     }
 }

@@ -62,7 +62,7 @@ public abstract class GameComponent {
         synchronized (children){
             for (GameComponent child : children) {
                 if (g.getClip() == null || g.getClip().intersects(child.getClip())) {
-                    child.paint(g.create().setClip(g.getClip()));
+                    child.paint(g.create());
                 }
             }
         }

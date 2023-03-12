@@ -29,6 +29,6 @@ public class Border {
             g.getGraphics().setStroke( new BasicStroke((float) size, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 10f, new float[]{10f}, 0f));
         else
             g.getGraphics().setStroke( new BasicStroke((float) size, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, new float[]{1f}, 0f));
-        g.getGraphics().drawRoundRect(parent.getX(), parent.getY(),parent.getWidth()-size/2,parent.getHeight()-size/2, arc,arc);
+        g.getGraphics().drawRoundRect(parent.getX()+size/2, parent.getY()+size/2,parent.getWidth()-size,parent.getHeight()-size, arc,arc);
     }
 }

@@ -1,16 +1,29 @@
 package de.henrik.implementation.player;
 
 import de.henrik.engine.card.Card;
+import de.henrik.engine.card.CardStack;
 import de.henrik.engine.card.CardStackArea;
+import de.henrik.engine.events.GameMouseListenerAdapter;
+import de.henrik.engine.game.Border;
+import de.henrik.engine.game.Game;
+import de.henrik.engine.game.Player;
+import de.henrik.implementation.GameEvent.CardEvent;
+import de.henrik.implementation.GameEvent.DraggingCardEvent;
+import de.henrik.implementation.boards.GameBoard;
+import de.henrik.implementation.card.BasicCard;
 import de.henrik.implementation.card.landmark.Landmark;
 import de.henrik.implementation.card.landmark.LandmarkBuilder;
 import de.henrik.implementation.card.playingcard.PlayingCard;
 import de.henrik.implementation.game.Options;
 
+import java.awt.*;
+import java.util.List;
+import java.awt.event.MouseEvent;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.function.Predicate;
 
-public class PlayerImpl extends de.henrik.engine.game.Player {
+public class PlayerImpl extends Player {
     int coins;
     HashMap<Landmark, Boolean> landmarkHashMap;
 
@@ -76,4 +89,38 @@ public class PlayerImpl extends de.henrik.engine.game.Player {
     }
 
 
+    public boolean hasLandmark(int id) {
+        for (Landmark landmark : landmarkHashMap.keySet()) {
+            if (landmark.getID() == id) {
+                return landmarkHashMap.get(landmark);
+            }
+        }
+        throw new IllegalArgumentException("This id is not a loaded Landmark: " + id);
+    }
+
+    @Override
+    public PlayerPaneImpl getPlayerPane() {
+        return (PlayerPaneImpl) playerPane;
+    }
+
+    public void updateGameBoard(GameBoard gameBoard) {
+        PlayerPaneImpl playerPane = getPlayerPane();
+
+        // borders for cardstacks
+        for (CardStack stack : gameBoard.drawStacks.getCardStacks()) {
+            Card topCard = stack.getCard();
+            if (((BasicCard) topCard).getCost() <= PlayerImpl.this.getCoins())
+                stack.setBorder(new Border(Color.GREEN, true, 2, stack, 5));
+            else stack.setBorder(null);
+        }
+        gameBoard.drawStacks.repaint();
+    }
+
+    public List<CardStack> getCardStacks() {
+        return getPlayerPane().ownedCards.getStacks();
+    }
+
+    public void removeBorders() {
+        getPlayerPane().removeBorders();
+    }
 }

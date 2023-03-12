@@ -343,7 +343,6 @@ public abstract class CardStack extends GameComponent {
                 g.getGraphics().drawString(cards.size() + " cards", x, y);
             }
         }
-        Toolkit.getDefaultToolkit().sync();
     }
 
     /**

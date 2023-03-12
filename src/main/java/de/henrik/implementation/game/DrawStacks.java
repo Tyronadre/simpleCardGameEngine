@@ -2,10 +2,15 @@ package de.henrik.implementation.game;
 
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
+import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
 import de.henrik.engine.card.CardStackArea;
+import de.henrik.engine.components.Button;
+import de.henrik.engine.components.Label;
 import de.henrik.engine.events.GameEventListener;
+import de.henrik.engine.game.Game;
+import de.henrik.implementation.GameEvent.DiceRollEvent;
 import de.henrik.implementation.card.playingcard.PlayingCardBuilder;
 import de.henrik.implementation.card.stack.BasicCardStack;
 import de.henrik.implementation.card.stack.DraggableCardStack;
@@ -22,6 +27,8 @@ public class DrawStacks extends GameComponent {
     private final int startCardsYSpace = 20;
     private int drawStacksMaxCount;
     private List<GameEventListener> gameEventListeners = new ArrayList<>();
+    public Button dice, twoDice, skipTurn;
+    public Label diceRoll, activePlayerLabel;
 
     public DrawStacks(int drawStacksMaxCount, Dimension size, Point pos) {
         super(pos, size);
@@ -34,8 +41,25 @@ public class DrawStacks extends GameComponent {
         startCards.shuffel();
         startCards.setDrawStackSizeHint(true);
         drawStacks = new CardStackArea(drawStacksMaxCount, 20, 20);
+
+        dice = new Button(new GameImage("dice.png"));
+        twoDice = new Button(new GameImage("twoDice.png"));
+        diceRoll = new Label("Rolled: 0");
+        skipTurn = new Button("Skip Turn");
+        activePlayerLabel = new Label("Init");
+
+        skipTurn.addActionListener(e -> {
+            Game.game.event(new );
+        });
+
+
+        add(dice);
+        add(twoDice);
+        add(diceRoll);
+        add(skipTurn);
         add(drawStacks);
         add(startCards);
+        add(activePlayerLabel);
         resize();
     }
 
@@ -44,9 +68,20 @@ public class DrawStacks extends GameComponent {
         int startCardsWidth = (int) (startCardsHeight * (2 / (double) 3));
         startCards.setPosition(getWidth() - startCardsWidth - startCardsXSpace, startCardsYSpace + getY());
         startCards.setSize(startCardsWidth, startCardsHeight);
+        dice.setPosition(startCards.getX() - 220, 10 + getY());
+        dice.setSize(100, 100);
+        twoDice.setPosition(startCards.getX() - 110, 10 + getY());
+        twoDice.setSize(100, 100);
+        diceRoll.setPosition(startCards.getX() - 220, 110 + getY());
+        diceRoll.setSize(210, 30);
+        skipTurn.setPosition(startCards.getX() - 220, 150 + getY());
+        skipTurn.setSize(210, 30);
+        activePlayerLabel.setPosition(startCards.getX() - 220, 190 + getY());
+        activePlayerLabel.setSize(210, 30);
+
         drawStacks.setPosition(getPosition());
-        drawStacks.setSize(getWidth() - startCardsWidth - 2 * startCardsXSpace, getHeight());
-        repaint(getClip());
+        drawStacks.setSize(getWidth() - startCards.getWidth() - 230, getHeight());
+        repaint();
     }
 
     @Override
@@ -67,9 +102,24 @@ public class DrawStacks extends GameComponent {
      * If there are no drawStacks to fill, nothing happens.
      */
     public void fillDrawStacks() {
-        if (startCards.getStackSize() == 0) return;
+        if (startCards.getStackSize() == 0)
+            removeEmptyStacks();
         while (anyStackEmpty() && startCards.getStackSize() != 0) {
             addCardToDrawStack(startCards.removeCard());
+        }
+        if (anyStackEmpty() && startCards.getStackSize() == 0)
+            removeEmptyStacks();
+    }
+
+    private void removeEmptyStacks() {
+        List<CardStack> removeStacks = new ArrayList<>();
+        for (CardStack cardStack : getCardStacks()) {
+            if (cardStack.getStackSize() == 0) {
+                removeStacks.add(cardStack);
+            }
+        }
+        for (CardStack cardStack : removeStacks) {
+            drawStacks.removeStack(cardStack);
         }
     }
 
@@ -89,7 +139,7 @@ public class DrawStacks extends GameComponent {
     }
 
     private boolean anyStackEmpty() {
-        if (drawStacks.getStacks().size() <= drawStacksMaxCount) return true;
+        if (drawStacks.getStacks().size() < drawStacksMaxCount) return true;
         for (CardStack stack : drawStacks.getStacks()) {
             if (stack.getStackSize() == 0) {
                 return true;
@@ -126,10 +176,19 @@ public class DrawStacks extends GameComponent {
     public void paint(GameGraphics g) {
         g.setColor(Color.DARK_GRAY);
         g.getGraphics().fillRect(getX(), getY(), getWidth(), getHeight());
+        g.setColor(Color.black);
         super.paint(g);
     }
 
     public boolean canFillDrawStacks() {
         return startCards.getStackSize() > 0;
+    }
+
+    public void removeBorders() {
+        this.setBorder(null);
+        for (CardStack cardStack : getCardStacks()) {
+            cardStack.setBorder(null);
+        }
+
     }
 }

@@ -77,6 +77,14 @@ public class Button extends GameComponent {
         this(description, null, x, y, width, height);
     }
 
+    public Button(String description) {
+        this(description, 0, 0, 0, 0);
+    }
+
+    public Button(GameImage background) {
+        this(background, 0, 0, 0, 0);
+    }
+
     public Button(GameImage background, int x, int y, int width, int height) {
         this(null, background, x, y, width, height);
     }
@@ -119,7 +127,7 @@ public class Button extends GameComponent {
 
     @Override
     public void setSize(int width, int height) {
-        if (description != null) font = Game.game.getFont().deriveFont((float) getHeight() - 5);
+        if (description != null) font = Game.game.getFont().deriveFont((float) height - 5);
         if (background != null) background = background.getScaledInstance(width - 1, height - 1);
         super.setSize(width, height);
     }
@@ -128,4 +136,7 @@ public class Button extends GameComponent {
         actionListeners.add(actionListener);
     }
 
+    public void removeActionListener() {
+        actionListeners.clear();
+    }
 }

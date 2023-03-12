@@ -7,7 +7,7 @@ public class BasicCardStack extends CardStack {
     boolean usable = true;
 
     public BasicCardStack(String name, Card allowedCardType, int maxStackSize) {
-        super(name, RP_ALL_CARDS_UNTURNED, card -> card.equals(allowedCardType), maxStackSize);
+        super(name, RP_ALL_CARDS_TURNED, card -> card.equals(allowedCardType), maxStackSize);
     }
 
     public BasicCardStack(String name, int maxStackSize) {

@@ -16,6 +16,10 @@ public class Label extends GameComponent {
         font = Game.game.getFont().deriveFont((float) getHeight() - 5);
     }
 
+    public Label(String description) {
+        this(description, 0, 0, 0, 0);
+    }
+
     @Override
     public void paint(GameGraphics g) {
         if (!visible)
@@ -27,7 +31,7 @@ public class Label extends GameComponent {
 
     @Override
     public void setSize(int width, int height) {
-        font = Game.game.getFont().deriveFont((float) getHeight() - 5);
+        font = Game.game.getFont().deriveFont((float) height - 5);
         super.setSize(width, height);
     }
 

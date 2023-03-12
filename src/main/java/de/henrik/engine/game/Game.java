@@ -1,11 +1,18 @@
 package de.henrik.engine.game;
 
 import de.henrik.engine.base.GameGraphics;
+import de.henrik.engine.events.GameEvent;
+import de.henrik.engine.events.GameEventListener;
+import de.henrik.engine.events.SwitchGameBoardEvent;
+import de.henrik.engine.events.SwitchGameBoardListener;
+import de.henrik.implementation.boards.GameBoard;
 import de.henrik.implementation.game.Options;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.SynchronousQueue;
 
 public class Game extends JFrame {
 
@@ -15,6 +22,8 @@ public class Game extends JFrame {
     private Player activePlayer;
 
     private static HashMap<String, Board> gameBoards = new HashMap<>();
+
+    private final GameEventThread gameEventThread;
 
     static {
         Options.init();
@@ -28,6 +37,8 @@ public class Game extends JFrame {
         setVisible(true);
         setVisible(false);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        gameEventThread = new GameEventThread();
     }
 
     public Board getActiveGameBoard() {
@@ -36,11 +47,18 @@ public class Game extends JFrame {
 
     public void start(Board gameBoard) {
         System.out.println("Game started");
+
+        addEventListener((SwitchGameBoardListener) event -> {
+            event.oldBoard.deactivate();
+            Game.game.gameBoard = event.newBoard;
+            event.newBoard.activate();
+        });
+
         this.gameBoard = gameBoard;
-        gameBoard.activate();
         Graphics2D g = (Graphics2D) getGraphics().create();
         g.setClip(0, 0, getWidth(), getHeight());
         gameBoard.setGraphics(new GameGraphics(g));
+        gameBoard.activate();
         setVisible(true);
         running = true;
     }
@@ -72,10 +90,7 @@ public class Game extends JFrame {
     public void switchGameBoard(String gameBoardName) {
         if (!gameBoards.containsKey(gameBoardName))
             throw new IllegalArgumentException("This gameBoard is not registered!");
-        this.gameBoard.deactivate();
-        this.gameBoard = gameBoards.get(gameBoardName);
-        this.gameBoard.activate();
-        repaint();
+        game.event(new SwitchGameBoardEvent(getActiveGameBoard(), gameBoards.get(gameBoardName)));
     }
 
     public Player getActivePlayer() {
@@ -86,4 +101,32 @@ public class Game extends JFrame {
         this.activePlayer = activePlayer;
     }
 
+    public void event(GameEvent event) {
+        gameEventThread.submitEvent(event);
+    }
+
+    public void addEventListener(GameEventListener gameEventListener) {
+        gameEventThread.addListener(gameEventListener);
+    }
+
+    public void removeEventListener(GameEventListener gameEventListener) {
+        gameEventThread.removeListener(gameEventListener);
+    }
+
+    /**
+     * Removes all event listener and adds a new default SwitchGameBoardListener
+     */
+    public void clearEventListener() {
+        gameEventThread.removeAllListener();
+        gameEventThread.addListener((SwitchGameBoardListener) event -> {
+            event.oldBoard.deactivate();
+            Game.game.gameBoard = event.newBoard;
+            clearEventListener();
+            event.newBoard.activate();
+        });
+    }
+
+    public void waitForEventListener() {
+        gameEventThread.waitForListenerChange();
+    }
 }

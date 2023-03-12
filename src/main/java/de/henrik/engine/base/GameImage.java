@@ -79,7 +79,7 @@ public class GameImage {
         ig.setColor(color);
         ig.fillRect(0, 0, image.getWidth(), image.getHeight());
         loadedImages.put(path, new HashMap<>());
-        loadedImages.get(path).put(new Dimension(Options.getWidth(), Options.getHeight()), image);
+        loadedImages.get(path).put(defaultImageDim, image);
     }
 
 
@@ -101,11 +101,15 @@ public class GameImage {
         if (loadedImages.get(path).containsKey(new Dimension(width, height)))
             return new GameImage(loadedImages.get(path).get(new Dimension(width, height)), this.path);
 
-
-        BufferedImage new_image = GFX_CONFIG.createCompatibleImage(width, height, image.getTransparency());
-        Graphics2D g2d = new_image.createGraphics();
-        g2d.drawImage(image.getScaledInstance(width, height, Image.SCALE_SMOOTH), 0, 0, null);
-        loadedImages.get(path).put(new Dimension(width, height), new_image);
-        return new GameImage(new_image, this.path);
+        if (width == 0 || height == 0) {
+            loadedImages.get(path).put(new Dimension(width, height), null);
+            return new GameImage(null, this.path);
+        } else {
+            BufferedImage new_image = GFX_CONFIG.createCompatibleImage(width, height, loadedImages.get(path).get(defaultImageDim).getTransparency());
+            Graphics2D g2d = new_image.createGraphics();
+            g2d.drawImage(loadedImages.get(path).get(defaultImageDim).getScaledInstance(width, height, Image.SCALE_SMOOTH), 0, 0, null);
+            loadedImages.get(path).put(new Dimension(width, height), new_image);
+            return new GameImage(new_image, this.path);
+        }
     }
 }

@@ -37,4 +37,8 @@ abstract public class Player {
     public String getName() {
         return name;
     }
+
+    public List<Card> getCardList() {
+        return cardList;
+    }
 }
