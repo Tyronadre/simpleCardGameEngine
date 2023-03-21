@@ -54,8 +54,8 @@ public class PlayingCardBuilder {
                         default -> throw new IllegalStateException("Unexpected value: " + line[2]);
                     });
                     cardBuilder.setCost(Integer.parseInt(line[3]));
-                    cardBuilder.setFront(new GameImage("/cards/" + line[4]));
-                    cardBuilder.setBack(new GameImage("/cards/" + line[5]));
+                    cardBuilder.setFront(new GameImage("/cards/c" + line[0] + ".png"));
+                    cardBuilder.setBack(new GameImage("/cards/back.png"));
                     cardBuilder.setAction(getEventListener(cardBuilder.id));
                     for (int i = 0; i < Integer.parseInt(line[6]); i++) {
                         cards.add(cardBuilder.build());
@@ -113,16 +113,6 @@ public class PlayingCardBuilder {
                 };
             case 7:
                 return event -> {
-                    if (event.roll == 6) {
-                        for (PlayerImpl player : event.gameBoard.getPlayer()) {
-                            if (player != event.owner) {
-                                event.owner.addCoins(player.removeCoins(2));
-                            }
-                        }
-                    }
-                };
-            case 8:
-                return event -> {
                     if (event.roll == 6 && event.owner == event.activePlayer) {
                         event.gameBoard.event(
                                 new ChoiceEvent(
@@ -130,6 +120,16 @@ public class PlayingCardBuilder {
                                                 gameComponent != event.activePlayer.getPlayerPane(),
                                         event1 -> event.owner.addCoins(((PlayerPaneImpl) event1.selected).getPlayer().removeCoins(5))));
 
+                    }
+                };
+            case 8:
+                return event -> {
+                    if (event.roll == 6) {
+                        for (PlayerImpl player : event.gameBoard.getPlayer()) {
+                            if (player != event.owner) {
+                                event.owner.addCoins(player.removeCoins(2));
+                            }
+                        }
                     }
                 };
             case 9:
@@ -140,16 +140,14 @@ public class PlayingCardBuilder {
                                         gameComponent -> gameComponent instanceof CardStack &&
                                                 !event.gameBoard.drawStacks.getCardStacks().contains(gameComponent) &&
                                                 event.owner.getCardStacks().contains(gameComponent),
-                                        event1 -> {
-                                            new ChoiceEvent(gameComponent -> gameComponent instanceof CardStack &&
-                                                    !event.gameBoard.drawStacks.getCardStacks().contains(gameComponent) &&
-                                                    !event.owner.getCardStacks().contains(gameComponent),
-                                                    event2 -> {
-                                                        event2.owner.addCard((PlayingCard) ((CardStack) event1.selected).removeCard());
-                                                        event.owner.addCard((PlayingCard) ((CardStack) event2.selected).removeCard());
-                                                    }
-                                            );
-                                        }
+                                        event1 -> new ChoiceEvent(gameComponent -> gameComponent instanceof CardStack &&
+                                                !event.gameBoard.drawStacks.getCardStacks().contains(gameComponent) &&
+                                                !event.owner.getCardStacks().contains(gameComponent),
+                                                event2 -> {
+                                                    event2.owner.addCard((PlayingCard) ((CardStack) event1.selected).removeCard());
+                                                    event.owner.addCard((PlayingCard) ((CardStack) event2.selected).removeCard());
+                                                }
+                                        )
                                 ));
                     }
                 };

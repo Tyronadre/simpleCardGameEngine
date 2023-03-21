@@ -14,11 +14,10 @@ public class MainMenu extends Board {
     int playerCount = 2;
 
 
-    public MainMenu(GameImage backgroundImage) {
-        super(backgroundImage);
+    public MainMenu() {
+        super(new GameImage("/background/mainMenu.jpg").getScaledInstance(Options.getWidth(),Options.getHeight()));
 
         // Player Names
-
         Label p1 = new Label("Player 1:", 100 + BUTTON_WIDTH + 100, 200, 200, 50);
         Label p2 = new Label("Player 2:", 100 + BUTTON_WIDTH + 100, 300, 200, 50);
         Label p3 = new Label("Player 3:", 100 + BUTTON_WIDTH + 100, 400, 200, 50);

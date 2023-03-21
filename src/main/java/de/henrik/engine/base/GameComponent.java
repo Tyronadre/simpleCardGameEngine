@@ -305,6 +305,7 @@ public abstract class GameComponent {
 
             @Override
             public void mouseDragged(MouseEvent e) {
+                lastLocation = e.getLocationOnScreen();
                 if (init == null) {
                     if (pointInside(e.getLocationOnScreen())) {
                         init = e.getLocationOnScreen();
@@ -340,7 +341,7 @@ public abstract class GameComponent {
 //        return false;
 //    }
 
-    public void removeMouseListener(MouseListener mouseListener) {
+    public void removeMouseListener(GameMouseListener mouseListener) {
         Game.game.removeMouseListener(mouseListenerHashMap.get(mouseListener.hashCode()));
     }
 

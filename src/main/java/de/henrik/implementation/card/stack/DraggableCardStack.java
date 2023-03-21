@@ -1,12 +1,17 @@
 package de.henrik.implementation.card.stack;
 
+import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
+import de.henrik.engine.components.Label;
+import de.henrik.engine.components.Pane;
+import de.henrik.engine.events.GameEvent;
 import de.henrik.engine.events.GameMouseListenerAdapter;
 import de.henrik.engine.game.Game;
 import de.henrik.implementation.GameEvent.DraggingCardEvent;
 import de.henrik.implementation.boards.GameBoard;
 import de.henrik.implementation.card.playingcard.PlayingCard;
+import de.henrik.implementation.game.Options;
 import de.henrik.implementation.player.PlayerImpl;
 
 import java.awt.*;
@@ -19,10 +24,42 @@ public class DraggableCardStack extends BasicCardStack {
         addMouseListener(new GameMouseListenerAdapter() {
             boolean pressed = true;
             int oldRenderPolicy;
+            Pane largeCard = null;
 
             @Override
             public void mousePressed(MouseEvent e) {
 
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (largeCard == null && getCard() != null) {
+                    largeCard = new Pane(getRenderPolicy() == RP_ALL_CARDS_UNTURNED ? getCard().getBackOfCard() : getCard().getFrontOfCard(),
+                            Options.getWidth() / 50,
+                            Options.getHeight() / 50,
+                            1000,
+                            1500);
+                    gameBoard.add(largeCard);
+                }
+                largeCard.setVisible(true);
+                gameBoard.addMouseListener(new GameMouseListenerAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        largeCard.setVisible(false);
+                        gameBoard.removeMouseListener(this);
+                    }
+                });
+            }
+
+
+            @Override
+            public void mouseReleasedAnywhere(MouseEvent e) {
+                pressed = false;
+
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
                 if (!gameBoard.isCardDragged() && getCard() != null) {
                     PlayingCard draggedCard = (PlayingCard) removeCard();
                     gameBoard.setCardDragged(draggedCard);
@@ -71,20 +108,6 @@ public class DraggableCardStack extends BasicCardStack {
                         gameBoard.event(cardEventEnd);
                     }).start();
                 }
-            }
-
-            @Override
-            public void mouseReleasedAnywhere(MouseEvent e) {
-                pressed = false;
-
-            }
-
-            @Override
-            public void mouseDragged(MouseEvent e) {
-//                    if (cardEvent != null) {
-//                        cardEvent.pos = e.getLocationOnScreen();
-//                        gameBoard.event(cardEvent);
-//                    }
             }
         });
     }

@@ -1,16 +1,15 @@
 package de.henrik.implementation.player;
 
 import de.henrik.engine.base.GameComponent;
+import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.CardStack;
 import de.henrik.engine.card.CardStackArea;
-import de.henrik.engine.components.Button;
 import de.henrik.engine.components.Label;
 import de.henrik.engine.components.Pane;
 import de.henrik.engine.game.Game;
 import de.henrik.engine.game.Player;
 import de.henrik.engine.game.PlayerPane;
-import de.henrik.implementation.boards.GameBoard;
 import de.henrik.implementation.card.SelfStackingCardStackArea;
 import de.henrik.implementation.card.landmark.Landmark;
 import de.henrik.implementation.card.stack.BasicCardStack;
@@ -22,18 +21,17 @@ public class PlayerPaneImpl extends PlayerPane {
     PlayerImpl player;
     CardStackArea landmarks;
     SelfStackingCardStackArea ownedCards;
-    public Label playerName;
+    Label playerName;
     Label coinLabel;
-    public Button skipTurn;
 
     public PlayerPaneImpl(PlayerImpl player) {
-        super(new GameImage(Color.BLACK), calcInitDim(player)[0], calcInitDim(player)[1],calcInitDim(player)[2],calcInitDim(player)[3]);
+        super(null, calcInitDim(player)[0], calcInitDim(player)[1],calcInitDim(player)[2],calcInitDim(player)[3]);
         this.player = player;
 
 
         // --- LANDMARKS, COINS, PLAYERNAME, SKIP TURN --- //
-        GameImage landmarkBG = new GameImage("/player/landmarkBackground.png");
-        Pane landmarksAndInfo = new Pane(landmarkBG, getX(), getY(), getWidth() / 4 - 3, getHeight());
+        GameImage landmarkBG = new GameImage("/player/landmarkBackground.png",true);
+        Pane landmarksAndInfo = new Pane(getX(), getY(), getWidth() / 4 - 3, getHeight());
         add(landmarksAndInfo);
 
         landmarks = new CardStackArea(20, 3, 3);
@@ -42,6 +40,7 @@ public class PlayerPaneImpl extends PlayerPane {
         landmarks.setPosition(landmarksAndInfo.getX(), landmarksAndInfo.getY() + 40);
         for (Landmark landmark : player.landmarkHashMap.keySet()) {
             CardStack landmarkStack = new BasicCardStack("player_" + player.getId() + "_landmark_" + landmark.ID, landmark, 1);
+            landmarkStack.setRenderPolicy(CardStack.RP_ALL_CARDS_UNTURNED);
             landmarkStack.addCard(landmark);
             landmarks.addStack(landmarkStack);
         }
@@ -53,7 +52,7 @@ public class PlayerPaneImpl extends PlayerPane {
         landmarksAndInfo.add(coinLabel);
 
         // --- PLAYER CARDS --- //
-        Pane playerCardsPane = new Pane(new GameImage("/player/cardsBackground.png"), getX() + getWidth() / 4 + 5, getY(), getWidth() / 4 * 3 - 5, getHeight());
+        Pane playerCardsPane = new Pane(new GameImage("/background/cardsBackground.png",true), getX() + getWidth() / 4 + 5, getY(), getWidth() / 4 * 3 - 5, getHeight());
         ownedCards = new SelfStackingCardStackArea(-1, 5, 5,300,200);
         ownedCards.setPosition(playerCardsPane.getPosition());
         ownedCards.setSize(playerCardsPane.getSize());
@@ -61,8 +60,9 @@ public class PlayerPaneImpl extends PlayerPane {
         add(playerCardsPane);
     }
 
-    protected void updateCoinLabel(int coins) {
+    protected void updateCoinLabel() {
         coinLabel.setDescription("Coins: " + player.getCoins());
+        coinLabel.repaint();
     }
 
     private static int[] calcInitDim(Player player) {
@@ -155,5 +155,20 @@ public class PlayerPaneImpl extends PlayerPane {
         for (GameComponent child : children) {
             child.setBorder(null);
         }
+        for (GameComponent landmark: landmarks.getChildren()) {
+            landmark.setBorder(null);
+        }
+        repaint();
+    }
+
+    @Override
+    public void paint(GameGraphics g) {
+        if (player == Game.game.getActivePlayer())
+            g.setColor(new Color(0.25f,0.4f,0.25f,0.5f));
+        else
+            g.setColor(new Color(0.25f,0.4f,0.4f,0.5f));
+        g.getGraphics().fillRect(getX(), getY(), getWidth(), getHeight());
+        g.setColor(GameGraphics.defaultColor);
+        super.paint(g);
     }
 }

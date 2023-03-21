@@ -2,13 +2,11 @@ package de.henrik.implementation.player;
 
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
-import de.henrik.engine.card.CardStackArea;
 import de.henrik.engine.events.GameMouseListenerAdapter;
 import de.henrik.engine.game.Border;
 import de.henrik.engine.game.Game;
 import de.henrik.engine.game.Player;
-import de.henrik.implementation.GameEvent.CardEvent;
-import de.henrik.implementation.GameEvent.DraggingCardEvent;
+import de.henrik.implementation.GameEvent.GameStateChangeEvent;
 import de.henrik.implementation.boards.GameBoard;
 import de.henrik.implementation.card.BasicCard;
 import de.henrik.implementation.card.landmark.Landmark;
@@ -17,15 +15,14 @@ import de.henrik.implementation.card.playingcard.PlayingCard;
 import de.henrik.implementation.game.Options;
 
 import java.awt.*;
-import java.util.List;
 import java.awt.event.MouseEvent;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.function.Predicate;
 
 public class PlayerImpl extends Player {
     int coins;
-    HashMap<Landmark, Boolean> landmarkHashMap;
+    LinkedHashMap<Landmark, Boolean> landmarkHashMap;
 
 
     public PlayerImpl(int id, String name) {
@@ -36,7 +33,7 @@ public class PlayerImpl extends Player {
     }
 
     private void loadLandmarks() {
-        landmarkHashMap = new HashMap<>();
+        landmarkHashMap = new LinkedHashMap<>();
         for (Landmark landmark : LandmarkBuilder.buildLandmarkFromCSV("/landmarksE0.csv")) {
             landmarkHashMap.put(landmark, false);
         }
@@ -63,14 +60,16 @@ public class PlayerImpl extends Player {
             return retCoins;
         }
         this.coins -= coins;
-        ((PlayerPaneImpl) playerPane).updateCoinLabel(coins);
+        ((PlayerPaneImpl) playerPane).updateCoinLabel();
+        System.out.println("Player " + getName() + " has " + this.coins + " coins left.");
         return coins;
 
     }
 
     public void addCoins(int coins) {
         this.coins += coins;
-        ((PlayerPaneImpl) playerPane).updateCoinLabel(coins);
+        ((PlayerPaneImpl) playerPane).updateCoinLabel();
+        System.out.println("Player " + getName() + " has " + this.coins + " coins left.");
     }
 
     @Override
@@ -106,14 +105,35 @@ public class PlayerImpl extends Player {
     public void updateGameBoard(GameBoard gameBoard) {
         PlayerPaneImpl playerPane = getPlayerPane();
 
-        // borders for cardstacks
+        // cardstacks
         for (CardStack stack : gameBoard.drawStacks.getCardStacks()) {
             Card topCard = stack.getCard();
-            if (((BasicCard) topCard).getCost() <= PlayerImpl.this.getCoins())
+            if (((BasicCard) topCard).getCost() <= getCoins())
                 stack.setBorder(new Border(Color.GREEN, true, 2, stack, 5));
             else stack.setBorder(null);
         }
         gameBoard.drawStacks.repaint();
+
+
+        // landmarks
+        for (CardStack landmarkStack : playerPane.landmarks.getStacks()) {
+            Landmark landmark = (Landmark) landmarkStack.getCard();
+            if (landmark.getCost() <= getCoins() && !hasLandmark(landmark.getID()))
+                landmarkStack.setBorder(new Border(Color.GREEN, true, 2, landmarkStack, 5));
+            else landmarkStack.setBorder(null);
+            landmarkStack.addMouseListener(new GameMouseListenerAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if (landmark.getCost() <= getCoins()) {
+                        removeCoins(landmark.getCost());
+                        landmarkHashMap.put(landmark, true);
+                        Game.game.event(new GameStateChangeEvent(GameBoard.NEW_PLAYER_STATE));
+                        landmarkStack.setRenderPolicy(CardStack.RP_ALL_CARDS_TURNED);
+                    }
+                }
+            });
+            landmarkStack.repaint();
+        }
     }
 
     public List<CardStack> getCardStacks() {

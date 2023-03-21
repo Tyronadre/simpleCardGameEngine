@@ -9,8 +9,11 @@ import de.henrik.engine.card.CardStackArea;
 import de.henrik.engine.components.Button;
 import de.henrik.engine.components.Label;
 import de.henrik.engine.events.GameEventListener;
+import de.henrik.engine.game.Border;
 import de.henrik.engine.game.Game;
 import de.henrik.implementation.GameEvent.DiceRollEvent;
+import de.henrik.implementation.GameEvent.GameStateChangeEvent;
+import de.henrik.implementation.boards.GameBoard;
 import de.henrik.implementation.card.playingcard.PlayingCardBuilder;
 import de.henrik.implementation.card.stack.BasicCardStack;
 import de.henrik.implementation.card.stack.DraggableCardStack;
@@ -26,7 +29,6 @@ public class DrawStacks extends GameComponent {
     private final int startCardsXSpace = 10;
     private final int startCardsYSpace = 20;
     private int drawStacksMaxCount;
-    private List<GameEventListener> gameEventListeners = new ArrayList<>();
     public Button dice, twoDice, skipTurn;
     public Label diceRoll, activePlayerLabel;
 
@@ -43,15 +45,14 @@ public class DrawStacks extends GameComponent {
         drawStacks = new CardStackArea(drawStacksMaxCount, 20, 20);
 
         dice = new Button(new GameImage("dice.png"));
+        dice.disable();
         twoDice = new Button(new GameImage("twoDice.png"));
+        twoDice.disable();
         diceRoll = new Label("Rolled: 0");
         skipTurn = new Button("Skip Turn");
+        skipTurn.addActionListener(e -> Game.game.event(new GameStateChangeEvent(GameBoard.NEW_PLAYER_STATE)));
+        skipTurn.disable();
         activePlayerLabel = new Label("Init");
-
-        skipTurn.addActionListener(e -> {
-            Game.game.event(new );
-        });
-
 
         add(dice);
         add(twoDice);
@@ -60,6 +61,7 @@ public class DrawStacks extends GameComponent {
         add(drawStacks);
         add(startCards);
         add(activePlayerLabel);
+
         resize();
     }
 
@@ -72,11 +74,11 @@ public class DrawStacks extends GameComponent {
         dice.setSize(100, 100);
         twoDice.setPosition(startCards.getX() - 110, 10 + getY());
         twoDice.setSize(100, 100);
-        diceRoll.setPosition(startCards.getX() - 220, 110 + getY());
+        diceRoll.setPosition(startCards.getX() - 220, 150 + getY());
         diceRoll.setSize(210, 30);
-        skipTurn.setPosition(startCards.getX() - 220, 150 + getY());
+        skipTurn.setPosition(startCards.getX() - 220, 190 + getY());
         skipTurn.setSize(210, 30);
-        activePlayerLabel.setPosition(startCards.getX() - 220, 190 + getY());
+        activePlayerLabel.setPosition(startCards.getX() - 220, 240 + getY());
         activePlayerLabel.setSize(210, 30);
 
         drawStacks.setPosition(getPosition());
@@ -174,9 +176,10 @@ public class DrawStacks extends GameComponent {
 
     @Override
     public void paint(GameGraphics g) {
-        g.setColor(Color.DARK_GRAY);
+        g.setColor(new Color(0.25f, 0.25f, 0.25f,0.6f));
+
         g.getGraphics().fillRect(getX(), getY(), getWidth(), getHeight());
-        g.setColor(Color.black);
+        g.setColor(GameGraphics.defaultColor);
         super.paint(g);
     }
 

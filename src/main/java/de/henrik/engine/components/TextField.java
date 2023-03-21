@@ -88,10 +88,10 @@ public class TextField extends GameComponent {
                 g.getGraphics().drawRoundRect(getX(), getY(), getWidth(), getHeight(), 3, 3);
                 break;
             case state_DEFAULT:
-                g.setColor(Color.black);
+                g.setColor(GameGraphics.defaultColor);
                 g.getGraphics().drawRoundRect(getX(), getY(), getWidth(), getHeight(), 3, 3);
         }
-        g.setColor(Color.black);
+        g.setColor(GameGraphics.defaultColor);
         g.getGraphics().setFont(font);
         g.drawString(savedString, getX() + 5, getY() + getHeight() - getHeight() / 10 - 5);
     }

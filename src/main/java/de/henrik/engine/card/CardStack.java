@@ -331,7 +331,7 @@ public abstract class CardStack extends GameComponent {
                 int x = pos.x + max * (X_CARD_OFFSET - 1) + 8;
                 int y = pos.y + getHeight() - 7;
 
-                g.setColor(Color.BLACK);
+                g.setColor(GameGraphics.defaultColor);
                 int width = 58;
                 if (cards.size() < 100)
                     width = 50;

@@ -41,6 +41,10 @@ public class Game extends JFrame {
         gameEventThread = new GameEventThread();
     }
 
+    public static void setDefaultColor(Color color) {
+        GameGraphics.defaultColor = color;
+    }
+
     public Board getActiveGameBoard() {
         return gameBoard;
     }

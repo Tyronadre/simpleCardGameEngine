@@ -8,14 +8,24 @@ public class Pane extends GameComponent {
 
     private GameImage background;
 
-    public Pane(GameImage background, int x, int y, int width, int height) {
+    public Pane(GameImage background, int x, int y, int width, int height, boolean visible){
         super(x, y, width, height);
-        this.background = background.getScaledInstance(width,height);
+        this.background = background == null ? null : background.getScaledInstance(width, height);
+        this.setVisible(visible);
+    }
+    public Pane(GameImage background, int x, int y, int width, int height) {
+        this(background, x, y, width, height, true);
+    }
+
+    public Pane(int x, int y, int width, int height) {
+        this(null, x, y, width, height);
     }
 
     @Override
     public void paint(GameGraphics g) {
-        g.drawImage(background.getImage(), getX(), getY());
+        if (!visible)
+            return;
+        if (background != null) g.drawImage(background.getImage(), getX(), getY());
         super.paint(g);
     }
 

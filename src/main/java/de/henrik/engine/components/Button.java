@@ -3,14 +3,12 @@ package de.henrik.engine.components;
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.base.GameImage;
-import de.henrik.engine.events.GameMouseListener;
 import de.henrik.engine.events.GameMouseListenerAdapter;
 import de.henrik.engine.game.Game;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,10 +18,10 @@ public class Button extends GameComponent {
     private String description;
     private Font font;
     private GameImage background;
-
     public static final int state_DEFAULT = 0;
     public static final int state_HOVERED = 1;
     public static final int state_CLICKED = 2;
+    public static final int state_DISABLED = 3;
     private int state = state_DEFAULT;
     private final List<ActionListener> actionListeners = new ArrayList<>();
 
@@ -37,7 +35,7 @@ public class Button extends GameComponent {
         addMouseListener(new GameMouseListenerAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (board.active) {
+                if (board.active && state != state_DISABLED) {
                     state = state_CLICKED;
                     for (var actionListener : actionListeners) {
                         actionListener.actionPerformed(new ActionEvent(this, 0, "buttonClicked"));
@@ -48,7 +46,7 @@ public class Button extends GameComponent {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (board.active) {
+                if (board.active && state != state_DISABLED) {
                     state = state_HOVERED;
                     repaint();
                 }
@@ -56,7 +54,7 @@ public class Button extends GameComponent {
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                if (board.active) {
+                if (board.active && state != state_DISABLED) {
                     state = state_HOVERED;
                     repaint();
                 }
@@ -64,7 +62,7 @@ public class Button extends GameComponent {
 
             @Override
             public void mouseExited(MouseEvent e) {
-                if (board.active) {
+                if (board.active && state != state_DISABLED) {
                     state = state_DEFAULT;
                     repaint();
                 }
@@ -100,13 +98,17 @@ public class Button extends GameComponent {
             return;
         if (background != null) {
             g.drawImage(background.getImage(), getX(), getY());
-
         }
         if (description != null && !description.equals("")) {
             g.getGraphics().setFont(font);
             g.drawString(description, getX() + 5, getY() + getHeight() - getHeight() / 10 - 5);
         }
         switch (state) {
+            case state_DISABLED -> {
+                g.getGraphics().drawRoundRect(getX(), getY(), getWidth(), getHeight(), 3, 3);
+                g.setColor(new Color(0.25f,0.25f,0.25f,0.25f));
+                g.getGraphics().fillRoundRect(getX(),getY(),getWidth(),getHeight(),3,3);
+            }
             case state_DEFAULT -> {
                 g.getGraphics().drawRoundRect(getX(), getY(), getWidth(), getHeight(), 3, 3);
             }
@@ -117,12 +119,20 @@ public class Button extends GameComponent {
             case state_CLICKED -> {
                 g.setColor(new Color(147, 147, 147, 26));
                 g.getGraphics().fillRoundRect(getX(), getY(), getWidth(), getHeight(), 3, 3);
-                g.setColor(Color.BLACK);
+                g.setColor(GameGraphics.defaultColor);
                 g.getGraphics().drawRoundRect(getX(), getY(), getWidth(), getHeight(), 3, 3);
             }
         }
-
+        g.setColor(GameGraphics.defaultColor);
         super.paint(g);
+    }
+
+    public void enable() {
+        state = state_DEFAULT;
+    }
+
+    public void disable() {
+        state = state_DISABLED;
     }
 
     @Override

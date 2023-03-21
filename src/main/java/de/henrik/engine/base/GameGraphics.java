@@ -4,12 +4,14 @@ import java.awt.*;
 
 public class GameGraphics {
     Graphics2D graphics2D;
+    public static Color defaultColor = Color.BLACK;
 
     public GameGraphics(Graphics2D graphics2D) {
         this.graphics2D = graphics2D;
+        graphics2D.setColor(defaultColor);
     }
 
-    public GameGraphics setClip(Shape clip){
+    public GameGraphics setClip(Shape clip) {
         graphics2D.setClip(clip);
         return this;
     }
@@ -44,11 +46,11 @@ public class GameGraphics {
     }
 
     public void drawImage(Image image, int x, int y) {
-        graphics2D.drawImage(image,x,y,null);
+        graphics2D.drawImage(image, x, y, null);
     }
 
     public void drawString(String string, int x, int y) {
-        graphics2D.drawString(string,x,y);
+        graphics2D.drawString(string, x, y);
     }
 
 }

@@ -104,6 +104,14 @@ abstract public class Card extends GameComponent {
         super.setSize(width, height);
     }
 
+    public GameImage getFrontOfCard() {
+        return frontOfCard;
+    }
+
+    public GameImage getBackOfCard() {
+        return backOfCard;
+    }
+
     @Override
     public String toString() {
         return "Card{" +

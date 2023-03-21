@@ -18,6 +18,7 @@ public class GameImage {
     private static final GraphicsConfiguration GFX_CONFIG = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
     BufferedImage image;
     String path;
+    Boolean cropImage;
 
 
     /**
@@ -27,6 +28,7 @@ public class GameImage {
      */
     public GameImage(String path) {
         this.path = path;
+        this.cropImage = false;
         if (loadedImages.containsKey(path)) {
             image = loadedImages.get(path).get(defaultImageDim);
             return;
@@ -63,13 +65,26 @@ public class GameImage {
         loadedImages.get(path).put(defaultImageDim, image);
     }
 
-    private GameImage(BufferedImage image, String path) {
+    /**
+     * If crop Image is true, the default {@link GameImage#getScaledInstance(int, int)} method will use {@link GameImage#getCroppedInstance(int, int, int, int)} instead, where x and y are 0.
+     * This can be used if this image should be cropped instead of scaled in every situation. Note that this will not use the internal dataclass for saving the image, so resizing might be slower.
+     * @param path The path to the image
+     * @param cropImage if this image should be cropped instead of scaled
+     */
+    public GameImage(String path, boolean cropImage) {
+        this(path);
+        this.cropImage = cropImage;
+    }
+
+    private GameImage(BufferedImage image, String path, boolean cropImage) {
         this.image = image;
         this.path = path;
+        this.cropImage = cropImage;
     }
 
     public GameImage(Color color) {
         this.path = String.valueOf(color);
+        this.cropImage = false;
         if (loadedImages.containsKey(path)) {
             image = loadedImages.get(path).get(new Dimension(Options.getWidth(), Options.getHeight()));
             return;
@@ -98,18 +113,35 @@ public class GameImage {
 
 
     public GameImage getScaledInstance(int width, int height) {
+        if (cropImage) {
+            return getCroppedInstance(0, 0, width, height);
+        }
         if (loadedImages.get(path).containsKey(new Dimension(width, height)))
-            return new GameImage(loadedImages.get(path).get(new Dimension(width, height)), this.path);
+            return new GameImage(loadedImages.get(path).get(new Dimension(width, height)), this.path, this.cropImage);
 
         if (width == 0 || height == 0) {
             loadedImages.get(path).put(new Dimension(width, height), null);
-            return new GameImage(null, this.path);
+            return new GameImage(null, this.path, this.cropImage);
         } else {
             BufferedImage new_image = GFX_CONFIG.createCompatibleImage(width, height, loadedImages.get(path).get(defaultImageDim).getTransparency());
             Graphics2D g2d = new_image.createGraphics();
             g2d.drawImage(loadedImages.get(path).get(defaultImageDim).getScaledInstance(width, height, Image.SCALE_SMOOTH), 0, 0, null);
             loadedImages.get(path).put(new Dimension(width, height), new_image);
-            return new GameImage(new_image, this.path);
+            return new GameImage(new_image, this.path, this.cropImage);
         }
+    }
+
+    public GameImage getCroppedInstance(int x, int y, int width, int height) {
+        if (width == 0 || height == 0) {
+            throw new IllegalArgumentException("width and height must be greater than 0");
+        }
+        BufferedImage base = loadedImages.get(path).get(defaultImageDim);
+        if (base.getWidth() < x + width || base.getHeight() < y + height) {
+            throw new IllegalArgumentException("try to get an area outside of the base image");
+        }
+        BufferedImage new_image = GFX_CONFIG.createCompatibleImage(width, height, loadedImages.get(path).get(defaultImageDim).getTransparency());
+        Graphics2D g2d = new_image.createGraphics();
+        g2d.drawImage(base.getSubimage(0, 0, width, height), 0, 0, null);
+        return new GameImage(new_image, this.path, this.cropImage);
     }
 }
