@@ -5,6 +5,7 @@ import de.henrik.engine.card.CardStack;
 import de.henrik.engine.components.Pane;
 import de.henrik.engine.events.GameMouseListenerAdapter;
 import de.henrik.engine.game.Game;
+import de.henrik.implementation.boards.GameBoard;
 import de.henrik.implementation.game.Options;
 
 import java.awt.event.MouseEvent;
@@ -32,7 +33,7 @@ public class BasicCardStack extends CardStack {
                     largeCard.setVisible(false);
                     Game.game.getActiveGameBoard().add(largeCard);
                 }
-                if (largeCard != null && !visibleBefore) {
+                if (largeCard != null && !visibleBefore && !((GameBoard)Game.game.getActiveGameBoard()).isCardDragged()) {
                     largeCard.setVisible(true);
                     visibleBefore = false;
                     Game.game.getActiveGameBoard().addMouseListener(new GameMouseListenerAdapter() {

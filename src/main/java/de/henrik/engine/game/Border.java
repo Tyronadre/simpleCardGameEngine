@@ -22,6 +22,14 @@ public class Border {
         this.parent = parent;
     }
 
+    public Border(Color color, boolean dashed, int size, int arc) {
+        this(color, dashed, size, null,arc);
+    }
+
+    public void setParent(GameComponent parent) {
+        this.parent = parent;
+    }
+
     public void paint(GameGraphics graphics) {
         GameGraphics g = graphics.create().setClip(graphics.getClip());
         g.setColor(color);

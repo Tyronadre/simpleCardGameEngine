@@ -362,6 +362,8 @@ public abstract class GameComponent {
 
     public void setBorder(Border border) {
         this.border = border;
+        if (border != null)
+            border.setParent(this);
     }
 
     public void setBoard(Board board) {

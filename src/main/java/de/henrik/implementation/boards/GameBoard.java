@@ -8,6 +8,7 @@ import de.henrik.engine.events.GameEventListener;
 import de.henrik.engine.game.*;
 import de.henrik.implementation.GameEvent.*;
 import de.henrik.implementation.card.playingcard.PlayingCard;
+import de.henrik.implementation.card.playingcard.PlayingCardBuilder;
 import de.henrik.implementation.game.DrawStacks;
 import de.henrik.implementation.game.Options;
 import de.henrik.implementation.player.PlayerImpl;
@@ -57,7 +58,7 @@ public class GameBoard extends Board {
         return event -> {
             if (event instanceof DiceRollEvent diceRollEvent && gameState == ROLL_DICE_STATE) {
                 for (int i = 0; i < Options.getPlayerCount(); i++) {
-                    PlayerImpl player = players.get((activePlayer.getId() + i + 1 ) % Options.getPlayerCount());
+                    PlayerImpl player = players.get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
                     for (Card c : player.getCardList()) {
                         PlayingCard card = (PlayingCard) c;
                         card.event(new CardEvent(player, activePlayer, diceRollEvent.roll, this));
@@ -186,6 +187,8 @@ public class GameBoard extends Board {
             });
             players.add(p);
             add(p.getPlayerPane());
+            for (Card card : PlayingCardBuilder.buildCardsFromCSV("/cardsBase.csv"))
+                p.addCard((PlayingCard) card);
         }
         super.activate();
 

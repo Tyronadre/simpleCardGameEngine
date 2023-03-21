@@ -3,11 +3,13 @@ package de.henrik.implementation.card.playingcard;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.CardStack;
+import de.henrik.engine.game.Border;
 import de.henrik.implementation.GameEvent.*;
 import de.henrik.implementation.card.BasicCard;
 import de.henrik.implementation.player.PlayerImpl;
 import de.henrik.implementation.player.PlayerPaneImpl;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -114,6 +116,7 @@ public class PlayingCardBuilder {
             case 7:
                 return event -> {
                     if (event.roll == 6 && event.owner == event.activePlayer) {
+                        event.card.setBorder(new Border(Color.GREEN,false,2,null,3));
                         event.gameBoard.event(
                                 new ChoiceEvent(
                                         gameComponent -> gameComponent instanceof PlayerPaneImpl &&
