@@ -15,7 +15,7 @@ public class EmptyCardStack extends CardStack {
     }
 
     @Override
-    public void setSize(int width, int height) {
+    public void setCardSize(int width, int height) {
         setWidth(width);
         setHeight(height);
         if (image != null)

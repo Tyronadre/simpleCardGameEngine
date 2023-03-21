@@ -8,10 +8,8 @@ import de.henrik.engine.card.CardStack;
 import de.henrik.engine.card.CardStackArea;
 import de.henrik.engine.components.Button;
 import de.henrik.engine.components.Label;
-import de.henrik.engine.events.GameEventListener;
 import de.henrik.engine.game.Border;
 import de.henrik.engine.game.Game;
-import de.henrik.implementation.GameEvent.DiceRollEvent;
 import de.henrik.implementation.GameEvent.GameStateChangeEvent;
 import de.henrik.implementation.boards.GameBoard;
 import de.henrik.implementation.card.playingcard.PlayingCardBuilder;
@@ -42,11 +40,12 @@ public class DrawStacks extends GameComponent {
         startCards.addCards(playingCards);
         startCards.shuffel();
         startCards.setDrawStackSizeHint(true);
-        drawStacks = new CardStackArea(drawStacksMaxCount, 20, 20);
+        drawStacks = new CardStackArea(drawStacksMaxCount, 5, 5);
+        drawStacks.setBorder(new Border(Color.RED,false,1,0));
 
-        dice = new Button(new GameImage("dice.png"));
+        dice = new Button(new GameImage("/other/dice.png"));
         dice.disable();
-        twoDice = new Button(new GameImage("twoDice.png"));
+        twoDice = new Button(new GameImage("/other/twoDice.png"));
         twoDice.disable();
         diceRoll = new Label("Rolled: 0");
         skipTurn = new Button("Skip Turn");
@@ -69,7 +68,7 @@ public class DrawStacks extends GameComponent {
         int startCardsHeight = getHeight() - 2 * startCardsYSpace;
         int startCardsWidth = (int) (startCardsHeight * (2 / (double) 3));
         startCards.setPosition(getWidth() - startCardsWidth - startCardsXSpace, startCardsYSpace + getY());
-        startCards.setSize(startCardsWidth, startCardsHeight);
+        startCards.setCardSize(startCardsWidth, startCardsHeight);
         dice.setPosition(startCards.getX() - 220, 10 + getY());
         dice.setSize(100, 100);
         twoDice.setPosition(startCards.getX() - 110, 10 + getY());
@@ -134,7 +133,7 @@ public class DrawStacks extends GameComponent {
             }
         }
         drawStacks.removeStack(emptyStack);
-        DraggableCardStack draggableCardStack = new DraggableCardStack("draw_stack_" + card.getID(), card, -1);
+        DraggableCardStack draggableCardStack = new DraggableCardStack("draw_stack_" + card.getID(), card, 7);
         draggableCardStack.addCard(card);
         drawStacks.addStack(draggableCardStack);
 //        draggableCardStack.addMouseListener(draggableCardStack.getDragAdapter());

@@ -10,17 +10,9 @@ import java.util.List;
 
 public class CardStackArea extends GameComponent {
     List<CardStack> cardStacks;
-    final int xSpace, ySpace, maxNumberOfStack,maxCardHeight, maxCardWidth;
+    final int xSpace, ySpace, maxNumberOfStack, maxCardHeight, maxCardWidth;
 
 
-    public CardStackArea(int maxNumberOfStack, int xSpace, int ySpace, int maxCardHeight, int maxCardWidth) {
-        this.cardStacks = new ArrayList<>();
-        this.xSpace = xSpace;
-        this.ySpace = ySpace;
-        this.maxCardHeight = maxCardHeight;
-        this.maxCardWidth = maxCardWidth;
-        this.maxNumberOfStack = maxNumberOfStack;
-    }
     public CardStackArea(int maxNumberOfStack, int xSpace, int ySpace) {
         this.cardStacks = new ArrayList<>();
         this.xSpace = xSpace;
@@ -47,26 +39,24 @@ public class CardStackArea extends GameComponent {
             return;
         }
 
-        int cardStackOffsetX = CardStack.X_CARD_OFFSET;
-        int cardStackOffsetY = CardStack.Y_CARD_OFFSET;
 
-        int cardWidth = 0;
-        int cardHeight = 0;
-        int cardsNumber = 0;
-        //finde den größten stack:
-        for (CardStack cardStack : cardStacks) {
-            if (cardStack.getStackMaxDrawSize() > cardsNumber) {
-                cardsNumber = cardStack.getStackMaxDrawSize();
+        double cardWidth = 0;
+        double cardHeight = 0;
+        int biggestPossibleStack = 0;
+        for (CardStack stack : cardStacks) {
+            if (stack.maxStackSize > biggestPossibleStack) {
+                biggestPossibleStack = stack.maxStackSize;
             }
         }
 
+
         int maxRows = 1;
         for (int line = 0; line < maxRows; line++) {
-            cardWidth = ((getWidth() - xSpace * (cardStacks.size() * cardStackOffsetY)) * maxRows) / (cardStacks.size());
-            cardHeight = (int) (cardWidth / (2 / (double) 3));
-            if ((cardHeight * maxRows) + 2 * ySpace + maxRows * ySpace + maxRows * cardStackOffsetY > this.getHeight()) {
-                cardHeight = (getHeight() - ySpace * (maxRows + 1) - maxRows * cardStackOffsetY) / maxRows;
-                cardWidth = (int) (cardHeight * (2 / (double) 3));
+            cardWidth = (getWidth() - (cardStacks.size() + 1) * (xSpace + biggestPossibleStack * CardStack.X_CARD_OFFSET)) / (double) cardStacks.size();
+            cardHeight = (cardWidth / (2 / 3.0));
+            if ((cardHeight * maxRows) + (1 + maxRows) * (ySpace + biggestPossibleStack + CardStack.Y_CARD_OFFSET) > this.getHeight()) {
+                cardHeight = (getHeight() - (maxRows + 1) * (ySpace + biggestPossibleStack * CardStack.Y_CARD_OFFSET)) / (double) maxRows;
+                cardWidth = (cardHeight * (2 / 3.0));
                 break;
             }
             if (((maxRows + 1) * cardHeight + 3 * ySpace) < getHeight()) {
@@ -84,16 +74,14 @@ public class CardStackArea extends GameComponent {
 
         boolean layout_changed = (cardStacks.size() == 0) || (cardWidth != cardStacks.get(0).getCardSize().getWidth()) || (cardHeight != cardStacks.get(0).getCardSize().getHeight());
 
-        //Karten können über die Kante Gucken, dann müssen wir den Parent an der Stelle neu malen. Wir wollen nicht jeden stack rendern, sondern berechnen die ganze fläche die aus der area rausguckt
-
         int row = 0;
         int col = 0;
         for (CardStack cardStack : cardStacks) {
-            int posX = getX() + xSpace + col * (cardWidth + xSpace);
-            int posY = getY() + ySpace + row * (cardHeight + ySpace);
+            int posX = (int) (getX() + xSpace + col * (cardWidth + xSpace) + (col) * biggestPossibleStack * CardStack.X_CARD_OFFSET);
+            int posY = (int) (getY() + ySpace + row * (cardHeight + ySpace) + (row) * biggestPossibleStack * CardStack.Y_CARD_OFFSET);
 
             cardStack.setPosition(posX, posY);
-            cardStack.setSize(cardWidth, cardHeight);
+            cardStack.setCardSize((int) cardWidth, (int) cardHeight);
 
             if (++row % maxRows == 0) {
                 col++;
@@ -132,15 +120,24 @@ public class CardStackArea extends GameComponent {
         if (!Game.isRunning()) return;
         for (int i = getChildren().size() - 1; i >= 0; i--) {
             GameComponent child = getChildren().get(i);
-            // verringert draw timing, aber dann dürfen sich die stacks nicht überlappen, sonst siehts doof aus
-             if (g.getClip() == null || g.getClip().intersects(child.getClip()))
+            if (g.getClip() == null || g.getClip().intersects(child.getClip()))
                 child.paint(g.create().setClip(child.getClip()));
-            // langsamer sieht aber besser aus
-//            child.paint(g.create().setClip(null));
         }
     }
 
     public List<CardStack> getStacks() {
         return cardStacks;
+    }
+
+    public void removeEmptyStacks() {
+        ArrayList<CardStack> stacksToRemove = new ArrayList<>();
+        for (CardStack cardStack : cardStacks) {
+            if (cardStack.getStackSize() == 0) {
+                stacksToRemove.add(cardStack);
+            }
+        }
+        for (CardStack cardStack : stacksToRemove) {
+            removeStack(cardStack);
+        }
     }
 }

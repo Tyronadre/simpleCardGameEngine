@@ -5,7 +5,6 @@ import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.game.Game;
 
 import java.awt.*;
-import java.awt.event.*;
 import java.util.List;
 import java.util.*;
 import java.util.function.Predicate;
@@ -192,6 +191,7 @@ public abstract class CardStack extends GameComponent {
         if (test(card)) {
             cards.add(pos, card);
             card.setSize(getCardSize());
+            add(card);
             repaint();
             return true;
         }
@@ -376,44 +376,6 @@ public abstract class CardStack extends GameComponent {
         return new Dimension(super.getWidth(), super.getHeight());
     }
 
-    public void addMouseMotionListener(MouseMotionListener mouseMotionListener) {
-        // TODO: 19.10.2022 addMouseMotionListener
-//        gameBoard.addMouseMotionListener(new MouseMotionListener() {
-//            @Override
-//            public void mouseDragged(MouseEvent e) {
-//                if (contains(e.getLocationOnScreen()))
-//                    mouseMotionListener.mouseDragged(e);
-//            }
-//
-//            @Override
-//            public void mouseMoved(MouseEvent e) {
-//                if (contains(e.getLocationOnScreen()))
-//                    mouseMotionListener.mouseMoved(e);
-//            }
-//        });
-    }
-
-    private void removeMouseMotionListener(MouseMotionAdapter topCardDraggableAdapter) {
-        // TODO: 19.10.2022 removeMouseMotionListener
-//        gameBoard.removeMouseMotionListener(topCardDraggableAdapter);
-    }
-
-
-    public void removeMouseListener(MouseListener mouseListener) {
-        // TODO: 19.10.2022 removeMouseListener
-//        gameBoard.removeMouseListener(mouseListener);
-    }
-
-    public void setTopCardDraggable(boolean b) {
-        // TODO: 19.10.2022 setTopCardDraggable
-        //  Init adapter for dragging
-//        if (b)
-//            gameBoard.addMouseListener(topCardDraggableAdapter);
-//        else
-//            gameBoard.removeMouseListener(topCardDraggableAdapter);
-
-    }
-
     @Override
     public String toString() {
         return "Stack{" +
@@ -428,9 +390,14 @@ public abstract class CardStack extends GameComponent {
         return cards;
     }
 
-    @Override
-    public void setSize(int width, int height) {
+    public void setCardSize(int width, int height) {
         super.setSize(width, height);
         cards.forEach(card -> card.setSize(width, height));
+    }
+
+    public void setSize(int width, int height) {
+        int newCardWidth = width - X_CARD_OFFSET * cards.size();
+        int newCardHeight = height - Y_CARD_OFFSET * cards.size();
+        setCardSize(newCardWidth, newCardHeight);
     }
 }

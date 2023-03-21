@@ -36,5 +36,11 @@ public class BasicCard extends Card {
         return cost;
     }
 
+    public CardClass getCardClass() {
+        return cardClass;
+    }
 
+    public CardType getCardType() {
+        return cardType;
+    }
 }

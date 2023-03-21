@@ -5,14 +5,11 @@ import de.henrik.engine.events.GameEvent;
 import de.henrik.engine.events.GameEventListener;
 import de.henrik.engine.events.SwitchGameBoardEvent;
 import de.henrik.engine.events.SwitchGameBoardListener;
-import de.henrik.implementation.boards.GameBoard;
 import de.henrik.implementation.game.Options;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.SynchronousQueue;
+import java.util.HashMap;
 
 public class Game extends JFrame {
 
@@ -130,7 +127,11 @@ public class Game extends JFrame {
         });
     }
 
-    public void waitForEventListener() {
-        gameEventThread.waitForListenerChange();
+    public void setWaitForEvent(boolean waitForEvent) {
+        gameEventThread.waitForEvent(waitForEvent);
+    }
+
+    public void forceEvent(GameEvent event) {
+        gameEventThread.forceEvent(event);
     }
 }

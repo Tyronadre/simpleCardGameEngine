@@ -33,7 +33,6 @@ abstract public class Board extends GameComponent {
     private GameImage backgroundImage;
     private List<ActionListener> onActivate;
     private List<ActionListener> onDeactivate;
-    private List<GameEventListener> gameListener;
     protected static final Game game = Game.game;
 
 
@@ -42,7 +41,6 @@ abstract public class Board extends GameComponent {
         this.backgroundImage = backgroundImage;
         this.onActivate = new ArrayList<>();
         this.onDeactivate = new ArrayList<>();
-        this.gameListener = new ArrayList<>();
     }
 
     public void setBackgroundImage(GameImage backgroundImage) {
@@ -127,13 +125,11 @@ abstract public class Board extends GameComponent {
     }
 
     public void event(GameEvent event) {
-//        List<GameEventListener> gameEventListenersCopy = List.copyOf(gameListener);
-//        System.out.println("Listener: " + gameEventListenersCopy);
-//        for (GameEventListener gameEventListener : gameEventListenersCopy) {
-//            gameEventListener.handleEvent(event);
-//        }
         Game.game.event(event);
+    }
 
+    public void forceEvent(GameEvent event) {
+        Game.game.forceEvent(event);
     }
 }
 

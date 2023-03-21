@@ -53,7 +53,7 @@ public class PlayerPaneImpl extends PlayerPane {
 
         // --- PLAYER CARDS --- //
         Pane playerCardsPane = new Pane(new GameImage("/background/cardsBackground.png",true), getX() + getWidth() / 4 + 5, getY(), getWidth() / 4 * 3 - 5, getHeight());
-        ownedCards = new SelfStackingCardStackArea(-1, 5, 5,300,200);
+        ownedCards = new SelfStackingCardStackArea(-1, 5, 5);
         ownedCards.setPosition(playerCardsPane.getPosition());
         ownedCards.setSize(playerCardsPane.getSize());
         playerCardsPane.add(ownedCards);

@@ -14,7 +14,8 @@ public class GameEventThread extends Thread {
     private final ReentrantReadWriteLock eventListenerLock = new ReentrantReadWriteLock();
     private final List<GameEventListener> eventListeners;
     private final ArrayBlockingQueue<GameEvent> eventQueue;
-    private boolean waitForListener;
+    boolean waitForEvent;
+
 
     public GameEventThread() {
         this.eventQueue = new ArrayBlockingQueue<>(10);
@@ -23,16 +24,25 @@ public class GameEventThread extends Thread {
         this.start();
     }
 
+    public void waitForEvent(boolean b) {
+        waitForEvent = b;
+    }
+
 
     @Override
     public void run() {
         System.out.println("Game Event Thread Started");
+        long lastTime = System.currentTimeMillis();
         while (true) {
             try {
-//                if (!waitForListener) {
+                if (!waitForEvent) {
                     handleEvent(eventQueue.take());
-//                    waitForListener = false;
-//                }
+                } else {
+                    if (lastTime + 500 < System.currentTimeMillis()) {
+                        lastTime = System.currentTimeMillis();
+                        System.out.println(eventQueue);
+                    }
+                }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -45,7 +55,6 @@ public class GameEventThread extends Thread {
         var eventListenerCopy = new ArrayList<>(eventListeners);
         eventListenerLock.writeLock().unlock();
         try {
-//            System.out.println("Handling event " + event + " with: \n " + eventListeners);
             for (GameEventListener gameEventListener : eventListenerCopy)
                 gameEventListener.handleEvent(event);
         } finally {
@@ -57,62 +66,26 @@ public class GameEventThread extends Thread {
     public synchronized void submitEvent(GameEvent event) {
         try {
             eventQueue.put(event);
-//            System.out.println("Received Event " + event);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void addListener(GameEventListener gameEventListener) {
-//        Thread thread = new Thread(() -> {
-//            eventListenerLock.readLock().lock();
-//            System.out.println(eventListenerLock + " for " + gameEventListener);
-//            try {
-//                this.eventListeners.add(gameEventListener);
-//                System.out.println("Added Listener " + gameEventListener);
-//            } finally {
-//                eventListenerLock.readLock().unlock();
-//            }
-//        });
-//        thread.start();
         this.eventListeners.add(gameEventListener);
 
 
     }
 
     public void removeListener(GameEventListener gameEventListener) {
-//        Thread thread = new Thread(() -> {
-//            eventListenerLock.readLock().lock();
-//            try {
-//                this.eventListeners.remove(gameEventListener);
-//                System.out.println("Removed Listener " + gameEventListener);
-//            } finally {
-//                eventListenerLock.readLock().unlock();
-//            }
-//        });
-//        thread.start();
         this.eventListeners.remove(gameEventListener);
-
     }
 
     public void removeAllListener() {
-//        new Thread(() -> {
-//            eventListenerLock.writeLock().lock();
-//            try {
-//                System.out.println("Removed Listener " + eventListeners);
-//                this.eventListeners.clear();
-//            } finally {
-//                eventListenerLock.writeLock().unlock();
-//            }
-//        }).start();
         this.eventListeners.clear();
-
     }
 
-    /**
-     * If this function is called the next event in the queue will be called after all staged event listener are handled
-     */
-    public void waitForListenerChange() {
-        this.waitForListener = true;
+    public void forceEvent(GameEvent event) {
+        handleEvent(event);
     }
 }

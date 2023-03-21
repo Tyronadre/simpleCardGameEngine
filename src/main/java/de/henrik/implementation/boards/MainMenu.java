@@ -15,7 +15,7 @@ public class MainMenu extends Board {
 
 
     public MainMenu() {
-        super(new GameImage("/background/mainMenu.jpg").getScaledInstance(Options.getWidth(),Options.getHeight()));
+        super(new GameImage("/background/mainMenu.jpg").getScaledInstance(Options.getWidth(), Options.getHeight()));
 
         // Player Names
         Label p1 = new Label("Player 1:", 100 + BUTTON_WIDTH + 100, 200, 200, 50);
@@ -31,7 +31,7 @@ public class MainMenu extends Board {
         p3Tf.setVisible(false);
         p4Tf.setVisible(false);
 
-        Label[] playerLabel = new Label[] {p1,p2,p3,p4};
+        Label[] playerLabel = new Label[]{p1, p2, p3, p4};
         TextField[] playerTextField = new TextField[]{p1Tf, p2Tf, p3Tf, p4Tf};
         add(p1);
         add(p2);
@@ -59,8 +59,8 @@ public class MainMenu extends Board {
         addPlayer.addActionListener(e -> {
             System.out.println("Add Player");
             if (increasePlayerCount()) {
-                playerLabel[playerCount-1].setVisible(true);
-                playerTextField[playerCount-1].setVisible(true);
+                playerLabel[playerCount - 1].setVisible(true);
+                playerTextField[playerCount - 1].setVisible(true);
             }
         });
 
@@ -74,29 +74,29 @@ public class MainMenu extends Board {
         });
 
 
-        Pane enabledE1 = new Pane(new GameImage("other/disabled"),50, 500,50,50);
+        Pane enabledE1 = new Pane(new GameImage("/other/disabled.png"), 50, 500, 50, 50);
         Button enableE1 = new Button("Toggle Expansion-Pack 1", 100, 500, BUTTON_WIDTH, 50);
         enableE1.addActionListener(e -> {
             System.out.println("toggle e1");
             if (Options.expansion1Selected) {
-                enabledE1.setBackground(new GameImage("other/enabled"));
+                enabledE1.setBackground(new GameImage("/other/disabled.png"));
                 Options.expansion1Selected = false;
             } else {
-                enabledE1.setBackground(new GameImage("other/disabled"));
+                enabledE1.setBackground(new GameImage("/other/enabled.png"));
                 Options.expansion1Selected = true;
             }
         });
 
-        Pane enabledE2 = new Pane(new GameImage("other/disabled"),50,600,50,50);
+        Pane enabledE2 = new Pane(new GameImage("/other/disabled.png"), 50, 600, 50, 50);
         Button enableE2 = new Button("Toggle Expansion-Pack 2", 100, 600, BUTTON_WIDTH, 50);
         enableE2.addActionListener(e -> {
             System.out.println("toggle e2");
-            if (Options.expansion1Selected) {
-                enabledE2.setBackground(new GameImage("other/enabled"));
-                Options.expansion1Selected = false;
+            if (Options.expansion2Selected) {
+                enabledE2.setBackground(new GameImage("/other/disabled.png"));
+                Options.expansion2Selected = false;
             } else {
-                enabledE2.setBackground(new GameImage("other/disabled"));
-                Options.expansion1Selected = true;
+                enabledE2.setBackground(new GameImage("/other/enabled.png"));
+                Options.expansion2Selected = true;
             }
         });
 
@@ -121,16 +121,14 @@ public class MainMenu extends Board {
         if (playerCount > 2) {
             playerCount--;
             return true;
-        } else
-            return false;
+        } else return false;
     }
 
     private boolean increasePlayerCount() {
         if (playerCount < 4) {
             playerCount++;
             return true;
-        } else
-            return false;
+        } else return false;
     }
 
 

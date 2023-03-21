@@ -6,8 +6,8 @@ import de.henrik.implementation.card.playingcard.PlayingCard;
 import de.henrik.implementation.card.stack.BasicCardStack;
 
 public class SelfStackingCardStackArea extends CardStackArea {
-    public SelfStackingCardStackArea(int maxNumberOfStack, int xSpace, int ySpace, int maxCardHeight, int maxCardWidth) {
-        super(maxNumberOfStack, xSpace, ySpace, maxCardHeight,maxCardWidth);
+    public SelfStackingCardStackArea(int maxNumberOfStack, int xSpace, int ySpace) {
+        super(maxNumberOfStack, xSpace, ySpace);
     }
 
 
@@ -20,7 +20,7 @@ public class SelfStackingCardStackArea extends CardStackArea {
             }
         }
         if (notAdded) {
-            CardStack stack = new BasicCardStack("s", playingCard, -1);
+            CardStack stack = new BasicCardStack("s", playingCard, 7);
             this.addStack(stack);
             stack.moveCardToStack(playingCard);
         }

@@ -72,7 +72,6 @@ abstract public class Card extends GameComponent {
      * @param g the Graphics
      */
     @Override
-
     public void paint(GameGraphics g) {
         if (!Game.isRunning())
             return;
@@ -90,7 +89,8 @@ abstract public class Card extends GameComponent {
             g.drawImage(backOfCard.getImage(), x, y);
 
         g.setColor(Color.BLACK);
-        g.getGraphics().drawRoundRect(x, y, w, h, ARC_SIZE, ARC_SIZE); //paint border
+        g.getGraphics().drawRoundRect(x, y, w, h, ARC_SIZE, ARC_SIZE);
+        super.paint(g);
     }
 
     public void setPaintFront(boolean paintFront) {

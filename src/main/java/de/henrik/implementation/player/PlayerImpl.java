@@ -27,7 +27,7 @@ public class PlayerImpl extends Player {
 
     public PlayerImpl(int id, String name) {
         super(id, name);
-        coins = 5;
+        coins = 5000;
         loadLandmarks();
         playerPane = new PlayerPaneImpl(this);
     }
@@ -142,5 +142,9 @@ public class PlayerImpl extends Player {
 
     public void removeBorders() {
         getPlayerPane().removeBorders();
+    }
+
+    public void removeEmptyStacks() {
+        getPlayerPane().ownedCards.removeEmptyStacks();
     }
 }

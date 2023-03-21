@@ -19,4 +19,6 @@ public class PlayingCard extends BasicCard {
     public void event(CardEvent event) {
         eventListener.consume(event);
     }
+
+
 }

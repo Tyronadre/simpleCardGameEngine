@@ -24,7 +24,7 @@ public class BasicCardStack extends CardStack {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (largeCard == null && getCard() != null) {
+                if (e.getButton()== MouseEvent.BUTTON3 && largeCard == null && getCard() != null) {
                     largeCard = new Pane(getRenderPolicy() == RP_ALL_CARDS_UNTURNED ? getCard().getBackOfCard() : getCard().getFrontOfCard(),
                             Options.getWidth() / 5,
                             Options.getHeight() / 50,
@@ -33,7 +33,7 @@ public class BasicCardStack extends CardStack {
                     largeCard.setVisible(false);
                     Game.game.getActiveGameBoard().add(largeCard);
                 }
-                if (largeCard != null && !visibleBefore && !((GameBoard)Game.game.getActiveGameBoard()).isCardDragged()) {
+                if (e.getButton()== MouseEvent.BUTTON3 && largeCard != null && !visibleBefore && !((GameBoard)Game.game.getActiveGameBoard()).isCardDragged()) {
                     largeCard.setVisible(true);
                     visibleBefore = false;
                     Game.game.getActiveGameBoard().addMouseListener(new GameMouseListenerAdapter() {
@@ -41,12 +41,15 @@ public class BasicCardStack extends CardStack {
                         public void mousePressed(MouseEvent e) {
                             if (largeCard != null) {
                                 largeCard.setVisible(false);
-                                visibleBefore = true;
+                                if (pointInside(e.getLocationOnScreen())) {
+                                    visibleBefore = true;
+                                }
                             }
+
                             Game.game.getActiveGameBoard().removeMouseListener(this);
                         }
                     });
-                } else if (largeCard != null) {
+                } else if (e.getButton()== MouseEvent.BUTTON3 && largeCard != null) {
                     visibleBefore = false;
                 }
             }

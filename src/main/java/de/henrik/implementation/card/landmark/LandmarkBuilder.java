@@ -1,7 +1,6 @@
 package de.henrik.implementation.card.landmark;
 
 import de.henrik.engine.base.GameImage;
-import de.henrik.engine.card.Card;
 import de.henrik.implementation.card.playingcard.CardClass;
 import de.henrik.implementation.card.playingcard.CardType;
 import de.henrik.implementation.card.playingcard.PlayingCardBuilder;
@@ -22,17 +21,17 @@ public class LandmarkBuilder {
             while ((l = reader.readLine()) != null) {
                 try {
                     var line = l.split(",");
-                    if (line.length != 4) {
+                    if (line.length != 2) {
                         System.err.println("Could not parse line, skipping: " + Arrays.toString(line));
                         continue;
                     }
                     landmarks.add(new Landmark(
                             Integer.parseInt(line[0]),
                             Integer.parseInt(line[1]),
-                            CardClass.LANDMARK,
+                            CardClass.PLANET,
                             CardType.LANDMARK,
-                            new GameImage("/cards/" + line[2]),
-                            new GameImage("/cards/" + line[3])
+                            new GameImage("/cards/" + line[0] + "_f.png"),
+                            new GameImage("/cards/" + line[0] + "_b.png")
                     ));
                 } catch (RuntimeException e) {
                     System.err.println("Failed to load card: " + l);

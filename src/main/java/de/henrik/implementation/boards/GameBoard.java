@@ -1,10 +1,12 @@
 package de.henrik.implementation.boards;
 
+import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
 import de.henrik.engine.events.GameEvent;
 import de.henrik.engine.events.GameEventListener;
+import de.henrik.engine.events.GameMouseListenerAdapter;
 import de.henrik.engine.game.*;
 import de.henrik.implementation.GameEvent.*;
 import de.henrik.implementation.card.playingcard.PlayingCard;
@@ -14,7 +16,9 @@ import de.henrik.implementation.game.Options;
 import de.henrik.implementation.player.PlayerImpl;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -57,11 +61,15 @@ public class GameBoard extends Board {
     private GameEventListener onDiceRollListener() {
         return event -> {
             if (event instanceof DiceRollEvent diceRollEvent && gameState == ROLL_DICE_STATE) {
+                drawStacks.dice.disable();
+                drawStacks.dice.setBorder(null);
+                drawStacks.twoDice.disable();
+                drawStacks.twoDice.setBorder(null);
                 for (int i = 0; i < Options.getPlayerCount(); i++) {
                     PlayerImpl player = players.get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
                     for (Card c : player.getCardList()) {
                         PlayingCard card = (PlayingCard) c;
-                        card.event(new CardEvent(player, activePlayer, diceRollEvent.roll, this));
+                        card.event(new CardEvent(player, activePlayer, diceRollEvent.roll, this, c));
                     }
                     player.getPlayerPane().repaint();
                 }
@@ -103,17 +111,44 @@ public class GameBoard extends Board {
     private GameEventListener onChoiceListener() {
         return event -> {
             if (event instanceof ChoiceEvent choiceEvent) {
+                Game.game.setWaitForEvent(true);
+                HashMap<PlayerImpl,List<GameComponent>> selectableComponents = new HashMap<>();
                 for (PlayerImpl player : players) {
+                    selectableComponents.put(player, new ArrayList<>());
                     if (choiceEvent.type.test(player.getPlayerPane())) {
-                        player.getPlayerPane().setBorder(new Border(Color.GREEN, true, 3, player.getPlayerPane(), 3));
-
+                        selectableComponents.get(player).add(player.getPlayerPane());
+                        player.getPlayerPane().setBorder(new Border(Color.GREEN, true, 3, 3));
+                        player.getPlayerPane().repaint();
                     }
                     for (CardStack cardStack : player.getCardStacks()) {
                         if (choiceEvent.type.test(cardStack)) {
-                            cardStack.setBorder(new Border(Color.GREEN, true, 3, cardStack, 3));
+                            selectableComponents.get(player).add(cardStack);
+                            cardStack.setBorder(new Border(Color.GREEN, true, 3, 3));
+                            cardStack.repaint();
                         }
                     }
                 }
+
+                addMouseListener(new GameMouseListenerAdapter(){
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        for (PlayerImpl player : selectableComponents.keySet()) {
+                            for (GameComponent component : selectableComponents.get(player)) {
+                                if (component.pointInside(e.getPoint())) {
+                                    selectableComponents.values().forEach(componentList -> componentList.forEach(component1 -> {
+                                        component1.setBorder(null);
+                                        component1.repaint();
+                                    }));
+
+                                    removeMouseListener(this);
+                                    choiceEvent.selected.consume(new ChoiceSelectedEvent(component,player));
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                });
+
             }
         };
     }
@@ -136,7 +171,7 @@ public class GameBoard extends Board {
                     case ROLL_DICE_STATE -> {
                         drawStacks.dice.setBorder(new Border(Color.GREEN, true, 2, drawStacks.dice, 3));
                         drawStacks.dice.enable();
-                        if (activePlayer.hasLandmark(0)) {
+                        if (activePlayer.hasLandmark(16)) {
                             drawStacks.twoDice.setBorder(new Border(Color.GREEN, true, 2, drawStacks.twoDice, 3));
                             drawStacks.twoDice.enable();
                         }
@@ -144,10 +179,6 @@ public class GameBoard extends Board {
                     }
                     case BUY_CARD_STATE -> {
                         drawStacks.skipTurn.enable();
-                        drawStacks.dice.disable();
-                        drawStacks.dice.setBorder(null);
-                        drawStacks.twoDice.disable();
-                        drawStacks.twoDice.setBorder(null);
                         activePlayer.updateGameBoard(this);
                     }
                 }

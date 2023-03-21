@@ -1,15 +1,14 @@
 package de.henrik.implementation.card.playingcard;
 
 public enum CardClass {
-    WHEAT,
-    COW,
-    GEAR,
-    BREAD,
-    FACTORY,
-    FRUIT,
-    CUP,
-    MAJOR,
-    SHIP,
-    SUITCASE,
-    LANDMARK
+    ASTEROID,
+    SPACE_FARM,
+    SPACE_HARBOR,
+    SPACE_SHOP,
+    SPACE_FACTORY,
+    SUPPLY_FACTORY,
+    SPACE_STATION,
+    SPACE_SHIP,
+    SPACE_OFFICE,
+    PLANET
 }
