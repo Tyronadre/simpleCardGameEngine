@@ -22,40 +22,12 @@ public class DraggableCardStack extends BasicCardStack {
         super(name, allowedCardType, maxStackSize);
         GameBoard gameBoard = (GameBoard) Game.game.getGameBoard();
         addMouseListener(new GameMouseListenerAdapter() {
-            boolean pressed = true;
+            boolean pressed = false;
             int oldRenderPolicy;
-            Pane largeCard = null;
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (largeCard == null && getCard() != null) {
-                    largeCard = new Pane(getRenderPolicy() == RP_ALL_CARDS_UNTURNED ? getCard().getBackOfCard() : getCard().getFrontOfCard(),
-                            Options.getWidth() / 50,
-                            Options.getHeight() / 50,
-                            1000,
-                            1500);
-                    gameBoard.add(largeCard);
-                }
-                largeCard.setVisible(true);
-                gameBoard.addMouseListener(new GameMouseListenerAdapter() {
-                    @Override
-                    public void mousePressed(MouseEvent e) {
-                        largeCard.setVisible(false);
-                        gameBoard.removeMouseListener(this);
-                    }
-                });
-            }
-
 
             @Override
             public void mouseReleasedAnywhere(MouseEvent e) {
                 pressed = false;
-
             }
 
             @Override

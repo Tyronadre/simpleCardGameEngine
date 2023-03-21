@@ -59,7 +59,7 @@ public abstract class GameComponent {
         if (!Game.isRunning() || !visible) {
             return;
         }
-        synchronized (children){
+        synchronized (children) {
             for (GameComponent child : children) {
                 if (g.getClip() == null || g.getClip().intersects(child.getClip())) {
                     child.paint(g.create());
@@ -309,6 +309,13 @@ public abstract class GameComponent {
                 if (init == null) {
                     if (pointInside(e.getLocationOnScreen())) {
                         init = e.getLocationOnScreen();
+                        Game.game.addMouseListener(new MouseAdapter() {
+                            @Override
+                            public void mouseReleased(MouseEvent e) {
+                                Game.game.removeMouseListener(this);
+                                init = null;
+                            }
+                        });
                     }
                 } else if (init != e.getLocationOnScreen()) {
                     mouseListener.mouseDragged(e);
@@ -346,9 +353,12 @@ public abstract class GameComponent {
     }
 
     public void setVisible(boolean visible) {
-        this.visible = visible;
-        repaint();
+        if (this.visible != visible) {
+            this.visible = visible;
+            repaint();
+        }
     }
+
 
     public void setBorder(Border border) {
         this.border = border;
@@ -360,5 +370,9 @@ public abstract class GameComponent {
 
     public void setParent(GameComponent parent) {
         this.parent = parent;
+    }
+
+    public boolean getVisible() {
+        return visible;
     }
 }
