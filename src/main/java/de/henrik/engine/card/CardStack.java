@@ -192,7 +192,6 @@ public abstract class CardStack extends GameComponent {
             cards.add(pos, card);
             card.setSize(getCardSize());
             add(card);
-            repaint();
             return true;
         }
         return false;

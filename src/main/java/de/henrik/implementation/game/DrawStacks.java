@@ -41,7 +41,6 @@ public class DrawStacks extends GameComponent {
         startCards.shuffel();
         startCards.setDrawStackSizeHint(true);
         drawStacks = new CardStackArea(drawStacksMaxCount, 5, 5);
-        drawStacks.setBorder(new Border(Color.RED,false,1,0));
 
         dice = new Button(new GameImage("/other/dice.png"));
         dice.disable();

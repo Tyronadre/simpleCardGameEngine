@@ -52,7 +52,7 @@ public class CardStackArea extends GameComponent {
 
         int maxRows = 1;
         for (int line = 0; line < maxRows; line++) {
-            cardWidth = (getWidth() - (cardStacks.size() + 1) * (xSpace + biggestPossibleStack * CardStack.X_CARD_OFFSET)) / (double) cardStacks.size();
+            cardWidth = (getWidth() - (cardStacks.size() + 1) * (xSpace + biggestPossibleStack * CardStack.X_CARD_OFFSET)) * maxRows/ (double) cardStacks.size();
             cardHeight = (cardWidth / (2 / 3.0));
             if ((cardHeight * maxRows) + (1 + maxRows) * (ySpace + biggestPossibleStack + CardStack.Y_CARD_OFFSET) > this.getHeight()) {
                 cardHeight = (getHeight() - (maxRows + 1) * (ySpace + biggestPossibleStack * CardStack.Y_CARD_OFFSET)) / (double) maxRows;
@@ -72,7 +72,7 @@ public class CardStackArea extends GameComponent {
             cardWidth = (int) (cardHeight * (2 / (double) 3));
         }
 
-        boolean layout_changed = (cardStacks.size() == 0) || (cardWidth != cardStacks.get(0).getCardSize().getWidth()) || (cardHeight != cardStacks.get(0).getCardSize().getHeight());
+//        boolean layout_changed = (cardStacks.size() == 0) || (cardWidth != cardStacks.get(0).getCardSize().getWidth()) || (cardHeight != cardStacks.get(0).getCardSize().getHeight());
 
         int row = 0;
         int col = 0;
