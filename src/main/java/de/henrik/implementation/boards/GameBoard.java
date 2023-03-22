@@ -9,6 +9,7 @@ import de.henrik.engine.events.GameEventListener;
 import de.henrik.engine.events.GameMouseListenerAdapter;
 import de.henrik.engine.game.*;
 import de.henrik.implementation.GameEvent.*;
+import de.henrik.implementation.card.playingcard.CardType;
 import de.henrik.implementation.card.playingcard.PlayingCard;
 import de.henrik.implementation.card.playingcard.PlayingCardBuilder;
 import de.henrik.implementation.game.DrawStacks;
@@ -67,12 +68,37 @@ public class GameBoard extends Board {
                 drawStacks.twoDice.setBorder(null);
                 for (int i = 0; i < Options.getPlayerCount(); i++) {
                     PlayerImpl player = players.get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
-                    for (Card c : player.getCardList()) {
+                    for (Card c : player.getCardList(CardType.SUPPLIER)) {
                         PlayingCard card = (PlayingCard) c;
                         card.event(new CardEvent(player, activePlayer, diceRollEvent.roll, this, c));
                     }
                     player.getPlayerPane().repaint();
                 }
+                for (int i = 0; i < Options.getPlayerCount(); i++) {
+                    PlayerImpl player = players.get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
+                    for (Card c : player.getCardList(CardType.PRIMARY_INDUSTRY)) {
+                        PlayingCard card = (PlayingCard) c;
+                        card.event(new CardEvent(player, activePlayer, diceRollEvent.roll, this, c));
+                    }
+                    player.getPlayerPane().repaint();
+                }
+                for (int i = 0; i < Options.getPlayerCount(); i++) {
+                    PlayerImpl player = players.get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
+                    for (Card c : player.getCardList(CardType.SECONDARY_INDUSTRY)) {
+                        PlayingCard card = (PlayingCard) c;
+                        card.event(new CardEvent(player, activePlayer, diceRollEvent.roll, this, c));
+                    }
+                    player.getPlayerPane().repaint();
+                }
+                for (int i = 0; i < Options.getPlayerCount(); i++) {
+                    PlayerImpl player = players.get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
+                    for (Card c : player.getCardList(CardType.MAYOR_ESTABLISHMENT)) {
+                        PlayingCard card = (PlayingCard) c;
+                        card.event(new CardEvent(player, activePlayer, diceRollEvent.roll, this, c));
+                    }
+                    player.getPlayerPane().repaint();
+                }
+
                 event(new GameStateChangeEvent(BUY_CARD_STATE));
             }
         };
@@ -82,8 +108,12 @@ public class GameBoard extends Board {
         return new GameEventListener() {
             @Override
             public void handleEvent(GameEvent event) {
-                if (event instanceof DraggingCardEvent draggingCardEvent && gameState == BUY_CARD_STATE) {
-                    System.out.println(draggingCardEvent);
+                if (event instanceof DraggingCardEvent draggingCardEvent) {
+                    if (gameState != BUY_CARD_STATE) {
+                        if (draggingCardEvent.endDragging)
+                            ((CardStack) event.getParent()).moveCardToStack(draggingCardEvent.card);
+                        return;
+                    }
                     PlayerImpl player = draggingCardEvent.player;
                     if (draggingCardEvent.startDragging && draggingCardEvent.card.getCost() <= player.getCoins()) {
                         player.getPlayerPane().setBorder(new Border(Color.GREEN, true, 3, player.getPlayerPane(), 3));
@@ -95,6 +125,8 @@ public class GameBoard extends Board {
                                 ((CardStack) draggingCardEvent.getParent()).removeCard();
                                 event(new GameStateChangeEvent(NEW_PLAYER_STATE));
                             }
+                        } else {
+                            ((CardStack) event.getParent()).moveCardToStack(draggingCardEvent.card);
                         }
                         player.getPlayerPane().repaint();
                     }
@@ -112,7 +144,7 @@ public class GameBoard extends Board {
         return event -> {
             if (event instanceof ChoiceEvent choiceEvent) {
                 Game.game.setWaitForEvent(true);
-                HashMap<PlayerImpl,List<GameComponent>> selectableComponents = new HashMap<>();
+                HashMap<PlayerImpl, List<GameComponent>> selectableComponents = new HashMap<>();
                 for (PlayerImpl player : players) {
                     selectableComponents.put(player, new ArrayList<>());
                     if (choiceEvent.type.test(player.getPlayerPane())) {
@@ -129,7 +161,7 @@ public class GameBoard extends Board {
                     }
                 }
 
-                addMouseListener(new GameMouseListenerAdapter(){
+                addMouseListener(new GameMouseListenerAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
                         for (PlayerImpl player : selectableComponents.keySet()) {
@@ -141,7 +173,7 @@ public class GameBoard extends Board {
                                     }));
 
                                     removeMouseListener(this);
-                                    choiceEvent.selected.consume(new ChoiceSelectedEvent(component,player));
+                                    choiceEvent.selected.consume(new ChoiceSelectedEvent(component, player));
                                     return;
                                 }
                             }

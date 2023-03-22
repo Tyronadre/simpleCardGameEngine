@@ -11,11 +11,13 @@ import de.henrik.implementation.boards.GameBoard;
 import de.henrik.implementation.card.BasicCard;
 import de.henrik.implementation.card.landmark.Landmark;
 import de.henrik.implementation.card.landmark.LandmarkBuilder;
+import de.henrik.implementation.card.playingcard.CardType;
 import de.henrik.implementation.card.playingcard.PlayingCard;
 import de.henrik.implementation.game.Options;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Predicate;
@@ -108,7 +110,7 @@ public class PlayerImpl extends Player {
         // cardstacks
         for (CardStack stack : gameBoard.drawStacks.getCardStacks()) {
             Card topCard = stack.getCard();
-            if (((BasicCard) topCard).getCost() <= getCoins())
+            if (topCard != null && ((BasicCard) topCard).getCost() <= getCoins())
                 stack.setBorder(new Border(Color.GREEN, true, 2, stack, 5));
             else stack.setBorder(null);
         }
@@ -147,4 +149,17 @@ public class PlayerImpl extends Player {
     public void removeEmptyStacks() {
         getPlayerPane().ownedCards.removeEmptyStacks();
     }
+
+    public List<Card> getCardList(CardType type) {
+        List<Card> cardList = new ArrayList<>();
+        for (Card card : getCardList()) {
+            if (card instanceof PlayingCard) {
+                if (((PlayingCard) card).getCardType() == type) {
+                    cardList.add(card);
+                }
+            }
+        }
+        return cardList;
+    }
+
 }

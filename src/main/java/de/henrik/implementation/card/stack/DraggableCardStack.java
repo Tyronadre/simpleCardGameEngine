@@ -1,17 +1,12 @@
 package de.henrik.implementation.card.stack;
 
-import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
-import de.henrik.engine.components.Label;
-import de.henrik.engine.components.Pane;
-import de.henrik.engine.events.GameEvent;
 import de.henrik.engine.events.GameMouseListenerAdapter;
 import de.henrik.engine.game.Game;
 import de.henrik.implementation.GameEvent.DraggingCardEvent;
 import de.henrik.implementation.boards.GameBoard;
 import de.henrik.implementation.card.playingcard.PlayingCard;
-import de.henrik.implementation.game.Options;
 import de.henrik.implementation.player.PlayerImpl;
 
 import java.awt.*;
@@ -71,7 +66,6 @@ public class DraggableCardStack extends BasicCardStack {
                             setRenderPolicy(CardStack.RP_TOP_CARD_TURNED);
                         }
                         setStackMaxDrawSize(getStackMaxDrawSize() + 1);
-                        moveCardToStack(draggedCard);
                         gameBoard.setCardDragged(null);
 
                         DraggingCardEvent cardEventEnd = new DraggingCardEvent(DraggableCardStack.this, draggedCard, (PlayerImpl) Game.game.getActivePlayer());

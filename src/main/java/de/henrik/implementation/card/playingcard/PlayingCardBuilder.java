@@ -39,7 +39,7 @@ public class PlayingCardBuilder {
                     PlayingCardBuilder cardBuilder = new PlayingCardBuilder().setID(Integer.parseInt(line[0])).setType(switch (Integer.parseInt(line[1])) {
                         case 1 -> CardType.PRIMARY_INDUSTRY;
                         case 2 -> CardType.SECONDARY_INDUSTRY;
-                        case 3 -> CardType.RESTAURANTS;
+                        case 3 -> CardType.SUPPLIER;
                         case 4 -> CardType.MAYOR_ESTABLISHMENT;
                         default -> throw new IllegalStateException("Unexpected value: " + line[2]);
                     }).setCardClass(switch (Integer.parseInt(line[2])) {
@@ -154,13 +154,61 @@ public class PlayingCardBuilder {
                         }));
                     }
                 };
+            case 10:
+                return event -> {
+                    if (event.roll == 7 && event.owner == event.activePlayer) {
+                        for (Card card : event.owner.getCardList()) {
+                            if (((PlayingCard) card).getCardClass() == CardClass.SPACE_FARM) {
+                                event.owner.addCoins(3);
+                            }
+                        }
+                    }
+                };
+            case 11:
+                return event -> {
+                    if (event.roll == 8 && event.owner == event.activePlayer) {
+                        for (Card card : event.owner.getCardList()) {
+                            if (((PlayingCard) card).getCardClass() == CardClass.SPACE_HARBOR) {
+                                event.owner.addCoins(3);
+                            }
+                        }
+                    }
+                };
+            case 12:
+                return event -> {
+                    if (event.roll == 9) {
+                        event.owner.addCoins(5);
+                    }
+                };
+            case 13:
+                return event -> {
+                    if (event.roll == 9 || event.roll == 10) {
+                        event.owner.addCoins(event.activePlayer.removeCoins(5));
+                    }
+                };
+            case 14:
+                return event -> {
+                    if (event.roll == 10) {
+                        event.owner.addCoins(3);
+                    }
+                };
+            case 15:
+                return event -> {
+                    if (event.roll == 11 || event.roll == 12) {
+                        for (Card card : event.owner.getCardList()) {
+                            if (((PlayingCard) card).getCardClass() == CardClass.ASTEROID) {
+                                event.owner.addCoins(2);
+                            }
+                        }
+                    }
+                };
 
             default:
-                return event -> {
-                    System.out.println("CARD " + id + " EVENT");
-
-                };
-//                throw new IllegalArgumentException("This id is not a valid Card ID: " + id);
+//                return event -> {
+//                    System.out.println("CARD " + id + " EVENT");
+//
+//                };
+                throw new IllegalArgumentException("This id is not a valid Card ID: " + id);
         }
     }
 
