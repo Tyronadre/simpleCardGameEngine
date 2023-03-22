@@ -36,7 +36,7 @@ public class Button extends GameComponent {
         GameMouseListener defaultHandler = new GameMouseListenerAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (board.active && state != state_DISABLED && e.getButton() == MouseEvent.BUTTON1) {
+                if (board != null && board.active && state != state_DISABLED && e.getButton() == MouseEvent.BUTTON1) {
                     state = state_CLICKED;
                     repaint(getClip());
                     for (var actionListener : actionListeners) {
@@ -47,7 +47,7 @@ public class Button extends GameComponent {
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                if (board.active && state != state_DISABLED) {
+                if (board != null && board.active && state != state_DISABLED) {
                     state = state_HOVERED;
                     repaint(getClip());
                 }
@@ -55,7 +55,7 @@ public class Button extends GameComponent {
 
             @Override
             public void mouseExited(MouseEvent e) {
-                if (board.active && state != state_DISABLED) {
+                if (board != null && board.active && state != state_DISABLED) {
                     state = state_DEFAULT;
                     repaint(getClip());
                 }

@@ -76,11 +76,6 @@ public class PlayerImpl extends Player {
         System.out.println("Player " + getName() + " has " + this.coins + " coins left.");
     }
 
-    @Override
-    public Predicate<Card> isActiveCard() {
-        return null;
-    }
-
     public boolean addCard(PlayingCard card) {
         if (coins < card.getCost()) {
             return false;
