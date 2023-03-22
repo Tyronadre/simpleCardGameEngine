@@ -1,20 +1,15 @@
 package de.henrik.engine.game;
 
-import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.Card;
-import de.henrik.engine.components.Label;
-import de.henrik.engine.components.Pane;
-import de.henrik.implementation.game.Options;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
 abstract public class Player {
-    protected int id;
-    String name;
-    protected List<Card> cardList;
+    protected final int id;
+    final String name;
+    protected final List<Card> cardList;
 
     protected PlayerPane playerPane;
 
@@ -27,8 +22,6 @@ abstract public class Player {
     public PlayerPane getPlayerPane() {
         return playerPane;
     }
-
-    abstract public Predicate<Card> isActiveCard();
 
     public int getId() {
         return id;

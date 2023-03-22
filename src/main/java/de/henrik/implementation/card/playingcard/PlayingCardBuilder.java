@@ -71,150 +71,133 @@ public class PlayingCardBuilder {
     private static CardEventListener getEventListener(int id) {
 
         // TODO: 18.01.2023 implement card actions
-        switch (id) {
-            case 1:
-                return event -> {
-                    if (event.roll == 1) {
-                        event.owner.addCoins(1);
-                    }
-                };
-            case 2:
-                return event -> {
-                    if (event.roll == 2) {
-                        event.owner.addCoins(2);
-                    }
-                };
-            case 3:
-                return event -> {
-                    if ((event.roll == 2 || event.roll == 3) && event.activePlayer == event.owner) {
-                        if (event.owner.hasLandmark(17)) event.owner.addCoins(2);
-                        else event.owner.addCoins(1);
-                    }
-                };
-            case 4:
-                return event -> {
-                    if (event.roll == 3 && event.activePlayer != event.owner) {
-                        if (event.owner.hasLandmark(17)) event.owner.addCoins(event.activePlayer.removeCoins(2));
-                        else event.owner.addCoins(event.activePlayer.removeCoins(1));
-                    }
-                };
-            case 5:
-                return event -> {
-                    if (event.roll == 4 && event.activePlayer == event.owner) {
-                        if (event.owner.hasLandmark(17)) event.owner.addCoins(4);
-                        else event.owner.addCoins(3);
-                    }
-                };
-            case 6:
-                return event -> {
-                    if (event.roll == 5) {
-                        event.owner.addCoins(3);
-                    }
-                };
-            case 7:
-                return event -> {
-                    if (event.roll == 6 && event.owner == event.activePlayer) {
-                        event.card.setBorder(new Border(Color.GREEN, false, 2, 3));
+        return switch (id) {
+            case 1 -> event -> {
+                if (event.roll == 1) {
+                    event.owner.addCoins(1);
+                }
+            };
+            case 2 -> event -> {
+                if (event.roll == 2) {
+                    event.owner.addCoins(1);
+                }
+            };
+            case 3 -> event -> {
+                if ((event.roll == 2 || event.roll == 3) && event.activePlayer == event.owner) {
+                    if (event.owner.hasLandmark(17)) event.owner.addCoins(2);
+                    else event.owner.addCoins(1);
+                }
+            };
+            case 4 -> event -> {
+                if (event.roll == 3 && event.activePlayer != event.owner) {
+                    if (event.owner.hasLandmark(17)) event.owner.addCoins(event.activePlayer.removeCoins(2));
+                    else event.owner.addCoins(event.activePlayer.removeCoins(1));
+                }
+            };
+            case 5 -> event -> {
+                if (event.roll == 4 && event.activePlayer == event.owner) {
+                    if (event.owner.hasLandmark(17)) event.owner.addCoins(4);
+                    else event.owner.addCoins(3);
+                }
+            };
+            case 6 -> event -> {
+                if (event.roll == 5) {
+                    event.owner.addCoins(1);
+                }
+            };
+            case 7 -> event -> {
+                if (event.roll == 6 && event.owner == event.activePlayer) {
+                    event.card.setBorder(new Border(Color.GREEN, false, 2, 3));
+                    event.card.repaint();
+                    Game.game.event(new ChoiceEvent(gameComponent -> gameComponent instanceof PlayerPaneImpl && gameComponent != event.activePlayer.getPlayerPane(), event1 -> {
+                        event.owner.addCoins(((PlayerPaneImpl) event1.selected).getPlayer().removeCoins(5));
+                        event.card.setBorder(null);
                         event.card.repaint();
-                        Game.game.event(new ChoiceEvent(gameComponent -> gameComponent instanceof PlayerPaneImpl && gameComponent != event.activePlayer.getPlayerPane(), event1 -> {
-                            event.owner.addCoins(((PlayerPaneImpl) event1.selected).getPlayer().removeCoins(5));
+                        Game.game.setWaitForEvent(false);
+                    }));
+
+                }
+            };
+            case 8 -> event -> {
+                if (event.roll == 6) {
+                    for (PlayerImpl player : event.gameBoard.getPlayers()) {
+                        if (player != event.owner) {
+                            event.owner.addCoins(player.removeCoins(2));
+                        }
+                    }
+                }
+            };
+            case 9 -> event -> {
+                if (event.roll == 8 && event.owner == event.activePlayer) {
+                    event.card.setBorder(new Border(Color.GREEN, false, 2, 3));
+                    event.card.repaint();
+                    Game.game.event(new ChoiceEvent(gameComponent -> gameComponent instanceof CardStack cardStack && !event.gameBoard.drawStacks.getCardStacks().contains(gameComponent) && event.owner.getCardStacks().contains(gameComponent) && cardStack.getCard() != null && ((BasicCard) cardStack.getCard()).getCardType() != CardType.MAYOR_ESTABLISHMENT, event1 -> {
+                        event1.selected.setBorder(new Border(Color.BLUE, false, 2, 3));
+                        event1.selected.repaint();
+                        Game.game.forceEvent(new ChoiceEvent(gameComponent -> gameComponent instanceof CardStack && !event.gameBoard.drawStacks.getCardStacks().contains(gameComponent) && !event.owner.getCardStacks().contains(gameComponent), event2 -> {
+                            event1.selected.setBorder(null);
+                            event1.selected.repaint();
                             event.card.setBorder(null);
                             event.card.repaint();
+                            event2.owner.addCard((PlayingCard) ((CardStack) event1.selected).removeCard());
+                            event.owner.addCard((PlayingCard) ((CardStack) event2.selected).removeCard());
+                            event2.owner.removeEmptyStacks();
+                            event1.owner.removeEmptyStacks();
                             Game.game.setWaitForEvent(false);
                         }));
+                    }));
+                }
+            };
+            case 10 -> event -> {
+                if (event.roll == 7 && event.owner == event.activePlayer) {
+                    for (Card card : event.owner.getCardList()) {
+                        if (((PlayingCard) card).getCardClass() == CardClass.SPACE_FARM) {
+                            event.owner.addCoins(3);
+                        }
+                    }
+                }
+            };
+            case 11 -> event -> {
+                if (event.roll == 8 && event.owner == event.activePlayer) {
+                    for (Card card : event.owner.getCardList()) {
+                        if (((PlayingCard) card).getCardClass() == CardClass.SPACE_HARBOR) {
+                            event.owner.addCoins(3);
+                        }
+                    }
+                }
+            };
+            case 12 -> event -> {
+                if (event.roll == 9) {
+                    event.owner.addCoins(5);
+                }
+            };
+            case 13 -> event -> {
+                if (event.roll == 9 || event.roll == 10) {
+                    if (event.owner.hasLandmark(17)) event.owner.addCoins(event.activePlayer.removeCoins(2));
+                    else event.owner.addCoins(event.activePlayer.removeCoins(5));
+                }
+            };
+            case 14 -> event -> {
+                if (event.roll == 10) {
+                    event.owner.addCoins(3);
+                }
+            };
+            case 15 -> event -> {
+                if (event.roll == 11 || event.roll == 12) {
+                    for (Card card : event.owner.getCardList()) {
+                        if (((PlayingCard) card).getCardClass() == CardClass.ASTEROID) {
+                            if (event.owner.hasLandmark(17)) event.owner.addCoins(3);
+                            else event.owner.addCoins(2);
+                        }
+                    }
+                }
+            };
+            default -> event -> {
+                System.out.println("CARD " + id + " EVENT");
 
-                    }
-                };
-            case 8:
-                return event -> {
-                    if (event.roll == 6) {
-                        for (PlayerImpl player : event.gameBoard.getPlayer()) {
-                            if (player != event.owner) {
-                                event.owner.addCoins(player.removeCoins(2));
-                            }
-                        }
-                    }
-                };
-            case 9:
-                return event -> {
-                    if (event.roll == 8 && event.owner == event.activePlayer) {
-                        event.card.setBorder(new Border(Color.GREEN, false, 2, 3));
-                        event.card.repaint();
-                        Game.game.event(new ChoiceEvent(gameComponent -> gameComponent instanceof CardStack cardStack && !event.gameBoard.drawStacks.getCardStacks().contains(gameComponent) && event.owner.getCardStacks().contains(gameComponent) && cardStack.getCard() != null && ((BasicCard) cardStack.getCard()).getCardType() != CardType.MAYOR_ESTABLISHMENT, event1 -> {
-                            event1.selected.setBorder(new Border(Color.BLUE, false, 2, 3));
-                            event1.selected.repaint();
-                            Game.game.forceEvent(new ChoiceEvent(gameComponent -> gameComponent instanceof CardStack && !event.gameBoard.drawStacks.getCardStacks().contains(gameComponent) && !event.owner.getCardStacks().contains(gameComponent), event2 -> {
-                                event1.selected.setBorder(null);
-                                event1.selected.repaint();
-                                event.card.setBorder(null);
-                                event.card.repaint();
-                                event2.owner.addCard((PlayingCard) ((CardStack) event1.selected).removeCard());
-                                event.owner.addCard((PlayingCard) ((CardStack) event2.selected).removeCard());
-                                event2.owner.removeEmptyStacks();
-                                event1.owner.removeEmptyStacks();
-                                Game.game.setWaitForEvent(false);
-                            }));
-                        }));
-                    }
-                };
-            case 10:
-                return event -> {
-                    if (event.roll == 7 && event.owner == event.activePlayer) {
-                        for (Card card : event.owner.getCardList()) {
-                            if (((PlayingCard) card).getCardClass() == CardClass.SPACE_FARM) {
-                                event.owner.addCoins(3);
-                            }
-                        }
-                    }
-                };
-            case 11:
-                return event -> {
-                    if (event.roll == 8 && event.owner == event.activePlayer) {
-                        for (Card card : event.owner.getCardList()) {
-                            if (((PlayingCard) card).getCardClass() == CardClass.SPACE_HARBOR) {
-                                event.owner.addCoins(3);
-                            }
-                        }
-                    }
-                };
-            case 12:
-                return event -> {
-                    if (event.roll == 9) {
-                        event.owner.addCoins(5);
-                    }
-                };
-            case 13:
-                return event -> {
-                    if (event.roll == 9 || event.roll == 10) {
-                        if (event.owner.hasLandmark(17)) event.owner.addCoins(event.activePlayer.removeCoins(2));
-                        else event.owner.addCoins(event.activePlayer.removeCoins(5));
-                    }
-                };
-            case 14:
-                return event -> {
-                    if (event.roll == 10) {
-                        event.owner.addCoins(3);
-                    }
-                };
-            case 15:
-                return event -> {
-                    if (event.roll == 11 || event.roll == 12) {
-                        for (Card card : event.owner.getCardList()) {
-                            if (((PlayingCard) card).getCardClass() == CardClass.ASTEROID) {
-                                if (event.owner.hasLandmark(17)) event.owner.addCoins(3);
-                                else event.owner.addCoins(2);
-                            }
-                        }
-                    }
-                };
-
-            default:
-//                return event -> {
-//                    System.out.println("CARD " + id + " EVENT");
-//
-//                };
-                throw new IllegalArgumentException("This id is not a valid Card ID: " + id);
-        }
+            };
+//                throw new IllegalArgumentException("This id is not a valid Card ID: " + id);
+        };
     }
 
     public BasicCard build() {

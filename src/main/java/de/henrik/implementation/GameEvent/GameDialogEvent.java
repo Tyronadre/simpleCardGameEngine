@@ -7,14 +7,16 @@ public class GameDialogEvent extends GameEvent {
     private final String message;
     private final String[] answerOptions;
     private final Runnable[] answerRunnables;
+    private final boolean opaque;
 
-    public GameDialogEvent(GameComponent owner, String message, String[] answerOptions, Runnable[] answerRunnables) {
+    public GameDialogEvent(GameComponent owner, String message, String[] answerOptions, Runnable[] answerRunnables, boolean opaque) {
         super("GameDialogEvent", owner);
         if (answerOptions.length != answerRunnables.length)
             throw new IllegalArgumentException("answerOptions.length != answerRunnables.length");
         this.message = message;
         this.answerOptions = answerOptions;
         this.answerRunnables = answerRunnables;
+        this.opaque = opaque;
     }
 
     public String getMessage() {
@@ -27,5 +29,9 @@ public class GameDialogEvent extends GameEvent {
 
     public Runnable[] getAnswerRunnables() {
         return answerRunnables;
+    }
+
+    public boolean isOpaque() {
+        return opaque;
     }
 }

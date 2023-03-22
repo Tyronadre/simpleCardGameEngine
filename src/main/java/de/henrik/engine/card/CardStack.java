@@ -51,8 +51,7 @@ public abstract class CardStack extends GameComponent {
 
     final List<Card> cards;
     boolean drawStackSizeHint;
-    int stackMaxDrawSize = 5;
-
+    int stackMaxDrawSize;
 
 
     /**
@@ -68,10 +67,6 @@ public abstract class CardStack extends GameComponent {
      */
     public CardStack(String name, int renderPolicy, Predicate<Card> stackAllowed, Dimension size, Point pos, int maxStackSize) {
         super(pos, size);
-        //CheckArguments
-        // TODO: 15.11.2022 funktioniert aktuell nicht mit stacks die sich wiederholen bei drawstacks
-//        if (givenNames.contains(name))
-//            throw new IllegalArgumentException("This name was already used for a CardStack");
         if (0 > renderPolicy || renderPolicy > 2)
             throw new IllegalArgumentException("This is not a render policy");
         if (maxStackSize < -1)
@@ -87,10 +82,11 @@ public abstract class CardStack extends GameComponent {
         setSize(size);
         this.maxStackSize = maxStackSize;
         this.drawStackSizeHint = false;
-
-
-//        //Init draggable cards
-
+        if (maxStackSize != -1 && maxStackSize <= 5) {
+            stackMaxDrawSize = maxStackSize;
+        } else {
+            stackMaxDrawSize = 5;
+        }
     }
 
 
@@ -279,7 +275,7 @@ public abstract class CardStack extends GameComponent {
      */
     public void shuffel() {
         Collections.shuffle(cards);
-        paint(g);
+        repaint();
     }
 
     @Override
@@ -323,8 +319,8 @@ public abstract class CardStack extends GameComponent {
                     card.paint(g.create().setClip(card.getClip()));
                 }
             }
-            //Paint the hint (if we want it) with some magic numbers.
-            if (drawStackSizeHint && max < cards.size()) {
+            //Paint the hint (if we want it) with some magic numbers
+            if (drawStackSizeHint && cards.size() > 1) {
 
                 Point pos = getPosition();
                 int x = pos.x + max * (X_CARD_OFFSET - 1) + 8;

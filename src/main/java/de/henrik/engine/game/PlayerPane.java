@@ -1,6 +1,5 @@
 package de.henrik.engine.game;
 
-import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameImage;
 import de.henrik.engine.components.Pane;
 

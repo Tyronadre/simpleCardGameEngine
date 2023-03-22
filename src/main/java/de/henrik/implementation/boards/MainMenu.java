@@ -9,6 +9,8 @@ import de.henrik.engine.components.Pane;
 import de.henrik.engine.components.TextField;
 import de.henrik.implementation.game.Options;
 
+import java.awt.*;
+
 public class MainMenu extends Board {
     public static final int BUTTON_WIDTH = 750;
     int playerCount = 2;
@@ -21,11 +23,13 @@ public class MainMenu extends Board {
         Label p1 = new Label("Player 1:", 100 + BUTTON_WIDTH + 100, 200, 200, 50);
         Label p2 = new Label("Player 2:", 100 + BUTTON_WIDTH + 100, 300, 200, 50);
         Label p3 = new Label("Player 3:", 100 + BUTTON_WIDTH + 100, 400, 200, 50);
-        Label p4 = new Label("Player 4:", 100 + BUTTON_WIDTH + 100, 500, 200, 50);
+        Label p4 = new Label("Player 4:", 100 + BUTTON_WIDTH + 100, 500, 300, 50);
+        Label drawStacks = new Label("Draw Stacks:", 100 + BUTTON_WIDTH + 100, 600, 200, 50);
         TextField p1Tf = new TextField("p1", 100 + BUTTON_WIDTH + 100 + 200, 200, 300, 50);
         TextField p2Tf = new TextField("p2", 100 + BUTTON_WIDTH + 100 + 200, 300, 300, 50);
         TextField p3Tf = new TextField("p3", 100 + BUTTON_WIDTH + 100 + 200, 400, 300, 50);
         TextField p4Tf = new TextField("p4", 100 + BUTTON_WIDTH + 100 + 200, 500, 300, 50);
+        TextField drawStacksTf = new TextField("10", 100 + BUTTON_WIDTH + 100 + 300, 600, 300, 50);
         p3.setVisible(false);
         p4.setVisible(false);
         p3Tf.setVisible(false);
@@ -41,9 +45,11 @@ public class MainMenu extends Board {
         add(p2Tf);
         add(p3Tf);
         add(p4Tf);
+        add(drawStacks);
+        add(drawStacksTf);
 
 
-        Label title = new Label("Machi Koro", 50, 50, 1000, 80);
+        Label title = new Label("Solar System Rush", 50, 50, 1000, 80);
 
         Button startGame = new Button("StartGame", 100, 200, BUTTON_WIDTH, 50);
         startGame.addActionListener(e -> {
@@ -52,27 +58,49 @@ public class MainMenu extends Board {
             Options.player2Name = p2Tf.getText();
             Options.player3Name = p3Tf.getText();
             Options.player4Name = p4Tf.getText();
+            Options.drawStacks = Integer.parseInt(drawStacksTf.getText());
+            Pane pane = new Pane(new GameImage(new Color(0, 0, 0, 0.5f)), 0, 0, Options.getWidth(), Options.getHeight());
+            pane.add(new Label("Loading...", 200, Options.getHeight() / 2 - 30, Options.getWidth(), 60));
+            add(pane);
+            repaint();
             Game.game.switchGameBoard("game");
+            remove(pane);
         });
 
         Button addPlayer = new Button("Add Player", 100, 300, BUTTON_WIDTH, 50);
+        Button removePlayer = new Button("Remove Player", 100, 400, BUTTON_WIDTH, 50);
+
         addPlayer.addActionListener(e -> {
             System.out.println("Add Player");
             if (increasePlayerCount()) {
                 playerLabel[playerCount - 1].setVisible(true);
                 playerTextField[playerCount - 1].setVisible(true);
+                if (playerCount == 4) {
+                    addPlayer.disable();
+                    addPlayer.repaint();
+                }
+                if (!removePlayer.isEnabled()) {
+                    removePlayer.enable();
+                    removePlayer.repaint();
+                }
             }
         });
-
-        Button removePlayer = new Button("Remove Player", 100, 400, BUTTON_WIDTH, 50);
         removePlayer.addActionListener(e -> {
             System.out.println("Remove Player");
             if (decreasePlayerCount()) {
                 playerLabel[playerCount].setVisible(false);
                 playerTextField[playerCount].setVisible(false);
+                if (playerCount == 2) {
+                    removePlayer.disable();
+                    removePlayer.repaint();
+                }
+                if (!addPlayer.isEnabled()) {
+                    addPlayer.enable();
+                    removePlayer.repaint();
+                }
             }
         });
-
+        removePlayer.disable();
 
         Pane enabledE1 = new Pane(new GameImage("/other/disabled.png"), 50, 500, 50, 50);
         Button enableE1 = new Button("Toggle Expansion-Pack 1", 100, 500, BUTTON_WIDTH, 50);

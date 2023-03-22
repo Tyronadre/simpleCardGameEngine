@@ -9,28 +9,28 @@ public interface GameMouseListener {
      *
      * @param e the event to be processed
      */
-    public void mousePressed(MouseEvent e);
+    void mousePressed(MouseEvent e);
 
     /**
      * Invoked when a mouse button has been released on a component.
      *
      * @param e the event to be processed
      */
-    public void mouseReleased(MouseEvent e);
+    void mouseReleased(MouseEvent e);
 
     /**
      * Invoked when the mouse enters a component.
      *
      * @param e the event to be processed
      */
-    public void mouseEntered(MouseEvent e);
+    void mouseEntered(MouseEvent e);
 
     /**
      * Invoked when the mouse exits a component.
      *
      * @param e the event to be processed
      */
-    public void mouseExited(MouseEvent e);
+    void mouseExited(MouseEvent e);
 
 
     /**
@@ -46,7 +46,7 @@ public interface GameMouseListener {
      *
      * @param e the event to be processed
      */
-    public void mouseDragged(MouseEvent e);
+    void mouseDragged(MouseEvent e);
 
-    public void mouseReleasedAnywhere(MouseEvent e);
+    void mouseReleasedAnywhere(MouseEvent e);
 }

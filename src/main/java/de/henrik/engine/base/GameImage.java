@@ -17,7 +17,7 @@ public class GameImage {
     private static final Dimension defaultImageDim = new Dimension(-1, -1);
     private static final GraphicsConfiguration GFX_CONFIG = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
     BufferedImage image;
-    String path;
+    final String path;
     Boolean cropImage;
 
 

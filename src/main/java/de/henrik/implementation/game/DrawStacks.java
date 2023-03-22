@@ -8,7 +8,6 @@ import de.henrik.engine.card.CardStack;
 import de.henrik.engine.card.CardStackArea;
 import de.henrik.engine.components.Button;
 import de.henrik.engine.components.Label;
-import de.henrik.engine.game.Border;
 import de.henrik.engine.game.Game;
 import de.henrik.implementation.GameEvent.GameStateChangeEvent;
 import de.henrik.implementation.boards.GameBoard;
@@ -24,11 +23,12 @@ public class DrawStacks extends GameComponent {
     private final CardStackArea drawStacks;
     private final CardStack startCards;
 
-    private final int startCardsXSpace = 10;
-    private final int startCardsYSpace = 20;
-    private int drawStacksMaxCount;
-    public Button dice, twoDice, skipTurn;
-    public Label diceRoll, activePlayerLabel;
+    private final int drawStacksMaxCount;
+    public final Button dice;
+    public final Button twoDice;
+    public final Button skipTurn;
+    public final Label diceRoll;
+    public final Label activePlayerLabel;
 
     public DrawStacks(int drawStacksMaxCount, Dimension size, Point pos) {
         super(pos, size);
@@ -50,7 +50,7 @@ public class DrawStacks extends GameComponent {
         skipTurn = new Button("Skip Turn");
         skipTurn.addActionListener(e -> Game.game.event(new GameStateChangeEvent(GameBoard.NEW_PLAYER_STATE)));
         skipTurn.disable();
-        activePlayerLabel = new Label("Init");
+        activePlayerLabel = new Label("Loading...");
 
         add(dice);
         add(twoDice);
@@ -64,8 +64,10 @@ public class DrawStacks extends GameComponent {
     }
 
     private void resize() {
+        int startCardsYSpace = 20;
         int startCardsHeight = getHeight() - 2 * startCardsYSpace;
         int startCardsWidth = (int) (startCardsHeight * (2 / (double) 3));
+        int startCardsXSpace = 10;
         startCards.setPosition(getWidth() - startCardsWidth - startCardsXSpace, startCardsYSpace + getY());
         startCards.setCardSize(startCardsWidth, startCardsHeight);
         dice.setPosition(startCards.getX() - 220, 10 + getY());
@@ -135,7 +137,6 @@ public class DrawStacks extends GameComponent {
         DraggableCardStack draggableCardStack = new DraggableCardStack("draw_stack_" + card.getID(), card, 7);
         draggableCardStack.addCard(card);
         drawStacks.addStack(draggableCardStack);
-//        draggableCardStack.addMouseListener(draggableCardStack.getDragAdapter());
     }
 
     private boolean anyStackEmpty() {
@@ -153,24 +154,7 @@ public class DrawStacks extends GameComponent {
         return drawStacks.getStacks();
     }
 
-    /**
-     * Trys to add a card to the existing stacks. if the card is null returns false
-     *
-     * @param card the card to add
-     * @return {@code TRUE} if the card was added, otherwise {@code FALSE}
-     */
-    private boolean addCardToExistingStack(Card card) {
-//        if (card == null)
-//            return false;
-//
-//        for (var drawStack : drawStacks) {
-//            if (drawStack.CardID == card.ID) {
-//                drawStack.cardStack.addCard(card);
-//                return true;
-//            }
-//        }
-        return false;
-    }
+
 
     @Override
     public void paint(GameGraphics g) {
@@ -179,10 +163,6 @@ public class DrawStacks extends GameComponent {
         g.getGraphics().fillRect(getX(), getY(), getWidth(), getHeight());
         g.setColor(GameGraphics.defaultColor);
         super.paint(g);
-    }
-
-    public boolean canFillDrawStacks() {
-        return startCards.getStackSize() > 0;
     }
 
     public void removeBorders() {

@@ -3,8 +3,8 @@ package de.henrik.engine.events;
 import de.henrik.engine.base.GameComponent;
 
 public class GameEvent {
-    private String name;
-    private GameComponent parent;
+    private final String name;
+    private final GameComponent parent;
 
     public GameEvent(String name, GameComponent parent) {
         this.name = name;

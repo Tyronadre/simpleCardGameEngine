@@ -89,7 +89,7 @@ public abstract class GameComponent {
         if (parent == null || this instanceof Board) {
             paint(g.create().setClip(x, y, width, height));
             Toolkit.getDefaultToolkit().sync();
-        } else parent.repaint(x,y,width,height);
+        } else parent.repaint(x, y, width, height);
     }
 
     /**
@@ -253,6 +253,9 @@ public abstract class GameComponent {
     }
 
     public void remove(GameComponent component) {
+        if (component == null) {
+            return;
+        }
         children.remove(component);
         component.remove();
     }
@@ -291,8 +294,8 @@ public abstract class GameComponent {
         return parent;
     }
 
-    HashMap<Integer, MouseListener> mouseListenerHashMap = new HashMap<>();
-    HashMap<Integer, MouseMotionListener> mouseMotionListenerHashMap = new HashMap<>();
+    final HashMap<Integer, MouseListener> mouseListenerHashMap = new HashMap<>();
+    final HashMap<Integer, MouseMotionListener> mouseMotionListenerHashMap = new HashMap<>();
 
     public void addMouseListener(GameMouseListener mouseListener) {
         var mouseListenerForObject = new MouseAdapter() {
@@ -311,7 +314,6 @@ public abstract class GameComponent {
         var mouseMotionListenerForObject = new MouseMotionAdapter() {
             Point lastLocation = new Point();
             Point init = null;
-            boolean dragging = false;
 
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -344,26 +346,6 @@ public abstract class GameComponent {
         Game.game.addMouseListener(mouseListenerForObject);
         Game.game.addMouseMotionListener(mouseMotionListenerForObject);
     }
-
-//    public boolean childOf(Board activeBoard) {
-//        for (GameComponent child : activeBoard.getChildren()) {
-//            if (child == this || childOf(child, this)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//
-//    private boolean childOf(GameComponent parent, GameComponent searchChild) {
-//        if (parent == searchChild) return true;
-//        if (children.size() == 0) return false;
-//        for (GameComponent child : children) {
-//            if (childOf(child, searchChild)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 
     public void removeMouseListener(GameMouseListener mouseListener) {
         Game.game.removeMouseListener(mouseListenerHashMap.get(mouseListener.hashCode()));

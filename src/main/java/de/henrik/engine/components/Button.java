@@ -25,7 +25,6 @@ public class Button extends GameComponent {
     public static final int state_DISABLED = 3;
     private int state = state_DEFAULT;
     private final List<ActionListener> actionListeners = new ArrayList<>();
-    private final GameMouseListener defaultHandler;
 
     public Button(String description, GameImage background, int x, int y, int width, int height) {
         super(x, y, width, height);
@@ -34,23 +33,15 @@ public class Button extends GameComponent {
             font = Game.game.getFont().deriveFont((float) getHeight() - 5);
         }
         if (background != null) this.background = background.getScaledInstance(width, height);
-        defaultHandler  = new GameMouseListenerAdapter() {
+        GameMouseListener defaultHandler = new GameMouseListenerAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (board.active && state != state_DISABLED && e.getButton() == MouseEvent.BUTTON1) {
                     state = state_CLICKED;
+                    repaint(getClip());
                     for (var actionListener : actionListeners) {
                         actionListener.actionPerformed(new ActionEvent(this, 0, "buttonClicked"));
                     }
-                    repaint(getClip());
-                }
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (board.active && state != state_DISABLED && e.getButton() == MouseEvent.BUTTON1) {
-                    state = state_HOVERED;
-                    repaint(getClip());
                 }
             }
 
@@ -112,9 +103,7 @@ public class Button extends GameComponent {
                 g.setColor(new Color(0.25f,0.25f,0.25f,0.25f));
                 g.getGraphics().fillRoundRect(getX(),getY(),getWidth(),getHeight(),3,3);
             }
-            case state_DEFAULT -> {
-                g.getGraphics().drawRoundRect(getX(), getY(), getWidth(), getHeight(), 3, 3);
-            }
+            case state_DEFAULT -> g.getGraphics().drawRoundRect(getX(), getY(), getWidth(), getHeight(), 3, 3);
             case state_HOVERED -> {
                 g.setColor(new Color(76, 90, 162));
                 g.getGraphics().drawRoundRect(getX(), getY(), getWidth(), getHeight(), 3, 3);
@@ -151,5 +140,9 @@ public class Button extends GameComponent {
 
     public void removeActionListener() {
         actionListeners.clear();
+    }
+
+    public boolean isEnabled() {
+        return state != state_DISABLED;
     }
 }

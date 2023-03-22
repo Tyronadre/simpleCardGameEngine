@@ -5,8 +5,8 @@ import de.henrik.engine.events.GameEvent;
 import de.henrik.implementation.player.PlayerImpl;
 
 public class ChoiceSelectedEvent extends GameEvent {
-    public GameComponent selected;
-    public PlayerImpl owner;
+    public final GameComponent selected;
+    public final PlayerImpl owner;
 
     public ChoiceSelectedEvent(GameComponent selected, PlayerImpl owner) {
         super( "Choice selected", null);

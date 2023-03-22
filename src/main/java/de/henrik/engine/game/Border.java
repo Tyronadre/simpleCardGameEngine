@@ -2,16 +2,15 @@ package de.henrik.engine.game;
 
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
-import de.henrik.engine.components.Pane;
-import de.henrik.implementation.card.playingcard.CardClass;
 
 import java.awt.*;
 
 public class Border {
 
-    Color color;
-    boolean dashed;
-    int size,arc;
+    final Color color;
+    final boolean dashed;
+    final int size;
+    final int arc;
     GameComponent parent;
 
     public Border(Color color, boolean dashed, int size, GameComponent parent, int arc) {

@@ -18,7 +18,7 @@ public class Game extends JFrame {
 
     private Player activePlayer;
 
-    private static HashMap<String, Board> gameBoards = new HashMap<>();
+    private static final HashMap<String, Board> gameBoards = new HashMap<>();
 
     private final GameEventThread gameEventThread;
 
@@ -53,6 +53,7 @@ public class Game extends JFrame {
             event.oldBoard.deactivate();
             Game.game.gameBoard = event.newBoard;
             event.newBoard.activate();
+            event.newBoard.repaint();
         });
 
         this.gameBoard = gameBoard;

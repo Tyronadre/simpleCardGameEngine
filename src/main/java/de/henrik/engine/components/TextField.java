@@ -1,6 +1,5 @@
 package de.henrik.engine.components;
 
-import de.henrik.engine.events.GameMouseListener;
 import de.henrik.engine.events.GameMouseListenerAdapter;
 import de.henrik.engine.game.Game;
 import de.henrik.engine.base.GameComponent;

@@ -21,6 +21,7 @@ public class SelfStackingCardStackArea extends CardStackArea {
         }
         if (notAdded) {
             CardStack stack = new BasicCardStack("s", playingCard, 7);
+            stack.setDrawStackSizeHint(true);
             this.addStack(stack);
             stack.moveCardToStack(playingCard);
         }

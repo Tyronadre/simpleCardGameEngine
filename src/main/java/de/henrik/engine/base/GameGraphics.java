@@ -3,7 +3,7 @@ package de.henrik.engine.base;
 import java.awt.*;
 
 public class GameGraphics {
-    Graphics2D graphics2D;
+    final Graphics2D graphics2D;
     public static Color defaultColor = Color.BLACK;
 
     public GameGraphics(Graphics2D graphics2D) {

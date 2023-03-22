@@ -5,9 +5,6 @@ import de.henrik.implementation.GameEvent.CardEvent;
 import de.henrik.implementation.GameEvent.CardEventListener;
 import de.henrik.implementation.card.BasicCard;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 public class PlayingCard extends BasicCard {
     private final CardEventListener eventListener;
 

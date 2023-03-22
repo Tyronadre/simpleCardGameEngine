@@ -5,16 +5,13 @@ import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.CardStack;
 import de.henrik.engine.events.GameEvent;
-import de.henrik.engine.events.GameEventListener;
 import de.henrik.implementation.game.Options;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
-import java.util.EventListener;
 import java.util.List;
 
 
@@ -31,8 +28,8 @@ import java.util.List;
 abstract public class Board extends GameComponent {
     public boolean active;
     private GameImage backgroundImage;
-    private List<ActionListener> onActivate;
-    private List<ActionListener> onDeactivate;
+    private final List<ActionListener> onActivate;
+    private final List<ActionListener> onDeactivate;
     protected static final Game game = Game.game;
 
 
@@ -73,8 +70,6 @@ abstract public class Board extends GameComponent {
         }
     }
 
-    ;
-
     /**
      * Gets called whenever this GameBoard was active and is switched for another one
      */
@@ -90,6 +85,10 @@ abstract public class Board extends GameComponent {
         this.onActivate.add(actionListener);
     }
 
+    public void addDeactivationListener(ActionListener actionListener) {
+        this.onDeactivate.add(actionListener);
+    }
+
     public CardStack getCardStackAtPosition(Point pos) {
         for (GameComponent child : children) {
             if (child instanceof CardStack && child.pointInside(pos)) {
@@ -100,28 +99,11 @@ abstract public class Board extends GameComponent {
     }
 
     public void addKeyListener(KeyListener keyListener) {
-        Game.game.addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                if (Game.game.getActiveGameBoard() == Board.this) {
-                    keyListener.keyTyped(e);
-                }
-            }
+        Game.game.addKeyListener(keyListener);
+    }
 
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (Game.game.getActiveGameBoard() == Board.this) {
-                    keyListener.keyPressed(e);
-                }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                if (Game.game.getActiveGameBoard() == Board.this) {
-                    keyListener.keyReleased(e);
-                }
-            }
-        });
+    public void removeKeyListener(KeyListener keyListener) {
+        Game.game.removeKeyListener(keyListener);
     }
 
     public void event(GameEvent event) {

@@ -18,11 +18,11 @@ import java.awt.*;
 public class PlayerPaneImpl extends PlayerPane {
     public static final GameImage activePlayerBackground = new GameImage(new Color(0.25f,0.4f,0.25f,0.5f));
     public static final GameImage inactivePlayerBackground = new GameImage(new Color(0.25f,0.4f,0.4f,0.5f));
-    PlayerImpl player;
-    CardStackArea landmarks;
-    SelfStackingCardStackArea ownedCards;
-    Label playerName;
-    Label coinLabel;
+    final PlayerImpl player;
+    final CardStackArea landmarks;
+    final SelfStackingCardStackArea ownedCards;
+    final Label playerName;
+    final Label coinLabel;
 
     public PlayerPaneImpl(PlayerImpl player) {
         super(null, calcInitDim(player)[0], calcInitDim(player)[1],calcInitDim(player)[2],calcInitDim(player)[3]);

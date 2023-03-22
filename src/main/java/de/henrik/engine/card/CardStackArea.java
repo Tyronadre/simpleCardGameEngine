@@ -4,12 +4,11 @@ import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.game.Game;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CardStackArea extends GameComponent {
-    List<CardStack> cardStacks;
+    final List<CardStack> cardStacks;
     final int xSpace, ySpace, maxNumberOfStack, maxCardHeight, maxCardWidth;
 
 
@@ -44,8 +43,8 @@ public class CardStackArea extends GameComponent {
         double cardHeight = 0;
         int biggestPossibleStack = 0;
         for (CardStack stack : cardStacks) {
-            if (stack.maxStackSize > biggestPossibleStack) {
-                biggestPossibleStack = stack.maxStackSize;
+            if (stack.stackMaxDrawSize > biggestPossibleStack) {
+                biggestPossibleStack = stack.stackMaxDrawSize;
             }
         }
 
@@ -72,8 +71,6 @@ public class CardStackArea extends GameComponent {
             cardWidth = (int) (cardHeight * (2 / (double) 3));
         }
 
-//        boolean layout_changed = (cardStacks.size() == 0) || (cardWidth != cardStacks.get(0).getCardSize().getWidth()) || (cardHeight != cardStacks.get(0).getCardSize().getHeight());
-
         int row = 0;
         int col = 0;
         for (CardStack cardStack : cardStacks) {
@@ -88,15 +85,6 @@ public class CardStackArea extends GameComponent {
                 row = 0;
             }
         }
-
-//        //We don't need to do repaint everything if the layout doesn't change
-//        if (layout_changed) {
-//            repaint();
-//        } else {
-//            cardStacks.get(cardStacks.size() - 1).repaint();
-//        }
-//
-//        Toolkit.getDefaultToolkit().sync();
     }
 
     public boolean addStack(CardStack cardStack) {

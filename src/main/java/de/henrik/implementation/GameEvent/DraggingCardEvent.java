@@ -1,7 +1,6 @@
 package de.henrik.implementation.GameEvent;
 
 import de.henrik.engine.base.GameComponent;
-import de.henrik.engine.card.Card;
 import de.henrik.engine.events.GameEvent;
 import de.henrik.implementation.card.playingcard.PlayingCard;
 import de.henrik.implementation.player.PlayerImpl;
@@ -12,7 +11,7 @@ public class DraggingCardEvent extends GameEvent {
     public boolean startDragging;
     public boolean endDragging;
     public Point pos;
-    public PlayerImpl player;
+    public final PlayerImpl player;
 
     final public PlayingCard card;
 

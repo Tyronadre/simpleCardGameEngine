@@ -4,7 +4,6 @@ import de.henrik.engine.events.GameEvent;
 import de.henrik.engine.events.GameEventListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -29,19 +28,16 @@ public class GameEventThread extends Thread {
     }
 
 
+    @SuppressWarnings("InfiniteLoopStatement")
     @Override
     public void run() {
         System.out.println("Game Event Thread Started");
         long lastTime = System.currentTimeMillis();
         while (true) {
             try {
-                if (!waitForEvent) {
+                if (lastTime + 50 < System.currentTimeMillis() && !waitForEvent) {
+                    lastTime = System.currentTimeMillis();
                     handleEvent(eventQueue.take());
-                } else {
-                    if (lastTime + 500 < System.currentTimeMillis()) {
-                        lastTime = System.currentTimeMillis();
-                        System.out.println(eventQueue);
-                    }
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);

@@ -1,6 +1,5 @@
 package de.henrik.engine.events;
 
-import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.game.Board;
 
 public class SwitchGameBoardEvent extends GameEvent {

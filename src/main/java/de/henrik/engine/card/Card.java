@@ -21,12 +21,12 @@ abstract public class Card extends GameComponent {
      * Creates a new Card.
      * @param ID the CardID
      * @param frontOfCard the image for the front of this Card
-     * @param backOfCard
-     * @param x
-     * @param y
-     * @param width
-     * @param height
-     * @param paintFront
+     * @param backOfCard the image for the back of this Card
+     * @param x the x position
+     * @param y the y position
+     * @param width the width
+     * @param height the height
+     * @param paintFront if true, the front of the card will be painted, otherwise the back
      */
     public Card(int ID, GameImage frontOfCard, GameImage backOfCard, int x, int y, int width, int height, boolean paintFront) {
         super(x, y, width, height);

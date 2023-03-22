@@ -29,7 +29,7 @@ public class PlayerImpl extends Player {
 
     public PlayerImpl(int id, String name) {
         super(id, name);
-        coins = 5000;
+        coins = 5;
         loadLandmarks();
         playerPane = new PlayerPaneImpl(this);
     }
@@ -59,13 +59,15 @@ public class PlayerImpl extends Player {
         if (this.coins <= coins) {
             int retCoins = coins - this.coins;
             this.coins = 0;
+            ((PlayerPaneImpl) playerPane).updateCoinLabel();
+            System.out.println("Player " + getName() + " has " + this.coins + " coins left.");
             return retCoins;
+        } else {
+            this.coins -= coins;
+            ((PlayerPaneImpl) playerPane).updateCoinLabel();
+            System.out.println("Player " + getName() + " has " + this.coins + " coins left.");
+            return coins;
         }
-        this.coins -= coins;
-        ((PlayerPaneImpl) playerPane).updateCoinLabel();
-        System.out.println("Player " + getName() + " has " + this.coins + " coins left.");
-        return coins;
-
     }
 
     public void addCoins(int coins) {
@@ -162,4 +164,12 @@ public class PlayerImpl extends Player {
         return cardList;
     }
 
+    public boolean hasAllLandmarks() {
+        for (Landmark landmark : landmarkHashMap.keySet()) {
+            if (!landmarkHashMap.get(landmark)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
