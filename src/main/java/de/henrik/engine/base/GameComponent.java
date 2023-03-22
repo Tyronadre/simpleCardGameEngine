@@ -88,7 +88,8 @@ public abstract class GameComponent {
         if (width <= 0 || height <= 0 || g == null) return;
         if (parent == null || this instanceof Board) {
             paint(g.create().setClip(x, y, width, height));
-        } else parent.paint(g.create().setClip(x, y, width, height));
+            Toolkit.getDefaultToolkit().sync();
+        } else parent.repaint(x,y,width,height);
     }
 
     /**
@@ -253,7 +254,23 @@ public abstract class GameComponent {
 
     public void remove(GameComponent component) {
         children.remove(component);
-        component.parent = null;
+        component.remove();
+    }
+
+    /**
+     * Removes this component from its parent and all children from this component
+     */
+    private void remove() {
+        parent = null;
+        for (GameComponent child : children) {
+            child.remove();
+        }
+        for (MouseMotionListener mouseMotionListener : mouseMotionListenerHashMap.values()) {
+            Game.game.removeMouseMotionListener(mouseMotionListener);
+        }
+        for (MouseListener mouseListener : mouseListenerHashMap.values()) {
+            Game.game.removeMouseListener(mouseListener);
+        }
     }
 
     /**

@@ -25,7 +25,7 @@ public class TextField extends GameComponent {
         addMouseListener(new GameMouseListenerAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (board.active) {
+                if (board.active && e.getButton() == MouseEvent.BUTTON1) {
                     state = state_CLICKED;
                     repaint();
                 }
@@ -55,6 +55,7 @@ public class TextField extends GameComponent {
                     if (e.getKeyChar() == '\b') {
                         if (savedString.length() != 0) savedString = savedString.substring(0, savedString.length() - 1);
                     } else savedString += e.getKeyChar();
+                    e.consume();
                     repaint();
                 }
             }

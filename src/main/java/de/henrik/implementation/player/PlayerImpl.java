@@ -126,7 +126,7 @@ public class PlayerImpl extends Player {
             landmarkStack.addMouseListener(new GameMouseListenerAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    if (landmark.getCost() <= getCoins()) {
+                    if (PlayerImpl.this == Game.game.getActivePlayer() && e.getButton() == MouseEvent.BUTTON1 && landmark.getCost() <= getCoins() && !hasLandmark(landmark.getID())) {
                         removeCoins(landmark.getCost());
                         landmarkHashMap.put(landmark, true);
                         Game.game.event(new GameStateChangeEvent(GameBoard.NEW_PLAYER_STATE));

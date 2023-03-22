@@ -1,13 +1,11 @@
 package de.henrik.implementation.player;
 
 import de.henrik.engine.base.GameComponent;
-import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.CardStack;
 import de.henrik.engine.card.CardStackArea;
 import de.henrik.engine.components.Label;
 import de.henrik.engine.components.Pane;
-import de.henrik.engine.game.Game;
 import de.henrik.engine.game.Player;
 import de.henrik.engine.game.PlayerPane;
 import de.henrik.implementation.card.SelfStackingCardStackArea;
@@ -18,6 +16,8 @@ import de.henrik.implementation.game.Options;
 import java.awt.*;
 
 public class PlayerPaneImpl extends PlayerPane {
+    public static final GameImage activePlayerBackground = new GameImage(new Color(0.25f,0.4f,0.25f,0.5f));
+    public static final GameImage inactivePlayerBackground = new GameImage(new Color(0.25f,0.4f,0.4f,0.5f));
     PlayerImpl player;
     CardStackArea landmarks;
     SelfStackingCardStackArea ownedCards;
@@ -27,10 +27,10 @@ public class PlayerPaneImpl extends PlayerPane {
     public PlayerPaneImpl(PlayerImpl player) {
         super(null, calcInitDim(player)[0], calcInitDim(player)[1],calcInitDim(player)[2],calcInitDim(player)[3]);
         this.player = player;
+        this.setBackground(inactivePlayerBackground);
 
 
         // --- LANDMARKS, COINS, PLAYERNAME, SKIP TURN --- //
-        GameImage landmarkBG = new GameImage("/player/landmarkBackground.png",true);
         Pane landmarksAndInfo = new Pane(getX(), getY(), getWidth() / 4 - 3, getHeight());
         add(landmarksAndInfo);
 
@@ -162,13 +162,7 @@ public class PlayerPaneImpl extends PlayerPane {
     }
 
     @Override
-    public void paint(GameGraphics g) {
-        if (player == Game.game.getActivePlayer())
-            g.setColor(new Color(0.25f,0.4f,0.25f,0.5f));
-        else
-            g.setColor(new Color(0.25f,0.4f,0.4f,0.5f));
-        g.getGraphics().fillRect(getX(), getY(), getWidth(), getHeight());
-        g.setColor(GameGraphics.defaultColor);
-        super.paint(g);
+    public void repaint() {
+        if (parent != null) parent.repaint(getClip());
     }
 }

@@ -3,6 +3,7 @@ package de.henrik.engine.components;
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameGraphics;
 import de.henrik.engine.base.GameImage;
+import de.henrik.engine.events.GameMouseListener;
 import de.henrik.engine.events.GameMouseListenerAdapter;
 import de.henrik.engine.game.Game;
 
@@ -24,6 +25,7 @@ public class Button extends GameComponent {
     public static final int state_DISABLED = 3;
     private int state = state_DEFAULT;
     private final List<ActionListener> actionListeners = new ArrayList<>();
+    private final GameMouseListener defaultHandler;
 
     public Button(String description, GameImage background, int x, int y, int width, int height) {
         super(x, y, width, height);
@@ -32,23 +34,23 @@ public class Button extends GameComponent {
             font = Game.game.getFont().deriveFont((float) getHeight() - 5);
         }
         if (background != null) this.background = background.getScaledInstance(width, height);
-        addMouseListener(new GameMouseListenerAdapter() {
+        defaultHandler  = new GameMouseListenerAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (board.active && state != state_DISABLED) {
+                if (board.active && state != state_DISABLED && e.getButton() == MouseEvent.BUTTON1) {
                     state = state_CLICKED;
                     for (var actionListener : actionListeners) {
                         actionListener.actionPerformed(new ActionEvent(this, 0, "buttonClicked"));
                     }
-                    repaint();
+                    repaint(getClip());
                 }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (board.active && state != state_DISABLED) {
+                if (board.active && state != state_DISABLED && e.getButton() == MouseEvent.BUTTON1) {
                     state = state_HOVERED;
-                    repaint();
+                    repaint(getClip());
                 }
             }
 
@@ -56,7 +58,7 @@ public class Button extends GameComponent {
             public void mouseEntered(MouseEvent e) {
                 if (board.active && state != state_DISABLED) {
                     state = state_HOVERED;
-                    repaint();
+                    repaint(getClip());
                 }
             }
 
@@ -64,10 +66,11 @@ public class Button extends GameComponent {
             public void mouseExited(MouseEvent e) {
                 if (board.active && state != state_DISABLED) {
                     state = state_DEFAULT;
-                    repaint();
+                    repaint(getClip());
                 }
             }
-        });
+        };
+        addMouseListener(defaultHandler);
     }
 
 

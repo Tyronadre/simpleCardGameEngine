@@ -5,6 +5,8 @@ import de.henrik.implementation.card.playingcard.CardClass;
 import de.henrik.implementation.card.playingcard.CardType;
 import de.henrik.implementation.card.playingcard.PlayingCardBuilder;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,8 +32,8 @@ public class LandmarkBuilder {
                             Integer.parseInt(line[1]),
                             CardClass.PLANET,
                             CardType.LANDMARK,
-                            new GameImage("/cards/" + line[0] + "_f.png"),
-                            new GameImage("/cards/" + line[0] + "_b.png")
+                            new GameImage("/cards/c" + line[0] + "_f.png"),
+                            new GameImage("/cards/c" + line[0] + "_f.png")
                     ));
                 } catch (RuntimeException e) {
                     System.err.println("Failed to load card: " + l);

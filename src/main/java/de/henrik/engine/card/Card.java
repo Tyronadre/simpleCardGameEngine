@@ -6,6 +6,7 @@ import de.henrik.engine.game.Game;
 import de.henrik.engine.base.GameImage;
 
 import java.awt.*;
+import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
 
 abstract public class Card extends GameComponent {
@@ -80,9 +81,15 @@ abstract public class Card extends GameComponent {
         int y = getY() + 1;
         int w = getWidth() - 1;
         int h = getHeight() - 1;
-        g.setColor(Color.DARK_GRAY);
+        if (g.getClip() != null) {
+            Area a = new Area(g.getClip());
+            a.intersect(new Area(new RoundRectangle2D.Float(x, y, w, h, ARC_SIZE, ARC_SIZE)));
+            g.getGraphics().setClip(a);
+        } else {
+            g.getGraphics().setClip(new RoundRectangle2D.Float(x, y, w, h, ARC_SIZE, ARC_SIZE));
+        }
 
-        g.getGraphics().setClip(new RoundRectangle2D.Float(x, y, w, h, ARC_SIZE, ARC_SIZE));
+
         if (paintFront) {
             g.drawImage(frontOfCard.getImage(), x, y);
         } else

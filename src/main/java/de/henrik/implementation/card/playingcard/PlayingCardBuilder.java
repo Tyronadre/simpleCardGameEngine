@@ -87,19 +87,22 @@ public class PlayingCardBuilder {
             case 3:
                 return event -> {
                     if ((event.roll == 2 || event.roll == 3) && event.activePlayer == event.owner) {
-                        event.owner.addCoins(1);
+                        if (event.owner.hasLandmark(17)) event.owner.addCoins(2);
+                        else event.owner.addCoins(1);
                     }
                 };
             case 4:
                 return event -> {
                     if (event.roll == 3 && event.activePlayer != event.owner) {
-                        event.owner.addCoins(event.activePlayer.removeCoins(1));
+                        if (event.owner.hasLandmark(17)) event.owner.addCoins(event.activePlayer.removeCoins(2));
+                        else event.owner.addCoins(event.activePlayer.removeCoins(1));
                     }
                 };
             case 5:
                 return event -> {
                     if (event.roll == 4 && event.activePlayer == event.owner) {
-                        event.owner.addCoins(3);
+                        if (event.owner.hasLandmark(17)) event.owner.addCoins(4);
+                        else event.owner.addCoins(3);
                     }
                 };
             case 6:
@@ -183,7 +186,8 @@ public class PlayingCardBuilder {
             case 13:
                 return event -> {
                     if (event.roll == 9 || event.roll == 10) {
-                        event.owner.addCoins(event.activePlayer.removeCoins(5));
+                        if (event.owner.hasLandmark(17)) event.owner.addCoins(event.activePlayer.removeCoins(2));
+                        else event.owner.addCoins(event.activePlayer.removeCoins(5));
                     }
                 };
             case 14:
@@ -197,7 +201,8 @@ public class PlayingCardBuilder {
                     if (event.roll == 11 || event.roll == 12) {
                         for (Card card : event.owner.getCardList()) {
                             if (((PlayingCard) card).getCardClass() == CardClass.ASTEROID) {
-                                event.owner.addCoins(2);
+                                if (event.owner.hasLandmark(17)) event.owner.addCoins(3);
+                                else event.owner.addCoins(2);
                             }
                         }
                     }

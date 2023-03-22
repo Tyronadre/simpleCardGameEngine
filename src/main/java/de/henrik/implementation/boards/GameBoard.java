@@ -4,6 +4,7 @@ import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.base.GameImage;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
+import de.henrik.engine.components.Pane;
 import de.henrik.engine.events.GameEvent;
 import de.henrik.engine.events.GameEventListener;
 import de.henrik.engine.events.GameMouseListenerAdapter;
@@ -15,8 +16,12 @@ import de.henrik.implementation.card.playingcard.PlayingCardBuilder;
 import de.henrik.implementation.game.DrawStacks;
 import de.henrik.implementation.game.Options;
 import de.henrik.implementation.player.PlayerImpl;
+import de.henrik.implementation.player.PlayerPaneImpl;
+import de.henrik.engine.components.Label;
+import de.henrik.engine.components.Button;
 
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +36,9 @@ public class GameBoard extends Board {
 
     public DrawStacks drawStacks;
     int gameState;
+    private boolean lastRollDouble = false;
+    boolean hasRerolled = false;
+
 
     public static final int NEW_PLAYER_STATE = 0;
     public static final int ROLL_DICE_STATE = 1;
@@ -48,11 +56,11 @@ public class GameBoard extends Board {
         return event -> {
             if (event instanceof PlayerChangeEvent playerChangeEvent) {
                 drawStacks.activePlayerLabel.setDescription("Active: " + playerChangeEvent.newPlayer.getName());
-                Player oldActivePlayer = activePlayer;
+                if (activePlayer != null)
+                    activePlayer.getPlayerPane().setBackground(PlayerPaneImpl.inactivePlayerBackground);
                 activePlayer = playerChangeEvent.newPlayer;
                 game.setActivePlayer(activePlayer);
-                if (oldActivePlayer != null) oldActivePlayer.getPlayerPane().repaint();
-                activePlayer.getPlayerPane().repaint();
+                activePlayer.getPlayerPane().setBackground(PlayerPaneImpl.activePlayerBackground);
 
                 event(new GameStateChangeEvent(ROLL_DICE_STATE));
             }
@@ -62,47 +70,92 @@ public class GameBoard extends Board {
     private GameEventListener onDiceRollListener() {
         return event -> {
             if (event instanceof DiceRollEvent diceRollEvent && gameState == ROLL_DICE_STATE) {
-                drawStacks.dice.disable();
-                drawStacks.dice.setBorder(null);
-                drawStacks.twoDice.disable();
-                drawStacks.twoDice.setBorder(null);
-                for (int i = 0; i < Options.getPlayerCount(); i++) {
-                    PlayerImpl player = players.get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
-                    for (Card c : player.getCardList(CardType.SUPPLIER)) {
-                        PlayingCard card = (PlayingCard) c;
-                        card.event(new CardEvent(player, activePlayer, diceRollEvent.roll, this, c));
-                    }
-                    player.getPlayerPane().repaint();
+                if (activePlayer.hasLandmark(19) && !hasRerolled) {
+                    event(new GameDialogEvent(GameBoard.this, "You own \"Mercury\". You can choose to roll the dice again.", new String[]{"Roll again", "Don't roll again"}, new Runnable[]{() -> {
+                        Game.game.setWaitForEvent(false);
+                        hasRerolled = true;
+                        event(new GameStateChangeEvent(ROLL_DICE_STATE));
+                    }, () -> {
+                        Game.game.setWaitForEvent(false);
+                        handleCardActions(diceRollEvent.roll);
+                    }}));
+                } else {
+                    handleCardActions(diceRollEvent.roll);
                 }
-                for (int i = 0; i < Options.getPlayerCount(); i++) {
-                    PlayerImpl player = players.get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
-                    for (Card c : player.getCardList(CardType.PRIMARY_INDUSTRY)) {
-                        PlayingCard card = (PlayingCard) c;
-                        card.event(new CardEvent(player, activePlayer, diceRollEvent.roll, this, c));
-                    }
-                    player.getPlayerPane().repaint();
-                }
-                for (int i = 0; i < Options.getPlayerCount(); i++) {
-                    PlayerImpl player = players.get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
-                    for (Card c : player.getCardList(CardType.SECONDARY_INDUSTRY)) {
-                        PlayingCard card = (PlayingCard) c;
-                        card.event(new CardEvent(player, activePlayer, diceRollEvent.roll, this, c));
-                    }
-                    player.getPlayerPane().repaint();
-                }
-                for (int i = 0; i < Options.getPlayerCount(); i++) {
-                    PlayerImpl player = players.get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
-                    for (Card c : player.getCardList(CardType.MAYOR_ESTABLISHMENT)) {
-                        PlayingCard card = (PlayingCard) c;
-                        card.event(new CardEvent(player, activePlayer, diceRollEvent.roll, this, c));
-                    }
-                    player.getPlayerPane().repaint();
-                }
-
-                event(new GameStateChangeEvent(BUY_CARD_STATE));
             }
         };
     }
+
+    private void handleCardActions(int roll) {
+        drawStacks.dice.disable();
+        drawStacks.dice.setBorder(null);
+        drawStacks.twoDice.disable();
+        drawStacks.twoDice.setBorder(null);
+        for (int i = 0; i < Options.getPlayerCount(); i++) {
+            PlayerImpl player = players.get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
+            for (Card c : player.getCardList(CardType.SUPPLIER)) {
+                PlayingCard card = (PlayingCard) c;
+                card.event(new CardEvent(player, activePlayer, roll, this, c));
+            }
+            player.getPlayerPane().repaint();
+        }
+        for (int i = 0; i < Options.getPlayerCount(); i++) {
+            PlayerImpl player = players.get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
+            for (Card c : player.getCardList(CardType.PRIMARY_INDUSTRY)) {
+                PlayingCard card = (PlayingCard) c;
+                card.event(new CardEvent(player, activePlayer, roll, this, c));
+            }
+            player.getPlayerPane().repaint();
+        }
+        for (int i = 0; i < Options.getPlayerCount(); i++) {
+            PlayerImpl player = players.get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
+            for (Card c : player.getCardList(CardType.SECONDARY_INDUSTRY)) {
+                PlayingCard card = (PlayingCard) c;
+                card.event(new CardEvent(player, activePlayer, roll, this, c));
+            }
+            player.getPlayerPane().repaint();
+        }
+        for (int i = 0; i < Options.getPlayerCount(); i++) {
+            PlayerImpl player = players.get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
+            for (Card c : player.getCardList(CardType.MAYOR_ESTABLISHMENT)) {
+                PlayingCard card = (PlayingCard) c;
+                card.event(new CardEvent(player, activePlayer, roll, this, c));
+            }
+            player.getPlayerPane().repaint();
+        }
+
+        event(new GameStateChangeEvent(BUY_CARD_STATE));
+    }
+
+
+    private GameEventListener onDialogListener() {
+        return event -> {
+            if (event instanceof GameDialogEvent gameDialogEvent) {
+                Game.game.setWaitForEvent(true);
+                Pane pane = new Pane(0, 0, Options.getWidth(), Options.getHeight());
+                pane.setBackground(new GameImage(new Color(0f, 0f, 0f, 0.5f)));
+                Label message = new Label(gameDialogEvent.getMessage());
+                message.setPosition(Options.getWidth() / 5, Options.getHeight() / 3);
+                message.setSize(Options.getWidth() / 5 * 3, 40);
+                pane.add(message);
+                for (int i = 0; i < gameDialogEvent.getAnswerOptions().length; i++) {
+                    Button button = new Button(gameDialogEvent.getAnswerOptions()[i]);
+                    button.setPosition(Options.getWidth() / 5, Options.getHeight() / 3 + 35 + (i + 1) * 35);
+                    button.setSize(Options.getWidth() / 5 * 3 + 20,  30);
+                    int finalI = i;
+                    button.addActionListener(e -> {
+                        remove(pane);
+                        repaint();
+                        gameDialogEvent.getAnswerRunnables()[finalI].run();
+                    });
+                    pane.add(button);
+                }
+                add(pane);
+                repaint();
+            }
+        };
+    }
+
 
     private GameEventListener onDragAndDropListener() {
         return new GameEventListener() {
@@ -166,7 +219,7 @@ public class GameBoard extends Board {
                     public void mousePressed(MouseEvent e) {
                         for (PlayerImpl player : selectableComponents.keySet()) {
                             for (GameComponent component : selectableComponents.get(player)) {
-                                if (component.pointInside(e.getPoint())) {
+                                if (component.pointInside(e.getPoint()) && e.getButton() == MouseEvent.BUTTON1) {
                                     selectableComponents.values().forEach(componentList -> componentList.forEach(component1 -> {
                                         component1.setBorder(null);
                                         component1.repaint();
@@ -197,7 +250,6 @@ public class GameBoard extends Board {
                     case NEW_PLAYER_STATE -> {
                         drawStacks.fillDrawStacks();
                         drawStacks.skipTurn.disable();
-
                         nextPlayer();
                     }
                     case ROLL_DICE_STATE -> {
@@ -210,6 +262,8 @@ public class GameBoard extends Board {
                         drawStacks.repaint();
                     }
                     case BUY_CARD_STATE -> {
+                        hasRerolled = false;
+                        lastRollDouble = false;
                         drawStacks.skipTurn.enable();
                         activePlayer.updateGameBoard(this);
                     }
@@ -238,6 +292,8 @@ public class GameBoard extends Board {
         return cardDragged != null;
     }
 
+
+
     @Override
     public void activate() {
         for (int i = 0; i < Options.getPlayerCount(); i++) {
@@ -264,6 +320,9 @@ public class GameBoard extends Board {
             int roll1 = new Random().nextInt(6) + 1;
             int roll2 = new Random().nextInt(6) + 1;
             int roll = roll1 + roll2;
+            if (roll1 == roll2) {
+                lastRollDouble = true;
+            }
             drawStacks.diceRoll.setDescription("Rolled: " + roll);
             event(new DiceRollEvent(roll));
         });
@@ -274,12 +333,15 @@ public class GameBoard extends Board {
         game.addEventListener(onDragAndDropListener());
         game.addEventListener(onPlayerSwitchListener());
         game.addEventListener(onGameStateChangeListener());
+        game.addEventListener(onDialogListener());
         event(new GameStateChangeEvent(NEW_PLAYER_STATE));
     }
 
     public void nextPlayer() {
-        if (activePlayer != null)
-            event(new PlayerChangeEvent(players.get((activePlayer.getId() + 1) % (players.size()))));
+        if (activePlayer != null) if (lastRollDouble) {
+            lastRollDouble = false;
+            event(new PlayerChangeEvent(activePlayer));
+        } else event(new PlayerChangeEvent(players.get((activePlayer.getId() + 1) % (players.size()))));
         else event(new PlayerChangeEvent(players.get(new Random().nextInt(Options.getPlayerCount()))));
     }
 

@@ -89,7 +89,7 @@ public class GameImage {
             image = loadedImages.get(path).get(new Dimension(Options.getWidth(), Options.getHeight()));
             return;
         }
-        image = GFX_CONFIG.createCompatibleImage(Options.getWidth(), Options.getHeight());
+        image = GFX_CONFIG.createCompatibleImage(Options.getWidth(), Options.getHeight(), Transparency.TRANSLUCENT);
         Graphics2D ig = (Graphics2D) image.getGraphics();
         ig.setColor(color);
         ig.fillRect(0, 0, image.getWidth(), image.getHeight());

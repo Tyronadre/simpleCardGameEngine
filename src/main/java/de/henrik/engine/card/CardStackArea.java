@@ -121,7 +121,7 @@ public class CardStackArea extends GameComponent {
         for (int i = getChildren().size() - 1; i >= 0; i--) {
             GameComponent child = getChildren().get(i);
             if (g.getClip() == null || g.getClip().intersects(child.getClip()))
-                child.paint(g.create().setClip(child.getClip()));
+                child.paint(g.create());
         }
     }
 
