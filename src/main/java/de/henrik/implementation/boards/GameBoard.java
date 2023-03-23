@@ -33,14 +33,15 @@ import java.util.List;
 import java.util.Random;
 
 public class GameBoard extends Board {
-    private final List<PlayerImpl> players;
+
+    protected final List<PlayerImpl> players;
     PlayerImpl activePlayer;
 
     private Card cardDragged;
 
     public DrawStacks drawStacks;
     int gameState;
-    private boolean lastRollDouble = false;
+    protected boolean lastRollDouble = false;
     boolean hasRerolled = false;
     KeyListener escKeyListener;
 
@@ -48,14 +49,14 @@ public class GameBoard extends Board {
     public static final int NEW_PLAYER_STATE = 0;
     public static final int ROLL_DICE_STATE = 1;
     public static final int BUY_CARD_STATE = 2;
-
+    public static final int PAUSE_STATE = 3;
 
     public GameBoard() {
         super(new GameImage("/background/gameboard.jpg", false).getScaledInstance(Options.getWidth(), Options.getHeight()));
         this.players = new ArrayList<>();
     }
 
-    private GameEventListener onPlayerSwitchListener() {
+    protected GameEventListener onPlayerSwitchListener() {
         return event -> {
             if (event instanceof PlayerChangeEvent playerChangeEvent) {
                 drawStacks.activePlayerLabel.setDescription("Active: " + playerChangeEvent.newPlayer.getName());
@@ -70,7 +71,7 @@ public class GameBoard extends Board {
         };
     }
 
-    private GameEventListener onDiceRollListener() {
+    protected GameEventListener onDiceRollListener() {
         return event -> {
             if (event instanceof DiceRollEvent diceRollEvent && gameState == ROLL_DICE_STATE) {
                 if (activePlayer.hasLandmark(19) && !hasRerolled) {
@@ -80,16 +81,20 @@ public class GameBoard extends Board {
                         event(new GameStateChangeEvent(ROLL_DICE_STATE));
                     }, () -> {
                         Game.game.setWaitForEvent(false);
-                        handleCardActions(diceRollEvent.roll);
+                        handleCardActions(diceRollEvent.dice1, diceRollEvent.dice2);
                     }}, false));
                 } else {
-                    handleCardActions(diceRollEvent.roll);
+                    handleCardActions(diceRollEvent.dice1, diceRollEvent.dice2);
                 }
             }
         };
     }
 
-    private void handleCardActions(int roll) {
+    private void handleCardActions(int dice1, int dice2) {
+        int roll = dice1 + dice2;
+        if (dice1 == dice2) {
+            lastRollDouble = true;
+        }
         drawStacks.dice.disable();
         drawStacks.dice.setBorder(null);
         drawStacks.twoDice.disable();
@@ -105,7 +110,7 @@ public class GameBoard extends Board {
     }
 
 
-    private GameEventListener onDialogListener() {
+    protected GameEventListener onDialogListener() {
         return event -> {
             if (event instanceof GameDialogEvent gameDialogEvent) {
                 Game.game.setWaitForEvent(true);
@@ -166,8 +171,7 @@ public class GameBoard extends Board {
         };
     }
 
-
-    private GameEventListener onDragAndDropListener() {
+    protected GameEventListener onDragAndDropListener() {
         return new GameEventListener() {
             @Override
             public void handleEvent(GameEvent event) {
@@ -207,7 +211,7 @@ public class GameBoard extends Board {
         };
     }
 
-    private GameEventListener onChoiceListener() {
+    protected GameEventListener onChoiceListener() {
         return event -> {
             if (event instanceof ChoiceEvent choiceEvent) {
                 Game.game.setWaitForEvent(true);
@@ -247,18 +251,18 @@ public class GameBoard extends Board {
                         }
                     }
                 });
-
             }
         };
     }
 
-    private GameEventListener onGameStateChangeListener() {
+    protected GameEventListener onGameStateChangeListener() {
         return event -> {
             if (event instanceof GameStateChangeEvent gameStateChangeEvent) {
+                int oldState = this.gameState;
+                this.gameState = gameStateChangeEvent.newState;
                 for (PlayerImpl player : players) {
                     player.removeBorders();
                 }
-                this.gameState = gameStateChangeEvent.newState;
                 drawStacks.removeBorders();
                 switch (gameStateChangeEvent.newState) {
                     case NEW_PLAYER_STATE -> {
@@ -287,10 +291,19 @@ public class GameBoard extends Board {
                     }
                     case BUY_CARD_STATE -> {
                         hasRerolled = false;
-                        lastRollDouble = false;
                         drawStacks.skipTurn.enable();
                         activePlayer.updateGameBoard(this);
                         System.out.println("Buy Card State");
+                    }
+                    case PAUSE_STATE -> {
+                        event(new GameDialogEvent(GameBoard.this, "Are you sure you want to quit?", new String[]{"Yes", "No"}, new Runnable[]{() -> {
+                            Game.game.setWaitForEvent(false);
+                            Game.game.switchGameBoard("MainMenu");
+                        }, () -> {
+                            Game.game.setWaitForEvent(false);
+                            event(new GameStateChangeEvent(oldState));
+                            repaint();
+                        }}, true));
                     }
                 }
             }
@@ -331,39 +344,28 @@ public class GameBoard extends Board {
                 case 3 -> Options.player4Name;
                 default -> throw new IllegalStateException("Unexpected value: " + i);
             });
-            players.add(p);
-            add(p.getPlayerPane());
             for (Card card : PlayingCardBuilder.buildCardsFromCSV("/cardsBase.csv"))
                 p.addCard((PlayingCard) card);
+            addPlayer(p);
         }
-        super.activate();
 
         drawStacks.dice.addActionListener(e -> {
             int roll = new Random().nextInt(6) + 1;
             drawStacks.diceRoll.setDescription("Rolled: " + roll);
-            event(new DiceRollEvent(roll));
+            event(new DiceRollEvent(roll, 0));
         });
         drawStacks.twoDice.addActionListener(e -> {
             int roll1 = new Random().nextInt(6) + 1;
             int roll2 = new Random().nextInt(6) + 1;
-            int roll = roll1 + roll2;
-            if (roll1 == roll2) {
-                lastRollDouble = true;
-            }
-            drawStacks.diceRoll.setDescription("Rolled: " + roll1 + " + " + roll2 + " = " + roll);
-            event(new DiceRollEvent(roll));
+            drawStacks.diceRoll.setDescription("Rolled: " + roll1 + " + " + roll2 + " = " + (roll1 + roll2));
+            event(new DiceRollEvent(roll1, roll2));
         });
         escKeyListener = new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyChar() == '\u001B') {
-                    event(new GameDialogEvent(GameBoard.this, "Are you sure you want to quit?", new String[]{"Yes", "No"}, new Runnable[]{() -> {
-                        Game.game.setWaitForEvent(false);
-                        Game.game.switchGameBoard("MainMenu");
-                    }, () -> {
-                        Game.game.setWaitForEvent(false);
-                        repaint();
-                    }}, true));
+                    if (gameState == PAUSE_STATE) return;
+                    event(new GameStateChangeEvent(PAUSE_STATE));
                 }
             }
         };
@@ -377,6 +379,7 @@ public class GameBoard extends Board {
         game.addEventListener(onGameStateChangeListener());
         game.addEventListener(onDialogListener());
         event(new GameStateChangeEvent(NEW_PLAYER_STATE));
+        super.activate();
     }
 
     @Override
@@ -403,10 +406,14 @@ public class GameBoard extends Board {
 
 
     public void nextPlayer() {
-        if (activePlayer != null) if (lastRollDouble) {
-            lastRollDouble = false;
-            event(new PlayerChangeEvent(activePlayer));
-        } else event(new PlayerChangeEvent(players.get((activePlayer.getId() + 1) % (players.size()))));
+        if (activePlayer != null)
+            if (lastRollDouble) {
+                lastRollDouble = false;
+                event(new GameDialogEvent(this, "You rolled double! You get another turn!", new String[]{"OK"}, new Runnable[]{() -> {
+                    Game.game.setWaitForEvent(false);
+                    event(new PlayerChangeEvent(activePlayer));
+                }}, false));
+            } else event(new PlayerChangeEvent(players.get((activePlayer.getId() + 1) % (players.size()))));
         else event(new PlayerChangeEvent(players.get(new Random().nextInt(Options.getPlayerCount()))));
     }
 
@@ -415,4 +422,12 @@ public class GameBoard extends Board {
     }
 
 
+    public void addPlayer(PlayerImpl player) {
+        players.add(player);
+        add(player.getPlayerPane());
+    }
+
+    public int getState() {
+        return gameState;
+    }
 }

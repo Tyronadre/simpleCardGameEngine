@@ -29,7 +29,7 @@ public class PlayerImpl extends Player {
 
     public PlayerImpl(int id, String name) {
         super(id, name);
-        coins = 5;
+        coins = 5000;
         loadLandmarks();
         playerPane = new PlayerPaneImpl(this);
     }
@@ -57,23 +57,24 @@ public class PlayerImpl extends Player {
 
     public int removeCoins(int coins) {
         if (this.coins <= coins) {
-            int retCoins = coins - this.coins;
+            coins = this.coins;
             this.coins = 0;
-            ((PlayerPaneImpl) playerPane).updateCoinLabel();
-            System.out.println("Player " + getName() + " has " + this.coins + " coins left.");
-            return retCoins;
         } else {
             this.coins -= coins;
-            ((PlayerPaneImpl) playerPane).updateCoinLabel();
-            System.out.println("Player " + getName() + " has " + this.coins + " coins left.");
-            return coins;
         }
+        ((PlayerPaneImpl) playerPane).updateCoinLabel();
+        return coins;
+
     }
 
     public void addCoins(int coins) {
         this.coins += coins;
         ((PlayerPaneImpl) playerPane).updateCoinLabel();
-        System.out.println("Player " + getName() + " has " + this.coins + " coins left.");
+    }
+
+    public void setCoins(int coins) {
+        this.coins = coins;
+        ((PlayerPaneImpl) playerPane).updateCoinLabel();
     }
 
     public boolean addCard(PlayingCard card) {
@@ -84,6 +85,12 @@ public class PlayerImpl extends Player {
         cardList.add(card);
         ((PlayerPaneImpl) playerPane).getCardArea().addCard(card);
         return true;
+    }
+
+    public PlayingCard removeCard(PlayingCard card) {
+        cardList.remove(card);
+        ((PlayerPaneImpl) playerPane).getCardArea().removeCard(card);
+        return card;
     }
 
 
@@ -124,10 +131,7 @@ public class PlayerImpl extends Player {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     if (PlayerImpl.this == Game.game.getActivePlayer() && e.getButton() == MouseEvent.BUTTON1 && landmark.getCost() <= getCoins() && !hasLandmark(landmark.getID())) {
-                        removeCoins(landmark.getCost());
-                        landmarkHashMap.put(landmark, true);
-                        Game.game.event(new GameStateChangeEvent(GameBoard.NEW_PLAYER_STATE));
-                        landmarkStack.setRenderPolicy(CardStack.RP_ALL_CARDS_TURNED);
+                        buyLandmark(landmark, landmarkStack);
                     }
                 }
             });
@@ -135,16 +139,30 @@ public class PlayerImpl extends Player {
         }
     }
 
+    public void buyLandmark(Landmark landmark, CardStack landmarkStack) {
+        if (landmark.getCost() > getCoins() || hasLandmark(landmark.getID())) {
+            return;
+        }
+        removeCoins(landmark.getCost());
+        landmarkHashMap.put(landmark, true);
+        Game.game.event(new GameStateChangeEvent(GameBoard.NEW_PLAYER_STATE));
+        landmarkStack.setRenderPolicy(CardStack.RP_ALL_CARDS_TURNED);
+    }
+
+    public void removeLandmark(Landmark landmark) {
+        landmarkHashMap.put(landmark, false);
+    }
+
     public List<CardStack> getCardStacks() {
         return getPlayerPane().ownedCards.getStacks();
     }
 
-    public void removeBorders() {
-        getPlayerPane().removeBorders();
+    public List<CardStack> getLandmarkStacks(){
+        return getPlayerPane().landmarks.getStacks();
     }
 
-    public void removeEmptyStacks() {
-        getPlayerPane().ownedCards.removeEmptyStacks();
+    public void removeBorders() {
+        getPlayerPane().removeBorders();
     }
 
     public List<Card> getCardList(CardType type) {
@@ -159,6 +177,19 @@ public class PlayerImpl extends Player {
         return cardList;
     }
 
+    public List<Landmark> getLandmarkList() {
+        return new ArrayList<>(landmarkHashMap.keySet());
+    }
+
+    public Landmark getLandmark(int id) {
+        for (Landmark landmark : landmarkHashMap.keySet()) {
+            if (landmark.getID() == id) {
+                return landmark;
+            }
+        }
+        throw new IllegalArgumentException("This id is not a loaded Landmark: " + id);
+    }
+
     public boolean hasAllLandmarks() {
         for (Landmark landmark : landmarkHashMap.keySet()) {
             if (!landmarkHashMap.get(landmark)) {
@@ -166,5 +197,24 @@ public class PlayerImpl extends Player {
             }
         }
         return true;
+    }
+
+    public boolean freeCard(PlayingCard card) {
+        cardList.add(card);
+        ((PlayerPaneImpl) playerPane).getCardArea().addCard(card);
+        return true;
+    }
+
+    public void freeLandmark(int id) {
+        for (Landmark landmark : landmarkHashMap.keySet()) {
+            if (landmark.getID() == id) {
+                landmarkHashMap.put(landmark, true);
+                return;
+            }
+        }
+    }
+
+    public Landmark[] getAllLandmarks() {
+        return landmarkHashMap.keySet().toArray(new Landmark[0]);
     }
 }

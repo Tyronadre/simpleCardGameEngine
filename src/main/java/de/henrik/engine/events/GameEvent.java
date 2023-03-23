@@ -5,6 +5,7 @@ import de.henrik.engine.base.GameComponent;
 public class GameEvent {
     private final String name;
     private final GameComponent parent;
+    private boolean consumed = false;
 
     public GameEvent(String name, GameComponent parent) {
         this.name = name;
@@ -22,5 +23,9 @@ public class GameEvent {
     @Override
     public String toString() {
         return "GameEvent: " + name;
+    }
+
+    public void consume() {
+        consumed = true;
     }
 }

@@ -13,7 +13,6 @@ import java.awt.*;
 
 public class MainMenu extends Board {
     public static final int BUTTON_WIDTH = 750;
-    int playerCount = 2;
 
 
     public MainMenu() {
@@ -73,9 +72,9 @@ public class MainMenu extends Board {
         addPlayer.addActionListener(e -> {
             System.out.println("Add Player");
             if (increasePlayerCount()) {
-                playerLabel[playerCount - 1].setVisible(true);
-                playerTextField[playerCount - 1].setVisible(true);
-                if (playerCount == 4) {
+                playerLabel[Options.playerCount - 1].setVisible(true);
+                playerTextField[Options.playerCount - 1].setVisible(true);
+                if (Options.playerCount == 4) {
                     addPlayer.disable();
                     addPlayer.repaint();
                 }
@@ -88,9 +87,9 @@ public class MainMenu extends Board {
         removePlayer.addActionListener(e -> {
             System.out.println("Remove Player");
             if (decreasePlayerCount()) {
-                playerLabel[playerCount].setVisible(false);
-                playerTextField[playerCount].setVisible(false);
-                if (playerCount == 2) {
+                playerLabel[Options.playerCount].setVisible(false);
+                playerTextField[Options.playerCount].setVisible(false);
+                if (Options.playerCount == 2) {
                     removePlayer.disable();
                     removePlayer.repaint();
                 }
@@ -142,19 +141,18 @@ public class MainMenu extends Board {
     @Override
     public void deactivate() {
         super.deactivate();
-        Options.setPlayerCount(playerCount);
     }
 
     private boolean decreasePlayerCount() {
-        if (playerCount > 2) {
-            playerCount--;
+        if (Options.playerCount > 2) {
+            Options.playerCount--;
             return true;
         } else return false;
     }
 
     private boolean increasePlayerCount() {
-        if (playerCount < 4) {
-            playerCount++;
+        if (Options.playerCount < 4) {
+            Options.playerCount++;
             return true;
         } else return false;
     }

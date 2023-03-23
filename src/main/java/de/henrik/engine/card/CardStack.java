@@ -111,7 +111,7 @@ public abstract class CardStack extends GameComponent {
     public void moveCardToStack(Card card) {
         Rectangle rec = card.getClip();
         addCard(card);
-        Game.game.getGameBoard().repaint(rec);
+        Game.game.getActiveGameBoard().repaint(rec);
         repaint();
     }
 
@@ -137,7 +137,7 @@ public abstract class CardStack extends GameComponent {
         if (policy < 0 || policy > 2)
             throw new IllegalArgumentException("This is not a valid render policy.");
         renderPolicy = policy;
-        paint(g);
+        repaint();
     }
 
     /**

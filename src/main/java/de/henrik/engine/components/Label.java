@@ -39,4 +39,8 @@ public class Label extends GameComponent {
         this.description = description;
         repaint();
     }
+
+    public String getDescription() {
+        return description;
+    }
 }

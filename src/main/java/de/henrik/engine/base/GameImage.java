@@ -144,4 +144,8 @@ public class GameImage {
         g2d.drawImage(base.getSubimage(0, 0, width, height), 0, 0, null);
         return new GameImage(new_image, this.path, this.cropImage);
     }
+
+    public String getPath() {
+        return path;
+    }
 }

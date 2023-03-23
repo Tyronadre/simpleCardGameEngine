@@ -68,7 +68,7 @@ public class PlayingCardBuilder {
         return cards;
     }
 
-    private static CardEventListener getEventListener(int id) {
+    public static CardEventListener getEventListener(int id) {
 
         // TODO: 18.01.2023 implement card actions
         return switch (id) {
@@ -119,7 +119,7 @@ public class PlayingCardBuilder {
                 }
             };
             case 8 -> event -> {
-                if (event.roll == 6) {
+                if (event.roll == 7) {
                     for (PlayerImpl player : event.gameBoard.getPlayers()) {
                         if (player != event.owner) {
                             event.owner.addCoins(player.removeCoins(2));
@@ -134,15 +134,13 @@ public class PlayingCardBuilder {
                     Game.game.event(new ChoiceEvent(gameComponent -> gameComponent instanceof CardStack cardStack && !event.gameBoard.drawStacks.getCardStacks().contains(gameComponent) && event.owner.getCardStacks().contains(gameComponent) && cardStack.getCard() != null && ((BasicCard) cardStack.getCard()).getCardType() != CardType.MAYOR_ESTABLISHMENT, event1 -> {
                         event1.selected.setBorder(new Border(Color.BLUE, false, 2, 3));
                         event1.selected.repaint();
-                        Game.game.forceEvent(new ChoiceEvent(gameComponent -> gameComponent instanceof CardStack && !event.gameBoard.drawStacks.getCardStacks().contains(gameComponent) && !event.owner.getCardStacks().contains(gameComponent), event2 -> {
+                        Game.game.forceEvent(new ChoiceEvent(gameComponent -> gameComponent instanceof CardStack cardStack && !event.gameBoard.drawStacks.getCardStacks().contains(gameComponent) && !event.owner.getCardStacks().contains(gameComponent) && cardStack.getCard() != null && ((BasicCard) cardStack.getCard()).getCardType() != CardType.MAYOR_ESTABLISHMENT, event2 -> {
                             event1.selected.setBorder(null);
                             event1.selected.repaint();
                             event.card.setBorder(null);
                             event.card.repaint();
-                            event2.owner.addCard((PlayingCard) ((CardStack) event1.selected).removeCard());
-                            event.owner.addCard((PlayingCard) ((CardStack) event2.selected).removeCard());
-                            event2.owner.removeEmptyStacks();
-                            event1.owner.removeEmptyStacks();
+                            event2.owner.freeCard(event1.owner.removeCard((PlayingCard) ((CardStack) event1.selected).getCard()));
+                            event1.owner.freeCard(event2.owner.removeCard((PlayingCard) ((CardStack) event2.selected).getCard()));
                             Game.game.setWaitForEvent(false);
                         }));
                     }));
@@ -173,8 +171,9 @@ public class PlayingCardBuilder {
             };
             case 13 -> event -> {
                 if (event.roll == 9 || event.roll == 10) {
-                    if (event.owner.hasLandmark(17)) event.owner.addCoins(event.activePlayer.removeCoins(2));
-                    else event.owner.addCoins(event.activePlayer.removeCoins(5));
+                    if (event.owner.hasLandmark(17)) event.owner.addCoins(event.activePlayer.removeCoins(3
+                    ));
+                    else event.owner.addCoins(event.activePlayer.removeCoins(2));
                 }
             };
             case 14 -> event -> {
