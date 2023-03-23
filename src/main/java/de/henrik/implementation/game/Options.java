@@ -14,7 +14,7 @@ public class Options {
     public static String player3Name;
     public static String player4Name;
     public static int drawStacks;
-    static int playerCount;
+    public static int playerCount;
     private static int width;
     private static int height;
     public static int getWidth() {
@@ -40,5 +40,13 @@ public class Options {
         playerCount = 2;
         width = Game.game.getWidth();
         height = Game.game.getHeight();
+    }
+
+    public static void setWidth(int i) {
+        width = i;
+    }
+
+    public static void setHeight(int i) {
+        height = i;
     }
 }

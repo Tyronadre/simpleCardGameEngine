@@ -65,6 +65,10 @@ public class PlayerPaneImpl extends PlayerPane {
         coinLabel.repaint();
     }
 
+    public String getCoinLabelText() {
+        return coinLabel.getDescription();
+    }
+
     private static int[] calcInitDim(Player player) {
         int x, y, width, height;
         switch (Options.getPlayerCount()) {

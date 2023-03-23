@@ -111,7 +111,7 @@ public abstract class CardStack extends GameComponent {
     public void moveCardToStack(Card card) {
         Rectangle rec = card.getClip();
         addCard(card);
-        Game.game.getGameBoard().repaint(rec);
+        Game.game.getActiveGameBoard().repaint(rec);
         repaint();
     }
 

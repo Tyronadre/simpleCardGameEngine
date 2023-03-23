@@ -57,23 +57,24 @@ public class PlayerImpl extends Player {
 
     public int removeCoins(int coins) {
         if (this.coins <= coins) {
-            int retCoins = coins - this.coins;
+            coins = this.coins;
             this.coins = 0;
-            ((PlayerPaneImpl) playerPane).updateCoinLabel();
-            System.out.println("Player " + getName() + " has " + this.coins + " coins left.");
-            return retCoins;
         } else {
             this.coins -= coins;
-            ((PlayerPaneImpl) playerPane).updateCoinLabel();
-            System.out.println("Player " + getName() + " has " + this.coins + " coins left.");
-            return coins;
         }
+        ((PlayerPaneImpl) playerPane).updateCoinLabel();
+        return coins;
+
     }
 
     public void addCoins(int coins) {
         this.coins += coins;
         ((PlayerPaneImpl) playerPane).updateCoinLabel();
-        System.out.println("Player " + getName() + " has " + this.coins + " coins left.");
+    }
+
+    public void setCoins(int coins) {
+        this.coins = coins;
+        ((PlayerPaneImpl) playerPane).updateCoinLabel();
     }
 
     public boolean addCard(PlayingCard card) {
@@ -84,6 +85,12 @@ public class PlayerImpl extends Player {
         cardList.add(card);
         ((PlayerPaneImpl) playerPane).getCardArea().addCard(card);
         return true;
+    }
+
+    public PlayingCard removeCard(PlayingCard card) {
+        cardList.remove(card);
+        ((PlayerPaneImpl) playerPane).getCardArea().removeCard(card);
+        return card;
     }
 
 
@@ -143,9 +150,7 @@ public class PlayerImpl extends Player {
         getPlayerPane().removeBorders();
     }
 
-    public void removeEmptyStacks() {
-        getPlayerPane().ownedCards.removeEmptyStacks();
-    }
+
 
     public List<Card> getCardList(CardType type) {
         List<Card> cardList = new ArrayList<>();
@@ -165,6 +170,12 @@ public class PlayerImpl extends Player {
                 return false;
             }
         }
+        return true;
+    }
+
+    public boolean freeCard(PlayingCard card) {
+        cardList.add(card);
+        ((PlayerPaneImpl) playerPane).getCardArea().addCard(card);
         return true;
     }
 }

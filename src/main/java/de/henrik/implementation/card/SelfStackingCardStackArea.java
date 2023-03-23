@@ -5,6 +5,9 @@ import de.henrik.engine.card.CardStackArea;
 import de.henrik.implementation.card.playingcard.PlayingCard;
 import de.henrik.implementation.card.stack.BasicCardStack;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SelfStackingCardStackArea extends CardStackArea {
     public SelfStackingCardStackArea(int maxNumberOfStack, int xSpace, int ySpace) {
         super(maxNumberOfStack, xSpace, ySpace);
@@ -24,6 +27,21 @@ public class SelfStackingCardStackArea extends CardStackArea {
             stack.setDrawStackSizeHint(true);
             this.addStack(stack);
             stack.moveCardToStack(playingCard);
+        }
+    }
+
+    public void removeCard(PlayingCard card) {
+        List<CardStack> stacks = new ArrayList<>();
+        for (CardStack cardStack : this.getStacks()) {
+            if (cardStack.test(card)) {
+                cardStack.removeCard();
+                if (cardStack.getStackSize() == 0) {
+                    stacks.add(cardStack);
+                }
+            }
+        }
+        for (CardStack stack : stacks) {
+            this.removeStack(stack);
         }
     }
 }

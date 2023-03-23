@@ -15,7 +15,7 @@ import java.awt.event.MouseEvent;
 public class DraggableCardStack extends BasicCardStack {
     public DraggableCardStack(String name, Card allowedCardType, int maxStackSize) {
         super(name, allowedCardType, maxStackSize);
-        GameBoard gameBoard = (GameBoard) Game.game.getGameBoard();
+        GameBoard gameBoard = (GameBoard) Game.game.getActiveGameBoard();
         addMouseListener(new GameMouseListenerAdapter() {
             boolean pressed = false;
             int oldRenderPolicy;

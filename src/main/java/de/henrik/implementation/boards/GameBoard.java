@@ -33,14 +33,14 @@ import java.util.List;
 import java.util.Random;
 
 public class GameBoard extends Board {
-    private final List<PlayerImpl> players;
+    protected final List<PlayerImpl> players;
     PlayerImpl activePlayer;
 
     private Card cardDragged;
 
     public DrawStacks drawStacks;
     int gameState;
-    private boolean lastRollDouble = false;
+    protected boolean lastRollDouble = false;
     boolean hasRerolled = false;
     KeyListener escKeyListener;
 
@@ -247,7 +247,6 @@ public class GameBoard extends Board {
                         }
                     }
                 });
-
             }
         };
     }

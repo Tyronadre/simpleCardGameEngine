@@ -9,6 +9,7 @@ import de.henrik.implementation.game.Options;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.dnd.DropTarget;
 import java.util.HashMap;
 
 public class Game extends JFrame {
@@ -20,7 +21,7 @@ public class Game extends JFrame {
 
     private static final HashMap<String, Board> gameBoards = new HashMap<>();
 
-    private final GameEventThread gameEventThread;
+    private GameEventThread gameEventThread;
 
     static {
         Options.init();
@@ -40,6 +41,10 @@ public class Game extends JFrame {
 
     public static void setDefaultColor(Color color) {
         GameGraphics.defaultColor = color;
+    }
+
+    public static Board getGameBoard(String gameBoard) {
+        return gameBoards.get(gameBoard);
     }
 
     public Board getActiveGameBoard() {
@@ -72,10 +77,6 @@ public class Game extends JFrame {
     @Override
     public void paint(Graphics g) {
         if (isRunning()) gameBoard.paint(new GameGraphics((Graphics2D) getGraphics()));
-    }
-
-    public Board getGameBoard() {
-        return gameBoard;
     }
 
     public static GameGraphics getGameGraphics() {
@@ -134,5 +135,11 @@ public class Game extends JFrame {
 
     public void forceEvent(GameEvent event) {
         gameEventThread.forceEvent(event);
+    }
+
+
+    public void setGameEventThread(GameEventThread gameEventThread){
+        this.gameEventThread.stop(true);
+        this.gameEventThread = gameEventThread;
     }
 }
