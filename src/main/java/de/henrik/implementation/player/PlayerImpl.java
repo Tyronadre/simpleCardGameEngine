@@ -41,7 +41,8 @@ public class PlayerImpl extends Player {
         }
         if (Options.expansion1Selected) {
             for (Landmark landmark : LandmarkBuilder.buildLandmarkFromCSV("/landmarksE1.csv")) {
-                landmarkHashMap.put(landmark, false);
+                if (landmark.getID() == 30) landmarkHashMap.put(landmark, true);
+                else landmarkHashMap.put(landmark, false);
             }
         }
         if (Options.expansion2Selected) {
@@ -100,7 +101,7 @@ public class PlayerImpl extends Player {
                 return landmarkHashMap.get(landmark);
             }
         }
-        throw new IllegalArgumentException("This id is not a loaded Landmark: " + id);
+        return false;
     }
 
     @Override
@@ -157,7 +158,7 @@ public class PlayerImpl extends Player {
         return getPlayerPane().ownedCards.getStacks();
     }
 
-    public List<CardStack> getLandmarkStacks(){
+    public List<CardStack> getLandmarkStacks() {
         return getPlayerPane().landmarks.getStacks();
     }
 

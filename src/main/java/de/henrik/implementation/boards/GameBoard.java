@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class GameBoard extends Board {
@@ -90,7 +91,15 @@ public class GameBoard extends Board {
     }
 
     private void handleCardActions(int dice1, int dice2) {
-        int roll = dice1 + dice2;
+        AtomicInteger roll = new AtomicInteger(dice1 + dice2);
+        if (activePlayer.hasLandmark(31)) {
+            event(new GameDialogEvent(GameBoard.this, "You own \"Earth\". You can add two to you rolled (" + roll + ")", new String[]{"Add two", "Cancel"}, new Runnable[]{() -> {
+                Game.game.setWaitForEvent(false);
+                roll.addAndGet(2);
+            }, () -> {
+                Game.game.setWaitForEvent(false);
+            }}, false));
+        }
         if (dice1 == dice2) {
             lastRollDouble = true;
         }
@@ -101,7 +110,12 @@ public class GameBoard extends Board {
         for (CardType cardType : CardType.values()) {
             for (Card c : activePlayer.getCardList(cardType)) {
                 PlayingCard card = (PlayingCard) c;
-                card.event(new CardEvent(activePlayer, activePlayer, roll, this, c));
+                card.event(new CardEvent(activePlayer, activePlayer, roll.get(), this, c));
+            }
+            if (cardType == CardType.SUPPLIER) {
+                if (activePlayer.getCoins() == 0) {
+                    activePlayer.addCoins(1);
+                }
             }
         }
 
@@ -360,6 +374,11 @@ public class GameBoard extends Board {
             int roll2 = new Random().nextInt(6) + 1;
             drawStacks.diceRoll.setDescription("Rolled: " + roll1 + " + " + roll2 + " = " + (roll1 + roll2));
             event(new DiceRollEvent(roll1, roll2));
+        });
+        drawStacks.skipTurn.addActionListener(e -> {
+            if (activePlayer.hasLandmark(32)) {
+                activePlayer.addCoins(10);
+            }
         });
         escKeyListener = new KeyAdapter() {
             @Override
