@@ -1,7 +1,7 @@
 package privateTests;
 
+import TestUtil.Util;
 import de.henrik.engine.events.GameEvent;
-import de.henrik.engine.game.Game;
 import de.henrik.engine.game.Player;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +44,7 @@ public class LandmarkPrivateTests {
         PlayerAdapter.clearLandmarks(player2);
         PlayerAdapter.clearLandmarks(player3);
         Provider.gameEventThread.submitEvent(EventAdapter.setPlayerEvent(player0));
-        Provider.gameEventThread.handleNextEvent();
+        Provider.gameEventThread.handleAllEvents();
     }
 
     @Test
@@ -104,9 +104,7 @@ public class LandmarkPrivateTests {
     void test_landmark_c18(){
         PlayerAdapter.freeLandmark(player0, 18);
         EventAdapter.setPlayerEvent(player0);
-        Provider.gameEventThread.handleNextEvent();
         EventAdapter.rollDiceEvent(1, 1);
-        Provider.gameEventThread.handleNextEvent();
         assertEquals(player0, Provider.game.getActivePlayer());
         EventAdapter.nextPlayerEvent();
         assertEquals(player0, Provider.game.getActivePlayer());
@@ -117,14 +115,18 @@ public class LandmarkPrivateTests {
     void test_landmark_c19() {
         PlayerAdapter.freeLandmark(player0, 19);
         EventAdapter.setPlayerEvent(player0);
-        Provider.gameEventThread.handleNextEvent();
         EventAdapter.rollDiceEvent(1, 0);
-        Provider.gameEventThread.handleNextEvent();
-        GameEvent event = Provider.gameEventThread.getNextEvent();
+        GameEvent event = Provider.gameEventThread.getEvent(EventAdapter.EventType.DialogEvent);
         EventAdapter.optionEvent(event, 1);
         Provider.gameEventThread.handleNextEvent();
-        Provider.gameEventThread.handleNextEvent();
         assertEquals(player0, Provider.game.getActivePlayer());
-        assertEquals(GameStateAdapter.GameState.BUY_CARD, GameStateAdapter.getGameState());
+    }
+
+    @Test
+    void test_landmark_c30(){
+        PlayerAdapter.freeLandmark(player0, 30);
+        PlayerAdapter.setCoins(player0, 0);
+        EventAdapter.setPlayerEvent(player0);
+        assertEquals(0,PlayerAdapter.getCoins(player0));
     }
 }

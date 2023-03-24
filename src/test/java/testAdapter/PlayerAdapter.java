@@ -43,16 +43,6 @@ public class PlayerAdapter {
     }
 
     /**
-     * Returns the amount of coins the player has, but parsed from however it is displayed in the GUI
-     *
-     * @param player the player
-     * @return the amount of coins the player has, but parsed from however it is displayed in the GUI
-     */
-    public static int getShownCoins(Player player) {
-        return Integer.parseInt(((PlayerPaneImpl) player.getPlayerPane()).getCoinLabelText().substring("Coins: ".length()));
-    }
-
-    /**
      * Sets the amount of coins the player has
      *
      * @param player the player
@@ -63,12 +53,23 @@ public class PlayerAdapter {
     }
 
     /**
+     * Returns the amount of coins the player has, but parsed from however it is displayed in the GUI
+     *
+     * @param player the player
+     * @return the amount of coins the player has, but parsed from however it is displayed in the GUI
+     */
+    public static int getShownCoins(Player player) {
+        return Integer.parseInt(((PlayerPaneImpl) player.getPlayerPane()).getCoinLabelText().substring("Coins: ".length()));
+    }
+
+    /**
      * Buys a Card for a player
      *
      * @param player the player
      * @param card   the card
      */
     public static void buyCard(Player player, Card card) {
+        Provider.gameEventThread.handleAllEvents();
         ((PlayerImpl) player).addCard((PlayingCard) card);
         Provider.game.event(new GameStateChangeEvent(GameBoard.NEW_PLAYER_STATE));
         Provider.gameEventThread.handleNextEvent();
@@ -79,7 +80,6 @@ public class PlayerAdapter {
      *
      * @param player the player
      * @param card   the card
-     * @param stack  the stack
      */
     public static void freeCard(Player player, Card card) {
         ((PlayerImpl) player).freeCard((PlayingCard) card);
@@ -224,7 +224,7 @@ public class PlayerAdapter {
     /**
      * Clears all Landmarks from a player
      *
-     * @param player0 the player
+     * @param player the player
      */
     public static void clearLandmarks(Player player) {
         for (Landmark landmark : ((PlayerImpl) player).getAllLandmarks())

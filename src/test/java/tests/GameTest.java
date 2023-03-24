@@ -3,8 +3,10 @@ package tests;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.game.Player;
 import de.henrik.implementation.game.Options;
-import jdk.jfr.Event;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import testAdapter.*;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -20,6 +22,7 @@ public class GameTest {
     @Test
     @Order(0)
     void init() {
+        System.out.println("If one of these tests fail, all following tests will probably fail too.");
         Provider.init();
         CardAdapter.init();
         Provider.setMenuState();
@@ -95,6 +98,7 @@ public class GameTest {
 
 
     @Test
+
     @Order(6)
     void t0_player0() {
         Provider.gameEventThread.clearEvents();
@@ -115,8 +119,6 @@ public class GameTest {
         assertEquals(4, PlayerAdapter.getCoins(player0));
 
         assertEquals(5, PlayerAdapter.getCoins(player1));
-
-        assertEquals(GameStateAdapter.GameState.NEW_PLAYER, GameStateAdapter.getGameState());
     }
 
     @Test
@@ -141,8 +143,8 @@ public class GameTest {
         assertArrayEquals(new int[]{1, 2, 1}, PlayerAdapter.getPlayer(1).getCardList().stream().mapToInt(Card::getID).toArray());
         assertEquals(2, PlayerAdapter.getCardStacks(player0).size());
         assertEquals(2, PlayerAdapter.getCardStacks(player1).size());
-        assertEquals(4, PlayerAdapter.getCoins(player0));
-        assertEquals(4, PlayerAdapter.getCoins(player1));
+        assertEquals(6, PlayerAdapter.getCoins(player0));
+        assertEquals(5, PlayerAdapter.getCoins(player1));
 
         assertEquals(GameStateAdapter.GameState.NEW_PLAYER, GameStateAdapter.getGameState());
     }

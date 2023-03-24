@@ -6,6 +6,7 @@ import de.henrik.engine.card.CardStack;
 import de.henrik.engine.game.Border;
 import de.henrik.engine.game.Game;
 import de.henrik.engine.game.Player;
+import de.henrik.implementation.GameEvent.CardEvent;
 import de.henrik.implementation.GameEvent.CardEventListener;
 import de.henrik.implementation.GameEvent.ChoiceEvent;
 import de.henrik.implementation.card.BasicCard;
@@ -77,39 +78,46 @@ public class PlayingCardBuilder {
         return switch (id) {
             case 1 -> event -> {
                 if (event.roll == 1) {
+                    if (checkDeactivated(event)) return;
                     event.owner.addCoins(1);
                 }
             };
             case 2 -> event -> {
                 if (event.roll == 2) {
+                    if (checkDeactivated(event)) return;
                     event.owner.addCoins(1);
                 }
             };
             case 3 -> event -> {
                 if ((event.roll == 2 || event.roll == 3) && event.activePlayer == event.owner) {
+                    if (checkDeactivated(event)) return;
                     if (event.owner.hasLandmark(17)) event.owner.addCoins(2);
                     else event.owner.addCoins(1);
                 }
             };
             case 4 -> event -> {
                 if (event.roll == 3 && event.activePlayer != event.owner) {
+                    if (checkDeactivated(event)) return;
                     if (event.owner.hasLandmark(17)) event.owner.addCoins(event.activePlayer.removeCoins(2));
                     else event.owner.addCoins(event.activePlayer.removeCoins(1));
                 }
             };
             case 5 -> event -> {
                 if (event.roll == 4 && event.activePlayer == event.owner) {
+                    if (checkDeactivated(event)) return;
                     if (event.owner.hasLandmark(17)) event.owner.addCoins(4);
                     else event.owner.addCoins(3);
                 }
             };
             case 6 -> event -> {
                 if (event.roll == 5) {
+                    if (checkDeactivated(event)) return;
                     event.owner.addCoins(1);
                 }
             };
             case 7 -> event -> {
                 if (event.roll == 6 && event.owner == event.activePlayer) {
+                    if (checkDeactivated(event)) return;
                     event.card.setBorder(new Border(Color.GREEN, false, 2, 3));
                     event.card.repaint();
                     Game.game.event(new ChoiceEvent(gameComponent -> gameComponent instanceof PlayerPaneImpl && gameComponent != event.activePlayer.getPlayerPane(), event1 -> {
@@ -123,6 +131,7 @@ public class PlayingCardBuilder {
             };
             case 8 -> event -> {
                 if (event.roll == 7) {
+                    if (checkDeactivated(event)) return;
                     for (PlayerImpl player : event.gameBoard.getPlayers()) {
                         if (player != event.owner) {
                             event.owner.addCoins(player.removeCoins(2));
@@ -132,6 +141,7 @@ public class PlayingCardBuilder {
             };
             case 9 -> event -> {
                 if (event.roll == 8 && event.owner == event.activePlayer) {
+                    if (checkDeactivated(event)) return;
                     event.card.setBorder(new Border(Color.GREEN, false, 2, 3));
                     event.card.repaint();
                     Game.game.event(new ChoiceEvent(gameComponent -> gameComponent instanceof CardStack cardStack && !event.gameBoard.drawStacks.getCardStacks().contains(gameComponent) && event.owner.getCardStacks().contains(gameComponent) && cardStack.getCard() != null && ((BasicCard) cardStack.getCard()).getCardType() != CardType.MAYOR_ESTABLISHMENT, event1 -> {
@@ -151,6 +161,7 @@ public class PlayingCardBuilder {
             };
             case 10 -> event -> {
                 if (event.roll == 7 && event.owner == event.activePlayer) {
+                    if (checkDeactivated(event)) return;
                     for (Card card : event.owner.getCardList()) {
                         if (((PlayingCard) card).getCardClass() == CardClass.SPACE_FARM) {
                             event.owner.addCoins(3);
@@ -160,6 +171,7 @@ public class PlayingCardBuilder {
             };
             case 11 -> event -> {
                 if (event.roll == 8 && event.owner == event.activePlayer) {
+                    if (checkDeactivated(event)) return;
                     for (Card card : event.owner.getCardList()) {
                         if (((PlayingCard) card).getCardClass() == CardClass.SPACE_HARBOR) {
                             event.owner.addCoins(3);
@@ -169,22 +181,26 @@ public class PlayingCardBuilder {
             };
             case 12 -> event -> {
                 if (event.roll == 9) {
+                    if (checkDeactivated(event)) return;
                     event.owner.addCoins(5);
                 }
             };
             case 13 -> event -> {
                 if (event.roll == 9 || event.roll == 10) {
+                    if (checkDeactivated(event)) return;
                     if (event.owner.hasLandmark(17)) event.owner.addCoins(event.activePlayer.removeCoins(3));
                     else event.owner.addCoins(event.activePlayer.removeCoins(2));
                 }
             };
             case 14 -> event -> {
                 if (event.roll == 10) {
+                    if (checkDeactivated(event)) return;
                     event.owner.addCoins(3);
                 }
             };
             case 15 -> event -> {
                 if (event.roll == 11 || event.roll == 12) {
+                    if (checkDeactivated(event)) return;
                     for (Card card : event.owner.getCardList()) {
                         if (((PlayingCard) card).getCardClass() == CardClass.ASTEROID) {
                             if (event.owner.hasLandmark(17)) event.owner.addCoins(3);
@@ -195,16 +211,19 @@ public class PlayingCardBuilder {
             };
             case 20 -> event -> {
                 if (event.roll == 4) {
+                    if (checkDeactivated(event)) return;
                     event.owner.addCoins(1);
                 }
             };
             case 21 -> event -> {
                 if (event.roll == 8 && event.owner.hasLandmark(31)) {
+                    if (checkDeactivated(event)) return;
                     event.owner.addCoins(3);
                 }
             };
             case 22 -> event -> {
                 if ((event.roll == 12 || event.roll == 13 || event.roll == 14) && event.owner.hasLandmark(31)) {
+                    if (checkDeactivated(event)) return;
                     Random random = new Random();
                     int roll1 = random.nextInt(6) + 1;
                     int roll2 = random.nextInt(6) + 1;
@@ -213,35 +232,46 @@ public class PlayingCardBuilder {
             };
             case 23 -> event -> {
                 if (event.roll == 6 && event.owner == event.activePlayer) {
+                    if (checkDeactivated(event)) return;
                     for (Card card : event.owner.getCardList()) {
                         if (card.getID() == 20) {
-                            event.owner.addCoins(1);
+                            if (event.owner.hasLandmark(17)) event.owner.addCoins(2);
+                            else event.owner.addCoins(1);
                         }
                     }
                 }
             };
             case 24 -> event -> {
                 if (event.roll == 9 && event.owner == event.activePlayer) {
+                    if (checkDeactivated(event)) return;
                     event.owner.addCoins(2 * event.owner.getCardList(CardType.SUPPLIER).size());
                 }
             };
             case 25 -> event -> {
                 if ((event.roll == 1) && event.owner != event.activePlayer) {
-                    if (event.owner.hasLandmark(31)) event.owner.addCoins(event.activePlayer.removeCoins(3));
+                    if (checkDeactivated(event)) return;
+                    if (event.owner.hasLandmark(31))
+                        if (event.owner.hasLandmark(17)) event.owner.addCoins(event.activePlayer.removeCoins(4));
+                        else event.owner.addCoins(event.activePlayer.removeCoins(3));
                 }
             };
             case 26 -> event -> {
                 if (event.roll == 7 && event.owner != event.activePlayer) {
-                    event.owner.addCoins(event.activePlayer.removeCoins(1));
+                    if (checkDeactivated(event)) return;
+                    if (event.owner.hasLandmark(17)) event.owner.addCoins(event.activePlayer.removeCoins(2));
+                    else event.owner.addCoins(event.activePlayer.removeCoins(1));
                 }
             };
             case 27 -> event -> {
                 if (event.roll == 8 && event.owner != event.activePlayer) {
-                    event.owner.addCoins(event.activePlayer.removeCoins(1));
+                    if (checkDeactivated(event)) return;
+                    if (event.owner.hasLandmark(17)) event.owner.addCoins(event.activePlayer.removeCoins(2));
+                    else event.owner.addCoins(event.activePlayer.removeCoins(1));
                 }
             };
             case 28 -> event -> {
                 if (event.roll == 7 && event.owner == event.activePlayer) {
+                    if (checkDeactivated(event)) return;
                     for (Card card : event.owner.getCardList()) {
                         if (((PlayingCard) card).getCardClass() == CardClass.SUPPLY_FACTORY || ((PlayingCard) card).getCardClass() == CardClass.SPACE_SHOP) {
                             for (Player player : event.gameBoard.getPlayers()) {
@@ -255,6 +285,7 @@ public class PlayingCardBuilder {
             };
             case 29 -> event -> {
                 if ((event.roll == 8 || event.roll == 9) && event.owner == event.activePlayer) {
+                    if (checkDeactivated(event)) return;
                     for (PlayerImpl player : event.gameBoard.getPlayers()) {
                         if (player != event.owner && player.getCoins() >= 10) {
                             event.owner.addCoins(player.removeCoins(player.getCoins() / 2));
@@ -264,24 +295,29 @@ public class PlayingCardBuilder {
             };
             case 33 -> event -> {
                 if ((event.roll == 2 || event.roll == 3)) {
-                    if (event.owner.getAllLandmarks().size() - (event.owner.hasLandmark(30) ? 1 : 0) < 2) {
+                    if (checkDeactivated(event)) return;
+                    if (event.owner.amountActiveLandmarks() - (event.owner.hasLandmark(30) ? 1 : 0) < 2) {
                         event.owner.addCoins(1);
                     }
                 }
             };
             case 34 -> event -> {
                 if (event.roll == 7) {
+                    if (checkDeactivated(event)) return;
                     event.owner.addCoins(3);
                 }
             };
             case 35 -> event -> {
                 if (event.roll == 2 && event.owner == event.activePlayer) {
-                    if (event.owner.getAllLandmarks().size() - (event.owner.hasLandmark(30) ? 1 : 0) < 2)
-                        event.owner.addCoins(2);
+                    if (checkDeactivated(event)) return;
+                    if (event.owner.amountActiveLandmarks() - (event.owner.hasLandmark(30) ? 1 : 0) < 2)
+                        if (event.owner.hasLandmark(17)) event.owner.addCoins(3);
+                        else event.owner.addCoins(2);
                 }
             };
             case 36 -> event -> {
                 if ((event.roll == 1 || event.roll == 9) && event.owner == event.activePlayer) {
+                    if (checkDeactivated(event)) return;
                     event.card.setBorder(new Border(Color.GREEN, false, 2, 3));
                     event.card.repaint();
                     Game.game.event(new ChoiceEvent(gameComponent -> gameComponent instanceof CardStack cardStack && !event.gameBoard.drawStacks.getCardStacks().contains(gameComponent) && event.owner.getCardStacks().contains(gameComponent) && cardStack.getCard() != null && ((BasicCard) cardStack.getCard()).getCardType() != CardType.MAYOR_ESTABLISHMENT, event1 -> {
@@ -299,21 +335,25 @@ public class PlayingCardBuilder {
                 }
             };
             case 37 -> event -> {
+                if (checkDeactivated(event)) return;
                 if ((event.roll == 5 || event.roll == 6) && event.owner == event.activePlayer) {
                     event.owner.removeCoins(2);
                 }
             };
             case 38 -> event -> {
                 if (event.roll == 9 && event.owner == event.activePlayer) {
+                    if (checkDeactivated(event)) return;
                     event.owner.addCoins((int) (6 * event.owner.getCardList().stream().filter(card -> card.getID() == 34).count()));
                     ((PlayingCard) event.card).setDeactived(true);
+                    event.card.repaint();
                 }
             };
             case 39 -> event -> {
                 if (event.roll == 4 && event.owner == event.activePlayer) {
+                    if (checkDeactivated(event)) return;
                     event.card.setBorder(new Border(Color.GREEN, false, 2, 3));
                     event.card.repaint();
-                    if (event.owner.getAllLandmarks().size() - (event.owner.hasLandmark(30) ? 1 : 0) > 0) {
+                    if (event.owner.amountActiveLandmarks() - (event.owner.hasLandmark(30) ? 1 : 0) > 0) {
                         Game.game.event(new ChoiceEvent(gameComponent -> gameComponent instanceof Landmark landmark && event.owner.getLandmarkList().contains(landmark), event1 -> {
                             event.owner.addCoins(8);
                             event.card.setBorder(null);
@@ -326,6 +366,7 @@ public class PlayingCardBuilder {
             };
             case 40 -> event -> {
                 if (event.roll == 11 && event.owner == event.activePlayer) {
+                    if (checkDeactivated(event)) return;
                     int restaurantsBuild = 0;
                     for (PlayerImpl player : event.gameBoard.getPlayers()) {
                         restaurantsBuild += player.getCardList(CardType.SUPPLIER).size();
@@ -335,20 +376,24 @@ public class PlayingCardBuilder {
             };
             case 41 -> event -> {
                 if (event.roll == 5 && event.owner != event.activePlayer) {
-                    if (event.activePlayer.getAllLandmarks().size() - (event.activePlayer.hasLandmark(30) ? 1 : 0) >= 2) {
-                        event.owner.addCoins(event.activePlayer.removeCoins(5));
+                    if (checkDeactivated(event)) return;
+                    if (event.activePlayer.amountActiveLandmarks() - (event.activePlayer.hasLandmark(30) ? 1 : 0) >= 2) {
+                        if (event.owner.hasLandmark(17)) event.owner.addCoins(event.activePlayer.removeCoins(6));
+                        else event.owner.addCoins(event.activePlayer.removeCoins(5));
                     }
                 }
             };
             case 42 -> event -> {
                 if ((event.roll == 12 || event.roll == 13 || event.roll == 14) && event.owner != event.activePlayer) {
-                    if (event.activePlayer.getAllLandmarks().size() - (event.activePlayer.hasLandmark(30) ? 1 : 0) >= 3) {
+                    if (checkDeactivated(event)) return;
+                    if (event.activePlayer.amountActiveLandmarks() - (event.activePlayer.hasLandmark(30) ? 1 : 0) >= 3) {
                         event.owner.addCoins(event.activePlayer.removeCoins(event.activePlayer.getCoins()));
                     }
                 }
             };
             case 43 -> event -> {
                 if ((event.roll == 11 || event.roll == 12 || event.roll == 13) && event.owner == event.activePlayer) {
+                    if (checkDeactivated(event)) return;
                     int coins = 0;
                     for (PlayerImpl player : event.gameBoard.getPlayers()) {
                         coins += player.getCoins();
@@ -363,6 +408,7 @@ public class PlayingCardBuilder {
             };
             case 44 -> event -> {
                 if (event.roll == 8 && event.owner == event.activePlayer) {
+                    if (checkDeactivated(event)) return;
                     var possibleBuildings = new ArrayList<>();
                     for (PlayerImpl player : event.gameBoard.getPlayers()) {
                         for (Card card : player.getCardList()) {
@@ -378,6 +424,7 @@ public class PlayingCardBuilder {
                             for (Card card : player.getCardList()) {
                                 if (card.getID() == ((Card) event1.selected).getID()) {
                                     ((BasicCard) card).setDeactived(true);
+                                    card.repaint();
                                     event.owner.addCoins(1);
                                     event.card.setBorder(null);
                                     event.card.repaint();
@@ -391,6 +438,15 @@ public class PlayingCardBuilder {
 
             default -> throw new IllegalArgumentException("This id is not a valid Card ID: " + id);
         };
+    }
+
+    private static boolean checkDeactivated(CardEvent event) {
+        if (((PlayingCard) event.card).isDeactived()) {
+            ((PlayingCard) event.card).setDeactived(false);
+            event.card.repaint();
+            return true;
+        }
+        return false;
     }
 
     public BasicCard build() {

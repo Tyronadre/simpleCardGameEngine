@@ -10,7 +10,7 @@ public class ChoiceEvent extends GameEvent {
     public final ChoiceSelectedListener selected;
 
     public ChoiceEvent(Predicate<? super GameComponent> type, ChoiceSelectedListener onSelect) {
-        super("choice event", null);
+        super("Choice Event", null);
         this.type = type;
         this.selected = onSelect;
     }

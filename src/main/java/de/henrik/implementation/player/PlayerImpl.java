@@ -131,7 +131,7 @@ public class PlayerImpl extends Player {
             landmarkStack.addMouseListener(new GameMouseListenerAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    if (PlayerImpl.this == Game.game.getActivePlayer() && e.getButton() == MouseEvent.BUTTON1 && landmark.getCost() <= getCoins() && !hasLandmark(landmark.getID())) {
+                    if (PlayerImpl.this == Game.game.getActivePlayer() && e.getButton() == MouseEvent.BUTTON1 && landmark.getCost() <= getCoins() && !hasLandmark(landmark.getID()) && ((GameBoard)Game.game.getActiveGameBoard()).getState() == GameBoard.BUY_CARD_STATE) {
                         buyLandmark(landmark, landmarkStack);
                     }
                 }
@@ -217,5 +217,15 @@ public class PlayerImpl extends Player {
 
     public List<Landmark> getAllLandmarks() {
         return landmarkHashMap.keySet().stream().toList();
+    }
+
+    public int amountActiveLandmarks() {
+        int i = 0;
+        for (Landmark landmark : landmarkHashMap.keySet()) {
+            if (landmarkHashMap.get(landmark)) {
+                i++;
+            }
+        }
+        return i;
     }
 }

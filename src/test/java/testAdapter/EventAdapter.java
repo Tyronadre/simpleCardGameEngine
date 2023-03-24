@@ -21,10 +21,10 @@ public class EventAdapter {
      */
     public static String getEventName(EventType eventType) {
         return switch (eventType) {
-            case ChoiceEvent -> "choice event";
+            case ChoiceEvent -> "Choice Event";
             case RollDiceEvent -> "Dice Rolled";
-            case NextPlayerEvent -> null;
-            case BuyCardsState -> "Buy Cards";
+            case DialogEvent -> "Game Dialog Event";
+            case NextPlayerEvent -> "Player Change";
         };
     }
 
@@ -54,13 +54,12 @@ public class EventAdapter {
      *
      * @param gameComponent the choice for a ChoiceEvent
      */
-    public static void setChoiceEventChoice(GameEvent event, GameComponent gameComponent, Player owner){
+    public static void setChoiceEventChoice(GameEvent event, GameComponent gameComponent, Player owner) {
         ((ChoiceEvent) event).selected.consume(new ChoiceSelectedEvent(gameComponent, (PlayerImpl) owner));
     }
 
     public static void rollDiceEvent(int dice1, int dice2) {
         Provider.game.event(new DiceRollEvent(dice1, dice2));
-        Provider.gameEventThread.handleNextEvent();
         Provider.gameEventThread.handleNextEvent();
     }
 
@@ -80,8 +79,6 @@ public class EventAdapter {
      * Type of Events
      */
     public enum EventType {
-        ChoiceEvent,
-        RollDiceEvent,
-        BuyCardsState, NextPlayerEvent
+        ChoiceEvent, RollDiceEvent, DialogEvent, NextPlayerEvent
     }
 }

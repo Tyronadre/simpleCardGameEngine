@@ -92,7 +92,7 @@ public class GameBoard extends Board {
 
     private void handleCardActions(int dice1, int dice2) {
         AtomicInteger roll = new AtomicInteger(dice1 + dice2);
-        if (activePlayer.hasLandmark(31)) {
+        if (activePlayer.hasLandmark(31) && roll.get() >= 10) {
             event(new GameDialogEvent(GameBoard.this, "You own \"Earth\". You can add two to you rolled (" + roll + ")", new String[]{"Add two", "Cancel"}, new Runnable[]{() -> {
                 Game.game.setWaitForEvent(false);
                 roll.addAndGet(2);
@@ -107,16 +107,41 @@ public class GameBoard extends Board {
         drawStacks.dice.setBorder(null);
         drawStacks.twoDice.disable();
         drawStacks.twoDice.setBorder(null);
-        for (CardType cardType : CardType.values()) {
-            for (Card c : activePlayer.getCardList(cardType)) {
+
+        for (int i = 0; i < Options.getPlayerCount(); i++) {
+            PlayerImpl player = getPlayers().get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
+            for (Card c : player.getCardList(CardType.SUPPLIER)) {
                 PlayingCard card = (PlayingCard) c;
-                card.event(new CardEvent(activePlayer, activePlayer, roll.get(), this, c));
+                card.event(new CardEvent(player, activePlayer, roll.get(), this, c));
             }
-            if (cardType == CardType.SUPPLIER) {
-                if (activePlayer.getCoins() == 0) {
-                    activePlayer.addCoins(1);
-                }
+            player.getPlayerPane().repaint();
+        }
+        if (activePlayer != null && activePlayer.hasLandmark(30) && activePlayer.getCoins() == 0) {
+            activePlayer.addCoins(1);
+        }
+        for (int i = 0; i < Options.getPlayerCount(); i++) {
+            PlayerImpl player = getPlayers().get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
+            for (Card c : player.getCardList(CardType.PRIMARY_INDUSTRY)) {
+                PlayingCard card = (PlayingCard) c;
+                card.event(new CardEvent(player, activePlayer, roll.get(), this, c));
             }
+            player.getPlayerPane().repaint();
+        }
+        for (int i = 0; i < Options.getPlayerCount(); i++) {
+            PlayerImpl player = getPlayers().get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
+            for (Card c : player.getCardList(CardType.SECONDARY_INDUSTRY)) {
+                PlayingCard card = (PlayingCard) c;
+                card.event(new CardEvent(player, activePlayer, roll.get(), this, c));
+            }
+            player.getPlayerPane().repaint();
+        }
+        for (int i = 0; i < Options.getPlayerCount(); i++) {
+            PlayerImpl player = getPlayers().get((activePlayer.getId() + i + 1) % Options.getPlayerCount());
+            for (Card c : player.getCardList(CardType.MAYOR_ESTABLISHMENT)) {
+                PlayingCard card = (PlayingCard) c;
+                card.event(new CardEvent(player, activePlayer, roll.get(), this, c));
+            }
+            player.getPlayerPane().repaint();
         }
 
         event(new GameStateChangeEvent(BUY_CARD_STATE));
@@ -346,7 +371,8 @@ public class GameBoard extends Board {
 
     @Override
     public void activate() {
-
+        drawStacks = new DrawStacks(Options.drawStacks, new Dimension(Options.getWidth(), Options.getHeight() / 3), new Point(0, Options.getHeight() / 3));
+        add(drawStacks);
 
         for (int i = 0; i < Options.getPlayerCount(); i++) {
             var p = new PlayerImpl(i, switch (i) {
@@ -360,9 +386,6 @@ public class GameBoard extends Board {
                 p.addCard((PlayingCard) card);
             addPlayer(p);
         }
-
-        drawStacks = new DrawStacks(Options.drawStacks, new Dimension(Options.getWidth(), Options.getHeight() / 3), new Point(0, Options.getHeight() / 3));
-        add(drawStacks);
 
         drawStacks.dice.addActionListener(e -> {
             int roll = new Random().nextInt(6) + 1;
@@ -427,7 +450,7 @@ public class GameBoard extends Board {
 
     public void nextPlayer() {
         if (activePlayer != null)
-            if (lastRollDouble) {
+            if (lastRollDouble && activePlayer.hasLandmark(18)) {
                 lastRollDouble = false;
                 event(new GameDialogEvent(this, "You rolled double! You get another turn!", new String[]{"OK"}, new Runnable[]{() -> {
                     Game.game.setWaitForEvent(false);

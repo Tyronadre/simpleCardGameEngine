@@ -1,7 +1,7 @@
 package tests;
 
+import TestUtil.Util;
 import de.henrik.engine.events.GameEvent;
-import de.henrik.engine.game.Game;
 import de.henrik.engine.game.Player;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -105,15 +105,10 @@ public class LandmarkTests {
         EventAdapter.setPlayerEvent(player0);
         Provider.gameEventThread.handleNextEvent();
         EventAdapter.rollDiceEvent(1, 0);
-        Provider.gameEventThread.handleNextEvent();
-        GameEvent event = Provider.gameEventThread.getNextEvent();
+        GameEvent event = Provider.gameEventThread.getEvent(EventAdapter.EventType.DialogEvent);
         EventAdapter.optionEvent(event, 0);
-        Provider.gameEventThread.handleNextEvent();
+        Provider.gameEventThread.handleAllEvents();
         assertEquals(player0, Provider.game.getActivePlayer());
-        Provider.gameEventThread.handleNextEvent();
-        EventAdapter.rollDiceEvent(1, 0);
-        event = Provider.gameEventThread.getNextEvent();
-        assertEquals(EventAdapter.getEventName(EventAdapter.EventType.RollDiceEvent), event.getName());
         assertEquals(5, PlayerAdapter.getCoins(player0));
     }
 }

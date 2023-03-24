@@ -10,7 +10,7 @@ public class GameDialogEvent extends GameEvent {
     private final boolean opaque;
 
     public GameDialogEvent(GameComponent owner, String message, String[] answerOptions, Runnable[] answerRunnables, boolean opaque) {
-        super("GameDialogEvent", owner);
+        super("Game Dialog Event", owner);
         if (answerOptions.length != answerRunnables.length)
             throw new IllegalArgumentException("answerOptions.length != answerRunnables.length");
         this.message = message;

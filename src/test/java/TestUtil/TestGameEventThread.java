@@ -2,6 +2,7 @@ package TestUtil;
 
 import de.henrik.engine.events.GameEvent;
 import de.henrik.engine.game.GameEventThread;
+import testAdapter.EventAdapter;
 
 import java.util.List;
 
@@ -57,5 +58,14 @@ public class TestGameEventThread extends GameEventThread {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public GameEvent getEvent(EventAdapter.EventType eventType) {
+        for (GameEvent event : eventQueue) {
+            if (EventAdapter.getEventName(eventType).equals(event.getName())) {
+                return event;
+            }
+        }
+        throw new RuntimeException("Event not found");
     }
 }

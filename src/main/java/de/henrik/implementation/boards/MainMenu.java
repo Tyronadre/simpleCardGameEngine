@@ -51,81 +51,101 @@ public class MainMenu extends Board {
         Label title = new Label("Solar System Rush", 50, 50, 1000, 80);
 
         Button startGame = new Button("StartGame", 100, 200, BUTTON_WIDTH, 50);
-        startGame.addActionListener(e -> {
-            System.out.println("Start Game");
-            Options.player1Name = p1Tf.getText();
-            Options.player2Name = p2Tf.getText();
-            Options.player3Name = p3Tf.getText();
-            Options.player4Name = p4Tf.getText();
-            Options.drawStacks = Integer.parseInt(drawStacksTf.getText());
-            Pane pane = new Pane(new GameImage(new Color(0, 0, 0, 0.5f)), 0, 0, Options.getWidth(), Options.getHeight());
-            pane.add(new Label("Loading...", 200, Options.getHeight() / 2 - 30, Options.getWidth(), 60));
-            add(pane);
-            repaint();
-            Game.game.switchGameBoard("game");
-            remove(pane);
-        });
+
 
         Button addPlayer = new Button("Add Player", 100, 300, BUTTON_WIDTH, 50);
         Button removePlayer = new Button("Remove Player", 100, 400, BUTTON_WIDTH, 50);
 
-        addPlayer.addActionListener(e -> {
-            System.out.println("Add Player");
-            if (increasePlayerCount()) {
-                playerLabel[Options.playerCount - 1].setVisible(true);
-                playerTextField[Options.playerCount - 1].setVisible(true);
-                if (Options.playerCount == 4) {
-                    addPlayer.disable();
-                    addPlayer.repaint();
-                }
-                if (!removePlayer.isEnabled()) {
-                    removePlayer.enable();
-                    removePlayer.repaint();
-                }
-            }
-        });
-        removePlayer.addActionListener(e -> {
-            System.out.println("Remove Player");
-            if (decreasePlayerCount()) {
-                playerLabel[Options.playerCount].setVisible(false);
-                playerTextField[Options.playerCount].setVisible(false);
-                if (Options.playerCount == 2) {
-                    removePlayer.disable();
-                    removePlayer.repaint();
-                }
-                if (!addPlayer.isEnabled()) {
-                    addPlayer.enable();
-                    removePlayer.repaint();
-                }
-            }
-        });
+
+
         removePlayer.disable();
 
         Pane enabledE1 = new Pane(new GameImage("/other/disabled.png"), 50, 500, 50, 50);
         Button enableE1 = new Button("Toggle Expansion-Pack 1", 100, 500, BUTTON_WIDTH, 50);
-        enableE1.addActionListener(e -> {
-            System.out.println("toggle e1");
-            if (Options.expansion1Selected) {
-                enabledE1.setBackground(new GameImage("/other/disabled.png"));
-                Options.expansion1Selected = false;
-            } else {
-                enabledE1.setBackground(new GameImage("/other/enabled.png"));
-                Options.expansion1Selected = true;
-            }
-        });
-
         Pane enabledE2 = new Pane(new GameImage("/other/disabled.png"), 50, 600, 50, 50);
         Button enableE2 = new Button("Toggle Expansion-Pack 2", 100, 600, BUTTON_WIDTH, 50);
-        enableE2.addActionListener(e -> {
-            System.out.println("toggle e2");
-            if (Options.expansion2Selected) {
-                enabledE2.setBackground(new GameImage("/other/disabled.png"));
-                Options.expansion2Selected = false;
-            } else {
-                enabledE2.setBackground(new GameImage("/other/enabled.png"));
-                Options.expansion2Selected = true;
-            }
+
+
+        enableE2.disable();
+        Button quit = new Button("Quit", 100, 700, BUTTON_WIDTH, 50);
+        addActivationListener(e1 -> {
+            quit.addActionListener(e -> {
+                System.out.println("Quit");
+                System.exit(0);
+            });
+            enableE2.addActionListener(e -> {
+                System.out.println("toggle e2");
+                if (Options.expansion2Selected) {
+                    enabledE2.setBackground(new GameImage("/other/disabled.png"));
+                    Options.expansion2Selected = false;
+                    enableE1.enable();
+                } else {
+                    enabledE2.setBackground(new GameImage("/other/enabled.png"));
+                    Options.expansion2Selected = true;
+                    enableE1.disable();
+                }
+                enableE1.repaint();
+            });
+            enableE1.addActionListener(e -> {
+                System.out.println("toggle e1");
+                if (Options.expansion1Selected) {
+                    enabledE1.setBackground(new GameImage("/other/disabled.png"));
+                    Options.expansion1Selected = false;
+                    enableE2.disable();
+
+                } else {
+                    enabledE1.setBackground(new GameImage("/other/enabled.png"));
+                    Options.expansion1Selected = true;
+                    enableE2.enable();
+                }
+                enableE2.repaint();
+            });
+            removePlayer.addActionListener(e -> {
+                System.out.println("Remove Player");
+                if (decreasePlayerCount()) {
+                    playerLabel[Options.playerCount].setVisible(false);
+                    playerTextField[Options.playerCount].setVisible(false);
+                    if (Options.playerCount == 2) {
+                        removePlayer.disable();
+                        removePlayer.repaint();
+                    }
+                    if (!addPlayer.isEnabled()) {
+                        addPlayer.enable();
+                        removePlayer.repaint();
+                    }
+                }
+            });
+            addPlayer.addActionListener(e -> {
+                System.out.println("Add Player");
+                if (increasePlayerCount()) {
+                    playerLabel[Options.playerCount - 1].setVisible(true);
+                    playerTextField[Options.playerCount - 1].setVisible(true);
+                    if (Options.playerCount == 4) {
+                        addPlayer.disable();
+                        addPlayer.repaint();
+                    }
+                    if (!removePlayer.isEnabled()) {
+                        removePlayer.enable();
+                        removePlayer.repaint();
+                    }
+                }
+            });
+            startGame.addActionListener(e -> {
+                System.out.println("Start Game");
+                Options.player1Name = p1Tf.getText();
+                Options.player2Name = p2Tf.getText();
+                Options.player3Name = p3Tf.getText();
+                Options.player4Name = p4Tf.getText();
+                Options.drawStacks = Integer.parseInt(drawStacksTf.getText());
+                Pane pane = new Pane(new GameImage(new Color(0, 0, 0, 0.5f)), 0, 0, Options.getWidth(), Options.getHeight());
+                pane.add(new Label("Loading...", 200, Options.getHeight() / 2 - 30, Options.getWidth(), 60));
+                add(pane);
+                repaint();
+                Game.game.switchGameBoard("game");
+                remove(pane);
+            });
         });
+
 
 
         add(title);
@@ -136,6 +156,12 @@ public class MainMenu extends Board {
         add(enableE1);
         add(enabledE2);
         add(enableE2);
+        add(quit);
+    }
+
+    @Override
+    public void activate() {
+        super.activate();
     }
 
     @Override

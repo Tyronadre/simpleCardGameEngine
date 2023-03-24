@@ -3,19 +3,11 @@ package testAdapter;
 import TestUtil.TestGameEventThread;
 import de.henrik.engine.events.SwitchGameBoardEvent;
 import de.henrik.engine.game.Game;
-import de.henrik.engine.game.Player;
-import de.henrik.implementation.GameEvent.DiceRollEvent;
 import de.henrik.implementation.boards.GameBoard;
 import de.henrik.implementation.boards.MainMenu;
-import de.henrik.implementation.game.DrawStacks;
 import de.henrik.implementation.game.Options;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 public class Provider {
     public static final Game game = Game.game;

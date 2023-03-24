@@ -40,7 +40,7 @@ public class PlayerPaneImpl extends PlayerPane {
         landmarks.setPosition(landmarksAndInfo.getX(), landmarksAndInfo.getY() + 40);
         for (Landmark landmark : player.landmarkHashMap.keySet()) {
             CardStack landmarkStack = new BasicCardStack("player_" + player.getId() + "_landmark_" + landmark.ID, landmark, 1);
-            landmarkStack.setRenderPolicy(CardStack.RP_ALL_CARDS_UNTURNED);
+            landmarkStack.setRenderPolicy(player.hasLandmark(landmark.ID) ? CardStack.RP_ALL_CARDS_TURNED : CardStack.RP_ALL_CARDS_UNTURNED);
             landmarkStack.addCard(landmark);
             landmarks.addStack(landmarkStack);
         }

@@ -61,8 +61,9 @@ public class BasicCard extends Card {
     public void paint(GameGraphics g) {
         if (deactived) {
             g.setColor(new Color(0, 0, 0, 0.5f));
-            g.getGraphics().fillRect(0, 0, getSize().width, getSize().height);
+            g.getGraphics().fillRect(getX(), getY(), getSize().width, getSize().height);
             g.setColor(Color.blue);
+            g.getGraphics().setFont(g.getGraphics().getFont().deriveFont(40f));
             g.getGraphics().drawString("Deactived", 10, 100);
         }
         super.paint(g);
