@@ -16,7 +16,6 @@ public class LandmarkTests {
     static Player player1;
     static Player player2;
     static Player player3;
-    static Game game;
 
     @BeforeAll
     static void init() {
@@ -24,11 +23,10 @@ public class LandmarkTests {
         LandmarkAdapter.init();
         CardAdapter.init();
         Provider.setGameState();
-        game = Provider.game;
-        player0 = PlayerAdapter.getDefaultPlayer(game, 0);
-        player1 = PlayerAdapter.getDefaultPlayer(game, 1);
-        player2 = PlayerAdapter.getDefaultPlayer(game, 2);
-        player3 = PlayerAdapter.getDefaultPlayer(game, 3);
+        player0 = PlayerAdapter.getPlayer( 0);
+        player1 = PlayerAdapter.getPlayer( 1);
+        player2 = PlayerAdapter.getPlayer( 2);
+        player3 = PlayerAdapter.getPlayer( 3);
     }
 
     @BeforeEach
@@ -92,7 +90,7 @@ public class LandmarkTests {
     @Test
     void test_landmark_effect_c17() {
         PlayerAdapter.freeLandmark(player0, 17);
-        CardAdapter.event(CardAdapter.getCard(3), player0, player0, 2, Provider.game);
+        CardAdapter.event(CardAdapter.getCard(3), player0, player0, 2);
         assertEquals(7, PlayerAdapter.getCoins(player0));
     }
 
@@ -106,14 +104,14 @@ public class LandmarkTests {
         PlayerAdapter.freeLandmark(player0, 19);
         EventAdapter.setPlayerEvent(player0);
         Provider.gameEventThread.handleNextEvent();
-        EventAdapter.rollDiceEvent(1, 0, Provider.game);
+        EventAdapter.rollDiceEvent(1, 0);
         Provider.gameEventThread.handleNextEvent();
         GameEvent event = Provider.gameEventThread.getNextEvent();
         EventAdapter.optionEvent(event, 0);
         Provider.gameEventThread.handleNextEvent();
         assertEquals(player0, Provider.game.getActivePlayer());
         Provider.gameEventThread.handleNextEvent();
-        EventAdapter.rollDiceEvent(1, 0, Provider.game);
+        EventAdapter.rollDiceEvent(1, 0);
         event = Provider.gameEventThread.getNextEvent();
         assertEquals(EventAdapter.getEventName(EventAdapter.EventType.RollDiceEvent), event.getName());
         assertEquals(5, PlayerAdapter.getCoins(player0));

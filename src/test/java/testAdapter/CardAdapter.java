@@ -90,7 +90,7 @@ public class CardAdapter {
         return ((PlayingCard) card).getCardType().ordinal() + 1;
     }
 
-    public static void event(Card card, Player activePlayer, Player eventOwner, int roll, Game game) {
-        ((PlayingCard) card).event(new CardEvent((PlayerImpl) eventOwner,(PlayerImpl) activePlayer, roll, (GameBoard) game.getActiveGameBoard(), card));
+    public static void event(Card card, Player activePlayer, Player eventOwner, int roll) {
+        ((PlayingCard) card).event(new CardEvent((PlayerImpl) eventOwner,(PlayerImpl) activePlayer, roll, (GameBoard) Provider.game.getActiveGameBoard(), card));
     }
 }

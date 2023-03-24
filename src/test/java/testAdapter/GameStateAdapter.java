@@ -1,11 +1,11 @@
 package testAdapter;
 
-import de.henrik.engine.events.SwitchGameBoardEvent;
-import de.henrik.engine.game.Game;
-import de.henrik.implementation.GameEvent.GameDialogEvent;
+import de.henrik.engine.game.Player;
 import de.henrik.implementation.GameEvent.GameStateChangeEvent;
+import de.henrik.implementation.GameEvent.PlayerChangeEvent;
 import de.henrik.implementation.boards.GameBoard;
 import de.henrik.implementation.boards.MainMenu;
+import de.henrik.implementation.player.PlayerImpl;
 
 public class GameStateAdapter {
     public static void setGameState(GameState state) {
@@ -22,12 +22,18 @@ public class GameStateAdapter {
         }
     }
 
+    public static void setActivePlayer(Player player) {
+        Provider.game.event(new PlayerChangeEvent((PlayerImpl) player));
+        Provider.gameEventThread.handleNextEvent();
+        Provider.gameEventThread.handleNextEvent();
+    }
+
     public enum GameState {
         MENU, PAUSE, NEW_PLAYER, ROLL_DICE, BUY_CARD,
     }
 
-    public static GameState getGameState(Game game) {
-        if (game.getActiveGameBoard() instanceof GameBoard gameBoard) {
+    public static GameState getGameState() {
+        if (Provider.game.getActiveGameBoard() instanceof GameBoard gameBoard) {
             return switch (gameBoard.getState()) {
                 case 0 -> GameState.NEW_PLAYER;
                 case 1 -> GameState.ROLL_DICE;
@@ -36,7 +42,7 @@ public class GameStateAdapter {
                 default -> throw new IllegalStateException("Unexpected value: " + gameBoard.getState());
             };
         }
-        else if (game.getActiveGameBoard() instanceof MainMenu){
+        else if (Provider.game.getActiveGameBoard() instanceof MainMenu){
             return GameState.MENU;
         }
         throw new IllegalArgumentException("Game is not in a valid state");

@@ -29,7 +29,7 @@ public class PlayerImpl extends Player {
 
     public PlayerImpl(int id, String name) {
         super(id, name);
-        coins = 5000;
+        coins = 5;
         loadLandmarks();
         playerPane = new PlayerPaneImpl(this);
     }
@@ -214,7 +214,7 @@ public class PlayerImpl extends Player {
         }
     }
 
-    public Landmark[] getAllLandmarks() {
-        return landmarkHashMap.keySet().toArray(new Landmark[0]);
+    public List<Landmark> getAllLandmarks() {
+        return landmarkHashMap.keySet().stream().toList();
     }
 }

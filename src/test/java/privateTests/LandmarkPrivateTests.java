@@ -15,7 +15,6 @@ public class LandmarkPrivateTests {
     static Player player1;
     static Player player2;
     static Player player3;
-    static Game game;
 
     @BeforeAll
     static void init() {
@@ -23,11 +22,10 @@ public class LandmarkPrivateTests {
         LandmarkAdapter.init();
         CardAdapter.init();
         Provider.setGameState();
-        game = Provider.game;
-        player0 = PlayerAdapter.getDefaultPlayer(game, 0);
-        player1 = PlayerAdapter.getDefaultPlayer(game, 1);
-        player2 = PlayerAdapter.getDefaultPlayer(game, 2);
-        player3 = PlayerAdapter.getDefaultPlayer(game, 3);
+        player0 = PlayerAdapter.getPlayer( 0);
+        player1 = PlayerAdapter.getPlayer(1);
+        player2 = PlayerAdapter.getPlayer( 2);
+        player3 = PlayerAdapter.getPlayer( 3);
     }
 
     @BeforeEach
@@ -84,21 +82,21 @@ public class LandmarkPrivateTests {
         PlayerAdapter.freeCard(player0, CardAdapter.getCard(1));
         PlayerAdapter.freeCard(player0, CardAdapter.getCard(14));
         PlayerAdapter.setCoins(player0, 0);
-        CardAdapter.event(CardAdapter.getCard(3), player0, player0, 2, Provider.game);
+        CardAdapter.event(CardAdapter.getCard(3), player0, player0, 2);
         assertEquals(2, PlayerAdapter.getCoins(player0));
-        CardAdapter.event(CardAdapter.getCard(5), player0, player0, 4, Provider.game);
+        CardAdapter.event(CardAdapter.getCard(5), player0, player0, 4);
         assertEquals(6, PlayerAdapter.getCoins(player0));
-        CardAdapter.event(CardAdapter.getCard(15), player0, player0, 11, Provider.game);
+        CardAdapter.event(CardAdapter.getCard(15), player0, player0, 11);
         assertEquals(12, PlayerAdapter.getCoins(player0));
         PlayerAdapter.setCoins(player0, 20);
         PlayerAdapter.setCoins(player1, 0);
-        CardAdapter.event(CardAdapter.getCard(4), player0, player1, 3, Provider.game);
+        CardAdapter.event(CardAdapter.getCard(4), player0, player1, 3);
         assertEquals(18, PlayerAdapter.getCoins(player0));
         assertEquals(2, PlayerAdapter.getCoins(player1));
-        CardAdapter.event(CardAdapter.getCard(13), player0, player1, 9, Provider.game);
+        CardAdapter.event(CardAdapter.getCard(13), player0, player1, 9);
         assertEquals(15, PlayerAdapter.getCoins(player0));
         assertEquals(5, PlayerAdapter.getCoins(player1));
-        CardAdapter.event(CardAdapter.getCard(15), player1, player1, 11, Provider.game);
+        CardAdapter.event(CardAdapter.getCard(15), player1, player1, 11);
         assertEquals(5, PlayerAdapter.getCoins(player1));
     }
 
@@ -107,10 +105,10 @@ public class LandmarkPrivateTests {
         PlayerAdapter.freeLandmark(player0, 18);
         EventAdapter.setPlayerEvent(player0);
         Provider.gameEventThread.handleNextEvent();
-        EventAdapter.rollDiceEvent(1, 1, Provider.game);
+        EventAdapter.rollDiceEvent(1, 1);
         Provider.gameEventThread.handleNextEvent();
         assertEquals(player0, Provider.game.getActivePlayer());
-        EventAdapter.nextPlayerEvent(Provider.game);
+        EventAdapter.nextPlayerEvent();
         assertEquals(player0, Provider.game.getActivePlayer());
         assertEquals(5, PlayerAdapter.getCoins(player0));
     }
@@ -120,13 +118,13 @@ public class LandmarkPrivateTests {
         PlayerAdapter.freeLandmark(player0, 19);
         EventAdapter.setPlayerEvent(player0);
         Provider.gameEventThread.handleNextEvent();
-        EventAdapter.rollDiceEvent(1, 0, Provider.game);
+        EventAdapter.rollDiceEvent(1, 0);
         Provider.gameEventThread.handleNextEvent();
         GameEvent event = Provider.gameEventThread.getNextEvent();
         EventAdapter.optionEvent(event, 1);
         Provider.gameEventThread.handleNextEvent();
         Provider.gameEventThread.handleNextEvent();
         assertEquals(player0, Provider.game.getActivePlayer());
-        assertEquals(GameStateAdapter.GameState.BUY_CARD, GameStateAdapter.getGameState(Provider.game));
+        assertEquals(GameStateAdapter.GameState.BUY_CARD, GameStateAdapter.getGameState());
     }
 }

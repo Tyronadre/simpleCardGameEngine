@@ -22,18 +22,16 @@ public class CardEventTests {
     static Player player1;
     static Player player2;
     static Player player3;
-    static Game game;
 
     @BeforeAll()
     static void init() {
         Provider.init();
         CardAdapter.init();
         Provider.setGameState();
-        game = Provider.game;
-        player0 = PlayerAdapter.getPlayer(game, 0);
-        player1 = PlayerAdapter.getPlayer(game, 1);
-        player2 = PlayerAdapter.getPlayer(game, 2);
-        player3 = PlayerAdapter.getPlayer(game, 3);
+        player0 = PlayerAdapter.getPlayer( 0);
+        player1 = PlayerAdapter.getPlayer( 1);
+        player2 = PlayerAdapter.getPlayer( 2);
+        player3 = PlayerAdapter.getPlayer( 3);
     }
 
     @BeforeEach
@@ -49,21 +47,21 @@ public class CardEventTests {
     @Test
     void c1() {
         Card card = CardAdapter.getCard(1);
-        CardAdapter.event(card, player0, player0, 1, game);
+        CardAdapter.event(card, player0, player0, 1);
         testCoins(1, 0, 0, 0);
     }
 
     @Test
     void c2() {
         Card card = CardAdapter.getCard(2);
-        CardAdapter.event(card, player0, player0, 2, game);
+        CardAdapter.event(card, player0, player0, 2);
         testCoins(1, 0, 0, 0);
     }
 
     @Test
     void c3() {
         Card card = CardAdapter.getCard(3);
-        CardAdapter.event(card, player0, player0, 2, game);
+        CardAdapter.event(card, player0, player0, 2);
         testCoins(1, 0, 0, 0);
     }
 
@@ -71,21 +69,21 @@ public class CardEventTests {
     void c4() {
         Card card = CardAdapter.getCard(4);
         setCoins(1, 0, 0, 0);
-        CardAdapter.event(card, player0, player1, 3, game);
+        CardAdapter.event(card, player0, player1, 3);
         testCoins(0, 1, 0, 0);
     }
 
     @Test
     void c5() {
         Card card = CardAdapter.getCard(5);
-        CardAdapter.event(card, player0, player0, 4, game);
+        CardAdapter.event(card, player0, player0, 4);
         testCoins(3, 0, 0, 0);
     }
 
     @Test
     void c6() {
         Card card = CardAdapter.getCard(6);
-        CardAdapter.event(card, player0, player0, 5, game);
+        CardAdapter.event(card, player0, player0, 5);
         testCoins(1, 0, 0, 0);
     }
 
@@ -93,7 +91,7 @@ public class CardEventTests {
     void c7() {
         Card card = CardAdapter.getCard(7);
         setCoins(10, 10, 4, 0);
-        CardAdapter.event(card, player0, player0, 6, game);
+        CardAdapter.event(card, player0, player0, 6);
         GameEvent event = Provider.gameEventThread.getEvents().get(0);
 
         assertEquals(EventAdapter.getEventName(EventAdapter.EventType.ChoiceEvent), event.getName());
@@ -107,7 +105,7 @@ public class CardEventTests {
     void c8() {
         Card card = CardAdapter.getCard(8);
         setCoins(10, 5, 3, 1);
-        CardAdapter.event(card, player0, player0, 7, game);
+        CardAdapter.event(card, player0, player0, 7);
         testCoins(15, 3, 1, 0);
     }
 
@@ -122,7 +120,7 @@ public class CardEventTests {
         Card card = CardAdapter.getCard(10);
         Card farmCard = CardAdapter.getCard(2);
         PlayerAdapter.freeCard(player0, farmCard);
-        CardAdapter.event(card, player0, player0, 7, game);
+        CardAdapter.event(card, player0, player0, 7);
         testCoins(3, 0, 0, 0);
     }
 
@@ -131,14 +129,14 @@ public class CardEventTests {
         Card card = CardAdapter.getCard(11);
         Card supplyCard = CardAdapter.getCard(6);
         PlayerAdapter.freeCard(player0, supplyCard);
-        CardAdapter.event(card, player0, player0, 8, game);
+        CardAdapter.event(card, player0, player0, 8);
         testCoins(3, 0, 0, 0);
     }
 
     @Test
     void c12() {
         Card card = CardAdapter.getCard(12);
-        CardAdapter.event(card, player0, player0, 9, game);
+        CardAdapter.event(card, player0, player0, 9);
         testCoins(5, 0, 0, 0);
     }
 
@@ -146,14 +144,14 @@ public class CardEventTests {
     void c13() {
         Card card = CardAdapter.getCard(13);
         setCoins(2, 0, 0, 0);
-        CardAdapter.event(card, player0, player1, 10, game);
+        CardAdapter.event(card, player0, player1, 10);
         testCoins(0, 2, 0, 0);
     }
 
     @Test
     void c14() {
         Card card = CardAdapter.getCard(14);
-        CardAdapter.event(card, player0, player0, 10, game);
+        CardAdapter.event(card, player0, player0, 10);
         testCoins(3, 0, 0, 0);
     }
 
@@ -162,7 +160,7 @@ public class CardEventTests {
         Card card = CardAdapter.getCard(15);
         Card supplyCard = CardAdapter.getCard(1);
         PlayerAdapter.freeCard(player0, supplyCard);
-        CardAdapter.event(card, player0, player0, 11, game);
+        CardAdapter.event(card, player0, player0, 11);
         testCoins(2, 0, 0, 0);
     }
 

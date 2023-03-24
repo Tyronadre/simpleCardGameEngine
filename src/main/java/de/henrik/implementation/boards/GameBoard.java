@@ -31,10 +31,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class GameBoard extends Board {
 
-    protected final List<PlayerImpl> players;
     PlayerImpl activePlayer;
 
     private Card cardDragged;
@@ -53,7 +53,6 @@ public class GameBoard extends Board {
 
     public GameBoard() {
         super(new GameImage("/background/gameboard.jpg", false).getScaledInstance(Options.getWidth(), Options.getHeight()));
-        this.players = new ArrayList<>();
     }
 
     protected GameEventListener onPlayerSwitchListener() {
@@ -216,7 +215,7 @@ public class GameBoard extends Board {
             if (event instanceof ChoiceEvent choiceEvent) {
                 Game.game.setWaitForEvent(true);
                 HashMap<PlayerImpl, List<GameComponent>> selectableComponents = new HashMap<>();
-                for (PlayerImpl player : players) {
+                for (PlayerImpl player : getPlayers()) {
                     selectableComponents.put(player, new ArrayList<>());
                     if (choiceEvent.type.test(player.getPlayerPane())) {
                         selectableComponents.get(player).add(player.getPlayerPane());
@@ -260,7 +259,7 @@ public class GameBoard extends Board {
             if (event instanceof GameStateChangeEvent gameStateChangeEvent) {
                 int oldState = this.gameState;
                 this.gameState = gameStateChangeEvent.newState;
-                for (PlayerImpl player : players) {
+                for (PlayerImpl player : getPlayers()) {
                     player.removeBorders();
                 }
                 drawStacks.removeBorders();
@@ -333,8 +332,7 @@ public class GameBoard extends Board {
 
     @Override
     public void activate() {
-        drawStacks = new DrawStacks(Options.drawStacks, new Dimension(Options.getWidth(), Options.getHeight() / 3), new Point(0, Options.getHeight() / 3));
-        add(drawStacks);
+
 
         for (int i = 0; i < Options.getPlayerCount(); i++) {
             var p = new PlayerImpl(i, switch (i) {
@@ -348,6 +346,9 @@ public class GameBoard extends Board {
                 p.addCard((PlayingCard) card);
             addPlayer(p);
         }
+
+        drawStacks = new DrawStacks(Options.drawStacks, new Dimension(Options.getWidth(), Options.getHeight() / 3), new Point(0, Options.getHeight() / 3));
+        add(drawStacks);
 
         drawStacks.dice.addActionListener(e -> {
             int roll = new Random().nextInt(6) + 1;
@@ -396,10 +397,10 @@ public class GameBoard extends Board {
         remove(drawStacks);
         removeKeyListener(escKeyListener);
         drawStacks = null;
-        for (PlayerImpl player : players) {
+        for (PlayerImpl player : getPlayers()) {
             remove(player.getPlayerPane());
+            game.removePlayer(player);
         }
-        players.clear();
         hasRerolled = false;
         lastRollDouble = false;
     }
@@ -413,17 +414,17 @@ public class GameBoard extends Board {
                     Game.game.setWaitForEvent(false);
                     event(new PlayerChangeEvent(activePlayer));
                 }}, false));
-            } else event(new PlayerChangeEvent(players.get((activePlayer.getId() + 1) % (players.size()))));
-        else event(new PlayerChangeEvent(players.get(new Random().nextInt(Options.getPlayerCount()))));
+            } else event(new PlayerChangeEvent(getPlayers().get((activePlayer.getId() + 1) % (getPlayers().size()))));
+        else event(new PlayerChangeEvent(getPlayers().get(new Random().nextInt(Options.getPlayerCount()))));
     }
 
     public List<PlayerImpl> getPlayers() {
-        return players;
+        return game.getPlayers().stream().map(player -> (PlayerImpl) player).collect(Collectors.toList());
     }
 
 
     public void addPlayer(PlayerImpl player) {
-        players.add(player);
+        game.addPlayer(player);
         add(player.getPlayerPane());
     }
 

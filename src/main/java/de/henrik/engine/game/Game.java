@@ -9,13 +9,16 @@ import de.henrik.implementation.game.Options;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.dnd.DropTarget;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Game extends JFrame {
 
     public static final Game game = new Game();
     private static boolean running = false;
+    private List<Player> players = new ArrayList<>();
 
     private Player activePlayer;
 
@@ -27,7 +30,7 @@ public class Game extends JFrame {
         Options.init();
     }
 
-    private Board gameBoard;
+    private Board board;
 
     private Game() {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -48,7 +51,7 @@ public class Game extends JFrame {
     }
 
     public Board getActiveGameBoard() {
-        return gameBoard;
+        return board;
     }
 
     public void start(Board gameBoard) {
@@ -56,12 +59,12 @@ public class Game extends JFrame {
 
         addEventListener((SwitchGameBoardListener) event -> {
             event.oldBoard.deactivate();
-            Game.game.gameBoard = event.newBoard;
+            Game.game.board = event.newBoard;
             event.newBoard.activate();
             event.newBoard.repaint();
         });
 
-        this.gameBoard = gameBoard;
+        this.board = gameBoard;
         Graphics2D g = (Graphics2D) getGraphics().create();
         g.setClip(0, 0, getWidth(), getHeight());
         gameBoard.setGraphics(new GameGraphics(g));
@@ -76,7 +79,7 @@ public class Game extends JFrame {
 
     @Override
     public void paint(Graphics g) {
-        if (isRunning()) gameBoard.paint(new GameGraphics((Graphics2D) getGraphics()));
+        if (isRunning()) board.paint(new GameGraphics((Graphics2D) getGraphics()));
     }
 
     public static GameGraphics getGameGraphics() {
@@ -123,7 +126,7 @@ public class Game extends JFrame {
         gameEventThread.removeAllListener();
         gameEventThread.addListener((SwitchGameBoardListener) event -> {
             event.oldBoard.deactivate();
-            Game.game.gameBoard = event.newBoard;
+            Game.game.board = event.newBoard;
             clearEventListener();
             event.newBoard.activate();
         });
@@ -141,5 +144,17 @@ public class Game extends JFrame {
     public void setGameEventThread(GameEventThread gameEventThread){
         this.gameEventThread.stop(true);
         this.gameEventThread = gameEventThread;
+    }
+
+    public void addPlayer(Player player) {
+        players.add(player);
+    }
+
+    public void removePlayer(Player player) {
+        players.remove(player);
+    }
+
+    public List<Player> getPlayers() {
+        return new ArrayList<>(players);
     }
 }

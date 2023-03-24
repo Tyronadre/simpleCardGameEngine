@@ -47,4 +47,15 @@ public class TestGameEventThread extends GameEventThread {
     public GameEvent getNextEvent() {
         return this.eventQueue.peek();
     }
+
+    public void handleAllEvents() {
+        while (!eventQueue.isEmpty()) {
+            handleEvent(eventQueue.poll());
+            try {
+                sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 }

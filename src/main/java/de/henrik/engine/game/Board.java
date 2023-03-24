@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -28,8 +29,8 @@ import java.util.List;
 abstract public class Board extends GameComponent {
     public boolean active;
     private GameImage backgroundImage;
-    private final List<ActionListener> onActivate;
-    private final List<ActionListener> onDeactivate;
+    protected final List<ActionListener> onActivate;
+    protected final List<ActionListener> onDeactivate;
     protected static final Game game = Game.game;
 
 
@@ -83,6 +84,10 @@ abstract public class Board extends GameComponent {
 
     public void addActivationListener(ActionListener actionListener) {
         this.onActivate.add(actionListener);
+    }
+
+    public void removeActivationListener(ActionListener actionListener) {
+        this.onActivate.remove(actionListener);
     }
 
     public void addDeactivationListener(ActionListener actionListener) {

@@ -17,6 +17,7 @@ import de.henrik.implementation.card.stack.DraggableCardStack;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class DrawStacks extends GameComponent {
@@ -171,5 +172,9 @@ public class DrawStacks extends GameComponent {
             cardStack.setBorder(null);
         }
 
+    }
+
+    public Collection<? extends Card> getDrawStack() {
+        return startCards.getCards();
     }
 }

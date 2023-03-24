@@ -58,12 +58,14 @@ public class EventAdapter {
         ((ChoiceEvent) event).selected.consume(new ChoiceSelectedEvent(gameComponent, (PlayerImpl) owner));
     }
 
-    public static void rollDiceEvent(int dice1, int dice2, Game game) {
-        game.event(new DiceRollEvent(dice1, dice2));
+    public static void rollDiceEvent(int dice1, int dice2) {
+        Provider.game.event(new DiceRollEvent(dice1, dice2));
+        Provider.gameEventThread.handleNextEvent();
+        Provider.gameEventThread.handleNextEvent();
     }
 
-    public static void nextPlayerEvent(Game game) {
-        ((GameBoard) game.getActiveGameBoard()).nextPlayer();
+    public static void nextPlayerEvent() {
+        ((GameBoard) Provider.game.getActiveGameBoard()).nextPlayer();
     }
 
     public static GameEvent setPlayerEvent(Player player) {
