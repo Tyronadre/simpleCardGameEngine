@@ -307,7 +307,6 @@ public abstract class GameComponent {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (pointInside(e.getLocationOnScreen())) mouseListener.mouseReleased(e);
-                mouseListener.mouseReleasedAnywhere(e);
             }
         };
 

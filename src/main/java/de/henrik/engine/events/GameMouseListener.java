@@ -47,6 +47,4 @@ public interface GameMouseListener {
      * @param e the event to be processed
      */
     void mouseDragged(MouseEvent e);
-
-    void mouseReleasedAnywhere(MouseEvent e);
 }

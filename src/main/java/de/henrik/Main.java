@@ -19,8 +19,5 @@ public class Main {
 
         Game.game.start(mainMenu);
         System.out.println("Resolution: " + Options.getWidth() + "x" + Options.getHeight());
-
     }
-
-
 }

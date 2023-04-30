@@ -22,16 +22,16 @@ public class LandmarkTest {
         Provider.init();
         LandmarkAdapter.init();
         Provider.setGameState();
-        game = Provider.game;
-        player0 = PlayerAdapter.getPlayer(game, 0);
-        player1 = PlayerAdapter.getPlayer(game, 1);
-        player2 = PlayerAdapter.getPlayer(game, 2);
-        player3 = PlayerAdapter.getPlayer(game, 3);
+        game = Provider.getGame();
+        player0 = PlayerAdapter.getPlayer(0);
+        player1 = PlayerAdapter.getPlayer(1);
+        player2 = PlayerAdapter.getPlayer(2);
+        player3 = PlayerAdapter.getPlayer(3);
     }
 
     @Test
     void test_landmark_e0_variables() {
-        for (int i = 16; i <=19; i++) {
+        for (int i = 16; i <= 19; i++) {
             System.out.println("Testing (Landmark) Card " + i);
             assertEquals(i, LandmarkAdapter.getLandmark(i).getID());
             assertEquals("/cards/c" + i + "_f.png", LandmarkAdapter.getLandmark(i).getFrontOfCard().getPath());
@@ -42,7 +42,7 @@ public class LandmarkTest {
                 case 18 -> 16;
                 case 19 -> 22;
                 default -> throw new IllegalStateException("Unexpected value: " + i);
-            }, LandmarkAdapter.getLandmark(i).getCost());
+            }, LandmarkAdapter.getCost(LandmarkAdapter.getLandmark(i)));
         }
     }
 }

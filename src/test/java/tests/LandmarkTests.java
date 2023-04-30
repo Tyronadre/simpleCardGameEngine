@@ -52,7 +52,7 @@ public class LandmarkTests {
     void test_landmark_e0_variables() {
         for (int i = 16; i <= 19; i++) {
             System.out.println("Testing (Landmark) Card " + i);
-            assertEquals(i, LandmarkAdapter.getLandmark(i).getID());
+            assertEquals(i, LandmarkAdapter.getLandmark(i));
             assertEquals("/cards/c" + i + "_f.png", LandmarkAdapter.getLandmark(i).getFrontOfCard().getPath());
             assertEquals("/cards/c" + i + "_b.png", LandmarkAdapter.getLandmark(i).getBackOfCard().getPath());
             assertEquals(switch (i) {
@@ -61,7 +61,7 @@ public class LandmarkTests {
                 case 18 -> 16;
                 case 19 -> 22;
                 default -> throw new IllegalStateException("Unexpected value: " + i);
-            }, LandmarkAdapter.getLandmark(i).getCost());
+            }, LandmarkAdapter.getCost(LandmarkAdapter.getLandmark(i)));
             assert (!PlayerAdapter.hasLandmark(player0, i));
         }
     }

@@ -3,33 +3,18 @@ package testAdapter;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.card.CardStack;
 import de.henrik.engine.game.Player;
-import de.henrik.implementation.GameEvent.GameStateChangeEvent;
-import de.henrik.implementation.boards.GameBoard;
-import de.henrik.implementation.card.landmark.Landmark;
-import de.henrik.implementation.card.playingcard.CardClass;
-import de.henrik.implementation.card.playingcard.PlayingCard;
-import de.henrik.implementation.player.PlayerImpl;
-import de.henrik.implementation.player.PlayerPaneImpl;
 
 import java.util.Collection;
-import java.util.List;
 
 public class PlayerAdapter {
     /**
      * Returns a Player
      *
-     * @param i    the player id
+     * @param i the player id
      */
     public static Player getPlayer(int i) {
-        if (Provider.game.getActiveGameBoard() instanceof GameBoard gameBoard) {
-            for (Player player : gameBoard.getPlayers()) {
-                if (player.getId() == i) {
-                    return player;
-                }
-            }
-            throw new IllegalStateException("Player " + i + " not found");
-        }
-        throw new IllegalStateException("Not in Playing State");
+        return null;
+
     }
 
     /**
@@ -39,7 +24,7 @@ public class PlayerAdapter {
      * @return the amount of coins the player has
      */
     public static int getCoins(Player player) {
-        return ((PlayerImpl) player).getCoins();
+        return 0;
     }
 
     /**
@@ -49,7 +34,6 @@ public class PlayerAdapter {
      * @param coins  the amount of coins
      */
     public static void setCoins(Player player, int coins) {
-        ((PlayerImpl) player).setCoins(coins);
     }
 
     /**
@@ -59,7 +43,7 @@ public class PlayerAdapter {
      * @return the amount of coins the player has, but parsed from however it is displayed in the GUI
      */
     public static int getShownCoins(Player player) {
-        return Integer.parseInt(((PlayerPaneImpl) player.getPlayerPane()).getCoinLabelText().substring("Coins: ".length()));
+        return 0;
     }
 
     /**
@@ -69,10 +53,7 @@ public class PlayerAdapter {
      * @param card   the card
      */
     public static void buyCard(Player player, Card card) {
-        Provider.gameEventThread.handleAllEvents();
-        ((PlayerImpl) player).addCard((PlayingCard) card);
-        Provider.game.event(new GameStateChangeEvent(GameBoard.NEW_PLAYER_STATE));
-        Provider.gameEventThread.handleNextEvent();
+
     }
 
     /**
@@ -82,7 +63,6 @@ public class PlayerAdapter {
      * @param card   the card
      */
     public static void freeCard(Player player, Card card) {
-        ((PlayerImpl) player).freeCard((PlayingCard) card);
     }
 
     /**
@@ -92,7 +72,6 @@ public class PlayerAdapter {
      * @param card   the card
      */
     public static void removeCard(Player player, Card card) {
-        ((PlayerImpl) player).removeCard((PlayingCard) card);
     }
 
     /**
@@ -102,7 +81,7 @@ public class PlayerAdapter {
      * @return all CardStacks that are not for SpaceStations of a player
      */
     public static CardStack[] getAllNonSpaceStationCardStacks(Player player) {
-        return ((PlayerImpl) player).getCardStacks().stream().filter(cardStack -> !((PlayingCard) cardStack.getCard()).getCardClass().equals(CardClass.SPACE_STATION)).toArray(CardStack[]::new);
+        return null;
     }
 
     /**
@@ -113,14 +92,8 @@ public class PlayerAdapter {
      * @return the CardStack that a specified Card would fit
      */
     public static CardStack getCardStack(Player player, Card card) {
-        List<CardStack> stacks = ((PlayerImpl) player).getCardStacks().stream().filter(cardStack -> cardStack.test(card)).toList();
-        if (stacks.size() > 1) {
-            throw new RuntimeException("More than one card stack found");
-        }
-        if (stacks.size() == 0) {
-            throw new RuntimeException("No card stack found");
-        }
-        return stacks.get(0);
+        return null;
+
     }
 
 
@@ -130,9 +103,7 @@ public class PlayerAdapter {
      * @param player the player
      */
     public static void clearCards(Player player) {
-        for (Card card : getAllCards(player)) {
-            removeCard(player, card);
-        }
+
     }
 
     /**
@@ -142,7 +113,7 @@ public class PlayerAdapter {
      * @return all Cards of a player
      */
     private static Iterable<? extends Card> getAllCards(Player player) {
-        return player.getCardList().stream().toList();
+        return null;
     }
 
     /**
@@ -152,7 +123,6 @@ public class PlayerAdapter {
      * @param id     the id of the Landmark
      */
     public static void freeLandmark(Player player, int id) {
-        ((PlayerImpl) player).freeLandmark(id);
     }
 
     /**
@@ -163,7 +133,7 @@ public class PlayerAdapter {
      * @return true if the player has the Landmark, false otherwise
      */
     public static boolean hasLandmark(Player player, int id) {
-        return ((PlayerImpl) player).hasLandmark(id);
+        return false;
     }
 
     /**
@@ -173,7 +143,8 @@ public class PlayerAdapter {
      * @param id     the id of the Landmark
      */
     public static Card getLandmark(Player player, int id) {
-        return ((PlayerImpl) player).getLandmark(id);
+        return null;
+
     }
 
     /**
@@ -183,7 +154,6 @@ public class PlayerAdapter {
      * @param id     the id of the Landmark
      */
     public static void removeLandmark(Player player, int id) {
-        ((PlayerImpl) player).removeLandmark((Landmark) getLandmark(player, id));
     }
 
     /**
@@ -194,9 +164,8 @@ public class PlayerAdapter {
      * @return the CardStack of the Landmark
      */
     public static CardStack getLandmarkStack(Player player, int id) {
-        for (CardStack stack : ((PlayerImpl) player).getLandmarkStacks())
-            if (stack.getCard().getID() == id) return stack;
-        throw new RuntimeException("No landmark stack found");
+        return null;
+
     }
 
     /**
@@ -206,8 +175,7 @@ public class PlayerAdapter {
      * @param id     the id of the Landmark
      */
     public static void buyLandmark(Player player, int id) {
-        PlayerImpl playerImpl = (PlayerImpl) player;
-        playerImpl.buyLandmark((Landmark) getLandmark(player, id), getLandmarkStack(player, id));
+
 
     }
 
@@ -218,7 +186,7 @@ public class PlayerAdapter {
      * @return how many dice are available for this player
      */
     public static int availableDice(Player player) {
-        return ((PlayerImpl) player).hasLandmark(16) ? 2 : 1;
+        return 0;
     }
 
     /**
@@ -227,15 +195,14 @@ public class PlayerAdapter {
      * @param player the player
      */
     public static void clearLandmarks(Player player) {
-        for (Landmark landmark : ((PlayerImpl) player).getAllLandmarks())
-            removeLandmark(player, landmark.getID());
+
     }
 
     public static Collection<? extends Card> getAllLandmarks(Player player) {
-        return ((PlayerImpl) player).getAllLandmarks();
+        return null;
     }
 
     public static Collection<? extends CardStack> getCardStacks(Player player) {
-        return ((PlayerImpl) player).getCardStacks();
+        return null;
     }
 }

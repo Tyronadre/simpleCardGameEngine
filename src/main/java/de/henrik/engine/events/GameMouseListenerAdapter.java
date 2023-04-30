@@ -27,9 +27,4 @@ public class GameMouseListenerAdapter implements GameMouseListener{
     public void mouseDragged(MouseEvent e) {
 
     }
-
-    @Override
-    public void mouseReleasedAnywhere(MouseEvent e) {
-
-    }
 }
