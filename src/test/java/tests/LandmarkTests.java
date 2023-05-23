@@ -1,6 +1,5 @@
 package tests;
 
-import TestUtil.Util;
 import de.henrik.engine.events.GameEvent;
 import de.henrik.engine.game.Player;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,7 +21,7 @@ public class LandmarkTests {
         Provider.init();
         LandmarkAdapter.init();
         CardAdapter.init();
-        Provider.setGameState();
+        GameStateAdapter.setGameState();
         player0 = PlayerAdapter.getPlayer( 0);
         player1 = PlayerAdapter.getPlayer( 1);
         player2 = PlayerAdapter.getPlayer( 2);

@@ -1,15 +1,11 @@
 package tests;
 
-import TestUtil.Util;
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.events.GameEvent;
 import de.henrik.engine.game.Player;
 import org.junit.jupiter.api.*;
-import testAdapter.CardAdapter;
-import testAdapter.EventAdapter;
-import testAdapter.PlayerAdapter;
-import testAdapter.Provider;
+import testAdapter.*;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,7 +20,7 @@ public class CardEventTests {
     static void init() {
         Provider.init();
         CardAdapter.init();
-        Provider.setGameState();
+        GameStateAdapter.setGameState();
         player0 = PlayerAdapter.getPlayer(0);
         player1 = PlayerAdapter.getPlayer(1);
         player2 = PlayerAdapter.getPlayer(2);

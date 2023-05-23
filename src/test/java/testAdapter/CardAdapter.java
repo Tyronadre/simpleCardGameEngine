@@ -24,6 +24,9 @@ public class CardAdapter {
     static HashMap<Integer, PlayingCardBuilder> cardMap;
     private static boolean init = false;
 
+    /**
+     * Initialize anything that is needed for cards here.
+     */
     public static void init() {
         if (init) return;
         init = true;
@@ -74,22 +77,54 @@ public class CardAdapter {
         }
     }
 
+    /**
+     * Get a card by its ID.
+     *
+     * @param id The ID of the card.
+     * @return The card.
+     */
     public static Card getCard(int id) {
         return cardMap.get(id).build();
     }
 
+    /**
+     * Get the cost of a card.
+     *
+     * @param card The card.
+     * @return The cost of the card.
+     */
     public static int getCost(Card card) {
         return ((PlayingCard)card).getCost();
     }
 
+    /**
+     * Get the class of a card.
+     *
+     * @param card The card.
+     * @return The class of the card.
+     */
     public static int getCardClassID(Card card) {
         return ((PlayingCard) card).getCardClass().ordinal() + 1;
     }
 
+    /**
+     * Get the type of a card.
+     *
+     * @param card The card.
+     * @return The type of the card.
+     */
     public static int getCardTypeID(Card card) {
         return ((PlayingCard) card).getCardType().ordinal() + 1;
     }
 
+    /**
+     * Events a card.
+     *
+     * @param card The card.
+     * @param activePlayer The active player.
+     * @param eventOwner   The owner of the card.
+     * @param roll         The roll.
+     */
     public static void event(Card card, Player activePlayer, Player eventOwner, int roll) {
         ((PlayingCard) card).event(new CardEvent((PlayerImpl) eventOwner,(PlayerImpl) activePlayer, roll, (GameBoard) Provider.game.getActiveGameBoard(), card));
     }

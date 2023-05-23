@@ -8,10 +8,7 @@ import de.henrik.engine.game.Player;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import testAdapter.CardAdapter;
-import testAdapter.EventAdapter;
-import testAdapter.PlayerAdapter;
-import testAdapter.Provider;
+import testAdapter.*;
 
 import java.util.List;
 
@@ -30,7 +27,7 @@ public class CardEventTest {
     static void init() {
         Provider.init();
         CardAdapter.init();
-        Provider.setGameState();
+        GameStateAdapter.setGameState();
         game = Provider.game;
         player0 = PlayerAdapter.getPlayer(0);
         player1 = PlayerAdapter.getPlayer(1);

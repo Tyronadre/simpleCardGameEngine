@@ -1,6 +1,5 @@
 package privateTests;
 
-import TestUtil.Util;
 import de.henrik.engine.base.GameComponent;
 import de.henrik.engine.card.Card;
 import de.henrik.engine.events.GameEvent;
@@ -27,7 +26,7 @@ public class CardEventPrivateTests {
     static void init() {
         Provider.init();
         CardAdapter.init();
-        Provider.setGameState();
+        GameStateAdapter.setGameState();
         player0 = PlayerAdapter.getPlayer(0);
         player1 = PlayerAdapter.getPlayer(1);
         player2 = PlayerAdapter.getPlayer(2);

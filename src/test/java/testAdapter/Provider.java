@@ -16,6 +16,9 @@ public class Provider {
     public static GameBoard gameBoard;
     public static MainMenu mainMenu;
 
+    /**
+     * Initializes the game and sets the default options.
+     */
     public static void init() {
         if (init) {
             gameEventThread.clearEvents();
@@ -55,12 +58,9 @@ public class Provider {
     }
 
 
-    public static void setGameState() {
-        game.event(new SwitchGameBoardEvent(mainMenu, gameBoard));
-        gameEventThread.handleNextEvent();
-        gameEventThread.handleNextEvent();
-    }
-
+    /**
+     * Sets the menu state
+     */
     public static void setMenuState() {
         game.event(new SwitchGameBoardEvent(gameBoard, mainMenu));
         gameEventThread.handleNextEvent();

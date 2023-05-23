@@ -9,6 +9,10 @@ import java.util.Collection;
 import java.util.List;
 
 public class DrawStacksAdapter {
+    /**
+     *
+     * @return all cards on the draw stack
+     */
     public static List<Card> getAllCards() {
         var list = new ArrayList<Card>();
         list.addAll(Provider.gameBoard.drawStacks.getDrawStack());
@@ -18,6 +22,10 @@ public class DrawStacksAdapter {
         return list;
     }
 
+    /**
+     *
+     * @return all draw stacks.
+     */
     public static Collection<CardStack> getDrawStacks() {
         return Provider.gameBoard.drawStacks.getCardStacks();
     }

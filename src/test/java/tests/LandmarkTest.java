@@ -4,6 +4,7 @@ import de.henrik.engine.game.Game;
 import de.henrik.engine.game.Player;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import testAdapter.GameStateAdapter;
 import testAdapter.LandmarkAdapter;
 import testAdapter.PlayerAdapter;
 import testAdapter.Provider;
@@ -21,7 +22,7 @@ public class LandmarkTest {
     static void init() {
         Provider.init();
         LandmarkAdapter.init();
-        Provider.setGameState();
+        GameStateAdapter.setGameState();
         game = Provider.game;
         player0 = PlayerAdapter.getPlayer(0);
         player1 = PlayerAdapter.getPlayer(1);

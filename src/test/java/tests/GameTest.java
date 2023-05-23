@@ -42,7 +42,7 @@ public class GameTest {
     @Test
     @Order(2)
     void StartGame() {
-        Provider.setGameState();
+        GameStateAdapter.setGameState();
         assertEquals(GameStateAdapter.GameState.NEW_PLAYER, GameStateAdapter.getGameState());
         player0 = PlayerAdapter.getPlayer(0);
         player1 = PlayerAdapter.getPlayer(1);

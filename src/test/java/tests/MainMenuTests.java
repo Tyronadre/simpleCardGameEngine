@@ -1,8 +1,6 @@
 package tests;
 
-import de.henrik.engine.game.Player;
 import de.henrik.implementation.game.Options;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import testAdapter.*;
@@ -26,7 +24,7 @@ public class MainMenuTests {
 
     @Test
     void test_StartGame(){
-        Provider.setGameState();
+        GameStateAdapter.setGameState();
         assertEquals(GameStateAdapter.GameState.NEW_PLAYER, GameStateAdapter.getGameState());
     }
 
@@ -56,7 +54,7 @@ public class MainMenuTests {
         MainMenuAdapter.setPlayerName(1, "Test");
         assertEquals(2, MainMenuAdapter.getPlayerCount());
         assertEquals("Test", MainMenuAdapter.getPlayerName(1));
-        Provider.setGameState();
+        GameStateAdapter.setGameState();
         assertEquals(GameStateAdapter.GameState.NEW_PLAYER, GameStateAdapter.getGameState());
     }
 }

@@ -17,6 +17,9 @@ public class LandmarkAdapter {
     static HashMap<Integer, Landmark> landmarkMap;
     private static boolean init = false;
 
+    /**
+     * Initialize anything that is needed for landmarks here.
+     */
     public static void init() {
         if (init) return;
         init = true;
@@ -58,6 +61,11 @@ public class LandmarkAdapter {
         }
     }
 
+    /**
+     * Returns a landmark with a specific id
+     * @param id the id
+     * @return the landmark
+     */
     public static Landmark getLandmark(int id) {
         return landmarkMap.get(id);
     }
